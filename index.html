@@ -432,6 +432,11 @@ select{font-family:inherit;font-size:calc(var(--k)*15);padding:calc(var(--k)*8);
 .b-predict .bp-bar>i{display:block;height:100%;background:#f2705c}
 .b-predict .bp-bar>s{display:block;height:100%;background:repeating-linear-gradient(45deg,rgba(242,112,92,.45) 0 calc(var(--k)*4),rgba(0,0,0,.25) calc(var(--k)*4) calc(var(--k)*8))}
 .b-predict .bp-btns{display:grid;grid-template-columns:1fr 1fr;gap:calc(var(--k)*9);margin-top:calc(var(--k)*11)}
+.b-predict.single{bottom:auto;width:min(calc(var(--k)*370),calc(100% - calc(var(--k)*24)))}
+.b-predict .bp-mods{font-size:calc(var(--k)*12);color:#c8d4bd;line-height:1.75;border-top:1px solid rgba(42,160,175,.55);padding-top:calc(var(--k)*7);margin-top:calc(var(--k)*6)}
+.b-predict .bp-ko{color:#ffb59d;font-weight:900}
+.b-predict .bp-bar.heal>i{background:#8fd07e}
+.b-predict .bp-bar.heal>s{background:repeating-linear-gradient(45deg,rgba(143,208,126,.55) 0 calc(var(--k)*4),rgba(0,0,0,.18) calc(var(--k)*4) calc(var(--k)*8))}
 .b-result{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:25;width:min(calc(var(--k)*400),calc(100% - calc(var(--k)*32)));text-align:center;background:linear-gradient(170deg,rgba(18,58,71,.98),rgba(10,34,43,.99));border:var(--panel-border);border-radius:calc(var(--k)*16);padding:calc(var(--k)*20);color:#eef3e6;box-shadow:0 calc(var(--k)*14) calc(var(--k)*36) rgba(0,0,0,.55)}
 .b-result h3{font-size:calc(var(--k)*24);margin:0 0 calc(var(--k)*6);color:#ffe9a8}
 .b-units{display:flex;flex-wrap:wrap;gap:calc(var(--k)*8);padding:calc(var(--k)*10) calc(var(--k)*12) calc(var(--k)*12)}
@@ -574,22 +579,17 @@ var CARES = [
   {name:"9. 寂れた祠", cost:{"木炭":9,"清らかな水":10,"粘土":3}, gains:[[3,9,3],[3,11,4],[4,13,4]]}
 ];
 CARES[3].gains = [[2,2,6],[3,2,7],[3,3,8]];
+/* 共通ツリーは基準イメージ「共通ツリー画面v7」（3柱とも同一構成）の6項目：
+   3列（水量・生命・資源）×2段階。効果と必要合計は画像のピルの記載どおりで、
+   全解放時の合計は 攻撃+8・HP+40・防御+8・神力+6（仕様の共通ツリー分の範囲内）。
+   req は従来どおり「パラメータポイントの合計（累計）」に対する閾値。 */
 var COMMON = [
-  {p:"water", req:2,  label:"細い流れ",       fx:{atk:1}},
-  {p:"life",  req:3,  label:"小さな湧き水",   fx:{hp:8}},
-  {p:"res",   req:4,  label:"川辺の石拾い",   fx:{def:2, mp:1}},
-  {p:"water", req:6,  label:"せせらぎ",       fx:{atk:1}},
-  {p:"life",  req:8,  label:"苔むす岩",       fx:{hp:8}},
-  {p:"res",   req:10, label:"流木の橋",       fx:{def:2, mp:1}},
-  {p:"water", req:12, label:"清らかな流れ",   fx:{atk:2}},
-  {p:"life",  req:14, label:"若葉の集い",     fx:{hp:8}},
-  {p:"res",   req:17, label:"石垣づくり",     fx:{def:1, mp:1}},
-  {p:"water", req:20, label:"力強い流れ",     fx:{atk:2}},
-  {p:"life",  req:23, label:"命の集う淵",     fx:{hp:8}},
-  {p:"res",   req:26, label:"水門の整備",     fx:{def:2, mp:1}},
-  {p:"water", req:30, label:"本流のうねり",   fx:{atk:2}},
-  {p:"life",  req:34, label:"御神木の根",     fx:{hp:8}},
-  {p:"res",   req:38, label:"里の守り石",     fx:{def:1, mp:2}}
+  {p:"water", req:4,  label:"細い流れ",     fx:{atk:3}},
+  {p:"life",  req:4,  label:"小さな湧き水", fx:{hp:15}},
+  {p:"res",   req:4,  label:"川辺の石拾い", fx:{def:3, mp:2}},
+  {p:"water", req:10, label:"せせらぎ",     fx:{atk:5}},
+  {p:"life",  req:10, label:"苔むす岩",     fx:{hp:25}},
+  {p:"res",   req:10, label:"流木の橋",     fx:{def:5, mp:4}}
 ];
 var THRESH = [4,9,14,20,27,34,42,50,58,66,74,82,91,100];
 var TREE_FX = {
@@ -609,7 +609,9 @@ var TREE_NAMES = {
 function SK(n,mp,k,v,r,rng,x){ var o={n:n,mp:mp,k:k,v:v,r:r,rng:rng||1}; if(x)for(var key in x)o[key]=x[key]; return o; }
 var PRE = [null,0,0,1,2,1,3,4,6];
 var STG = [1,2,2,3,3,3,4,4,5];
-var STG_REQ = {2:6,3:10,4:14,5:18};
+/* 解放数＝共通ツリー（そのパラメータ分）＋パラメータツリー。共通が6項目化で
+   パラメータあたり最大2になったため、上限は 2+14=16。第5段階の必要数を16に合わせる */
+var STG_REQ = {2:6,3:10,4:14,5:16};
 var SKILLS = {
 dobu:{
  water:[SK("水流弾",2,"d",110,"s",3),SK("波うち",4,"d",90,"self",2),SK("うずまき",4,"d",80,"s",2,{pull:1}),
@@ -783,7 +785,10 @@ function newGame(godId){
 }
 /* ============ セーブ／ロード（localStorage・拠点操作後に自動保存。戦闘中の状態は保存しない） ============ */
 var SAVE_KEY = "kawakami-proto-save-v1";
-var SAVE_VER = 1;
+/* v2：共通ツリーを15項目→6項目に作り替えた版。v1以前のセーブは共通ツリーの
+   解放状態だけをリセットし、ポイント・素材・ターン・パラメータツリー等の
+   他の進行はすべて保持する（loadSave の移行処理を参照）。 */
+var SAVE_VER = 2;
 function saveGame(){
   if(!G) return;
   try{ localStorage.setItem(SAVE_KEY, JSON.stringify({v:SAVE_VER, savedAt:Date.now(), state:G})); }catch(e){ /* 保存できない環境では無音で続行 */ }
@@ -803,7 +808,9 @@ function loadSave(){
       turn:num(s.turn,1,1,51),
       pts:{ water:num(s.pts&&s.pts.water,0,0,99999), life:num(s.pts&&s.pts.life,0,0,99999), res:num(s.pts&&s.pts.res,0,0,99999) },
       mats:mats, careCounts:care,
-      common:(Array.isArray(s.common)?s.common.filter(function(x){return typeof x==="number"&&x>=0&&x<COMMON.length;}):[]),
+      /* 移行：v1（15項目時代）のセーブはインデックスの意味が変わるため、共通ツリーの
+         解放状態だけを空に戻す。ステータスは calcStats が新しい6項目から再計算する */
+      common:(d.v>=2&&Array.isArray(s.common)?s.common.filter(function(x){return typeof x==="number"&&x>=0&&x<COMMON.length;}):[]),
       tree:{ water:num(s.tree&&s.tree.water,0,0,14), life:num(s.tree&&s.tree.life,0,0,14), res:num(s.tree&&s.tree.res,0,0,14) },
       skills:(Array.isArray(s.skills)?s.skills.filter(function(x){return typeof x==="string";}):[]),
       evo:num(s.evo,0,0,2),
@@ -1437,10 +1444,9 @@ function linkSvgC(segs){
    3列が集まる。列の x は v7 画像の相対位置（水量≈43%／生命≈63%／資源≈83%、
    上段ほどわずかに中央へ寄る）、段階ラベルは左に縦に並ぶ。ノードのラベルは
    「効果（1行目）＋パラメータ名と必要合計（2行目・パラメータ色）」の2段ピル。
-   ※項目数だけは現行データ（15項目＝3列×5段階）のまま（v7画像は6項目の図表）。
-   閾値・解放条件・効果は一切変えていない。 */
-var COMMON_X={water:[43.5,44,44.5,45,45.5], life:[63.2,63.2,63.2,63.2,63.2], res:[83,82.5,82,81.5,81]};
-var COMMON_Y=[80.5,67,53.5,40,26.5];
+   項目は画像どおり6項目（3列×2段階）：第1段階が下、第2段階が上。 */
+var COMMON_X={water:[43.5,44.5], life:[63.2,63.2], res:[83,82]};
+var COMMON_Y=[80.5,53.5];
 var COMMON_ROOT=[63.2,92.5], COMMON_LOCK=[63.2,14.5];
 function commonCanvas(){
   var byParam={water:[],life:[],res:[]};
@@ -1454,10 +1460,11 @@ function commonCanvas(){
     var list=byParam[p];
     segs.push([COMMON_ROOT[0],COMMON_ROOT[1],pos[list[0]][0],pos[list[0]][1], G.common.indexOf(list[0])>=0, "rgba(110,190,245,"]);
     for(var j=0;j<list.length-1;j++) segs.push([pos[list[j]][0],pos[list[j]][1],pos[list[j+1]][0],pos[list[j+1]][1], G.common.indexOf(list[j])>=0&&G.common.indexOf(list[j+1])>=0, "rgba(110,190,245,"]);
-    segs.push([pos[list[4]][0],pos[list[4]][1],COMMON_LOCK[0],COMMON_LOCK[1], G.common.indexOf(list[4])>=0, "rgba(230,200,120,"]);
+    var topGi=list[list.length-1];
+    segs.push([pos[topGi][0],pos[topGi][1],COMMON_LOCK[0],COMMON_LOCK[1], G.common.indexOf(topGi)>=0, "rgba(230,200,120,"]);
   });
   var html=linkSvgC(segs);
-  for(var r=0;r<5;r++){ html+='<div class="stage-label" style="left:26.5%;top:'+COMMON_Y[r]+'%">第'+(r+1)+'段階</div>'; }
+  for(var r=0;r<COMMON_Y.length;r++){ html+='<div class="stage-label" style="left:26.5%;top:'+COMMON_Y[r]+'%">第'+(r+1)+'段階</div>'; }
   html+='<div class="tnode gold '+(canEvo1()?"avail":"locked")+'" style="left:'+COMMON_LOCK[0]+'%;top:'+COMMON_LOCK[1]+'%">'
     +'<span class="nc" style="width:calc(var(--k)*52);height:calc(var(--k)*52);font-size:calc(var(--k)*23)">'+(canEvo1()?"🔓":"🔒")+'</span>'
     +'<span class="nl">第一進化ロック解除<span class="sub">共通 '+G.common.length+' / '+COMMON.length+'</span></span>'
@@ -1853,6 +1860,7 @@ function applyCam(animate){
   e.world.style.transform = "translate("+CAM.tx+"px,"+CAM.ty+"px) scale("+CAM.z+")";
   var zp=$("zoom-pct"); if(zp) zp.textContent=Math.round(CAM.z*100)+"%";
   positionMenu(); /* カメラが動いたら、行動コマンドもキャラ絵に追随させる */
+  positionPredict(); /* 戦闘予測パネルも対象ユニットに追随させる */
 }
 function centerCameraOn(x,y,animate){
   var e=camEls(); if(!e.stage||!e.board) return;
@@ -1935,6 +1943,22 @@ function positionMenu(){
   if(top+mh>vh-6) top=aTop-mh-4;
   if(top<6) top=6;
   menu.style.left=left+"px"; menu.style.top=top+"px";
+}
+/* 戦闘予測パネルを対象ユニットの近くに置く。位置はカメラの最終変換（CAM）から
+   計算するので、ズーム・回転・パンのあとでも対象に追随して破綻しない。
+   盤面を覆いすぎないよう対象の上側を優先し、上に置けない場合は下へ回す。 */
+function positionPredict(){
+  var panel=document.getElementById("predict-panel"); if(!panel||!B||!B.predict) return;
+  var e=camEls(); if(!e.stage||!e.board) return;
+  var pt=cellScreenPx(B.predict.x, B.predict.y); if(!pt) return;
+  var vw=e.stage.clientWidth, vh=e.stage.clientHeight;
+  var pw=panel.offsetWidth, ph=panel.offsetHeight;
+  var cellH=(2*ISO_SY)/100*e.board.offsetHeight*CAM.z;
+  var left=Math.max(6, Math.min(vw-pw-6, pt.x-pw/2));
+  var top=pt.y-cellH*1.2-ph;
+  if(top<6) top=pt.y+cellH*0.8;
+  if(top+ph>vh-6) top=Math.max(6, vh-ph-6);
+  panel.style.left=left+"px"; panel.style.top=top+"px";
 }
 /* マップ画像（assets/map-battle-wide.jpg）は盤面の約2.57倍の面積で描かれ、
    7×10の盤面はその中央に位置する（盤面に対応するのは画像の u 16.7%〜83.3%／
@@ -2035,7 +2059,7 @@ function startBattle(si,di){
   foes.forEach(function(u){ faceNearestOpponent(u,allies); });
   allies.concat(foes).forEach(function(u){ TERRAIN[tIdx(u.x,u.y)]="grass"; });
   CAM={z:1, tx:0, ty:0, zMin:0.5, suppressTapUntil:0, centerReq:false}; lastCenteredCur=null;
-  B={si:si,di:di,rot:0,loot:STAGES[si].loot[di],allies:allies,foes:foes,round:1,sel:null,moved:false,preMove:null,mode:"select",targets:[],pendingSkill:null,showSkills:false,confirm:null,focus:null,logs:["<b>"+STAGES[si].name+" 深度"+(di+1)+"</b> の戦闘開始！ 敵を全て倒すと勝利、神様が倒れると敗北です。","行動順は各巡の開始時に素早さ順（味方・敵混在）で確定します。素早さの増減は次巡の順序から反映されます。","地形には高さがあります（川底-10〜高台+17）。高い所から攻撃すると命中・ダメージが上がり（高さ差1ごとに命中+1・ダメージ+1%）、隣との高さ差が8以上のマスへは直接移動できません（崖）。⟳ボタンでマップを90°ずつ回転できます。","向き：側面からの攻撃は与ダメージ+15%、背面からは+30%（正面は変動なし）。待機・攻撃・技のあとに、ターンを終える向きを選べます。足元の矢印が今の向きです。","カメラ：行動するキャラクターが画面の中心に来ます。盤面をドラッグすると上下左右にスクロール、サイドバーの＋/−ボタンやピンチ操作でズームできます。"],over:false,order:[],turnIdx:0,skipAllies:false,cur:null,faceSel:null};
+  B={si:si,di:di,rot:0,loot:STAGES[si].loot[di],allies:allies,foes:foes,round:1,sel:null,moved:false,preMove:null,mode:"select",targets:[],pendingSkill:null,showSkills:false,confirm:null,focus:null,logs:["<b>"+STAGES[si].name+" 深度"+(di+1)+"</b> の戦闘開始！ 敵を全て倒すと勝利、神様が倒れると敗北です。","行動順は各巡の開始時に素早さ順（味方・敵混在）で確定します。素早さの増減は次巡の順序から反映されます。","地形には高さがあります（川底-10〜高台+17）。高い所から攻撃すると命中・ダメージが上がり（高さ差1ごとに命中+1・ダメージ+1%）、隣との高さ差が8以上のマスへは直接移動できません（崖）。⟳ボタンでマップを90°ずつ回転できます。","向き：側面からの攻撃は与ダメージ+15%、背面からは+30%（正面は変動なし）。待機・攻撃・技のあとに、ターンを終える向きを選べます。足元の矢印が今の向きです。","カメラ：行動するキャラクターが画面の中心に来ます。盤面をドラッグすると上下左右にスクロール、サイドバーの＋/−ボタンやピンチ操作でズームできます。"],over:false,order:[],turnIdx:0,skipAllies:false,cur:null,faceSel:null,predict:null};
   var roleNotes=[], roleSeen={};
   foes.forEach(function(f){ var p=ENEMY_PROFILES[f.art]; if(p&&!roleSeen[f.art]){ roleSeen[f.art]=1; roleNotes.push(f.name+"＝"+p.label); } });
   if(roleNotes.length) B.logs.push("敵の個性："+roleNotes.join("／")+"。種類ごとに狙い方と倒し方が変わります。");
@@ -2074,6 +2098,89 @@ function previewDamage(src,tgt,power){
   dmg=Math.max(1, Math.round(dmg*facingDmgMult(src,tgt))); /* 向きの倍率（正面×1.0／側面×1.15／背面×1.30）も同じ入口で適用し、予測と一致させる */
   dmg=Math.max(1, Math.round(dmg*(1-shieldPct(tgt)/100)));
   return dmg;
+}
+/* ============ 戦闘予測パネル（通常攻撃・単体技） ============
+   対象を選んだ時点で、実行前に予測を出す。数値はすべて実計算と同じ入口
+   （previewDamage／hitChance／heightDmgMult／facingDmgMult／effDefWithTerrain／
+   shieldPct）から取得するので、表示と実際の結果は必ず一致する。
+   反撃はこのゲームには無いため、その旨をパネルに明示する。
+   「実行する」で初めて実処理が走り、「キャンセル」では対象選択に戻る
+   （移動の全キャンセル等の既存フローには干渉しない）。 */
+function buffPctSum(u,stat){ var s=0; u.buffs.forEach(function(b){ if(b.stat===stat) s+=b.pct; }); return s; }
+function predictPanelHtml(){
+  var p=B.predict, src=B.sel; if(!p||!src) return "";
+  var sk = (p.kind==="skill"&&B.pendingSkill) ? B.pendingSkill.sk : null;
+  var healKind = !!(sk && (sk.k==="h"||sk.k==="hb"||sk.k==="rev"));
+  var tgt = healKind ? unitAtIncludingDead(p.x,p.y) : unitAt(p.x,p.y);
+  if(!tgt) return "";
+  var head='<div class="b-predict single" id="predict-panel"><div class="bp-t">戦闘予測</div>'
+    +'<div class="bp-name" style="font-size:calc(var(--k)*17)">'+esc(src.name)+' <span style="color:#9fc3bb;font-size:calc(var(--k)*14)">→</span> '+esc(tgt.name)+'</div>'
+    +'<div style="font-size:calc(var(--k)*13.5);margin-top:calc(var(--k)*3);font-weight:700">'+(sk?esc(sk.n):"通常攻撃")+(sk?'<span class="bp-cost" style="margin-left:calc(var(--k)*8)">消費神力 '+sk.mp+'</span>':"")+'</div>';
+  var btns='<div class="bp-btns"><button class="btn gold" id="btn-predict-ok">実行する</button><button class="btn ghost" id="btn-predict-no" style="background:transparent;color:#eef3e6;border-color:rgba(120,200,210,.6)">キャンセル</button></div>';
+  if(sk && sk.k==="b"){
+    /* 単体バフ技：HPは変化しないので、付与効果を予測として出す */
+    var fx=[];
+    if(sk.buff) for(var bk in sk.buff) fx.push(paramName2(bk)+" "+(sk.buff[bk]>0?"+":"")+sk.buff[bk]+"%（"+(sk.bt||2)+"巡）");
+    if(sk.shield) fx.push("シールド "+sk.shield+"%軽減（"+(sk.bt||1)+"巡）");
+    return head+'<div class="bp-row"><div class="r1"><span>'+esc(tgt.name)+'</span><span>HP '+tgt.hp+'（変化なし）</span></div>'
+      +'<div style="margin-top:calc(var(--k)*3)">付与効果：'+(fx.join("・")||"―")+'</div>'
+      +'<div>命中：必中（味方への技）｜反撃 なし</div></div>'+btns+'</div>';
+  }
+  if(healKind){
+    if(!tgt.alive){
+      var rp = sk.k==="rev" ? sk.v : (sk.revive||0);
+      var rAfter=Math.max(1, Math.round(tgt.maxhp*rp/100));
+      return head+'<div class="bp-row"><div class="r1"><span>'+esc(tgt.name)+'</span><span>HP 0 → '+rAfter+'</span></div>'
+        +'<div class="bp-bar heal"><i style="width:0%"></i><s style="width:'+Math.round(rAfter/tgt.maxhp*100)+'%"></s></div>'
+        +'<div>✨ <b>蘇生</b>：HP '+rAfter+' で復活</div><div>命中：必中（回復・蘇生）｜反撃 なし</div></div>'+btns+'</div>';
+    }
+    var amt=Math.round(tgt.maxhp*sk.v/100);
+    var gain=Math.min(tgt.maxhp, tgt.hp+amt)-tgt.hp;
+    var hAfter=tgt.hp+gain;
+    var extra=[];
+    if(sk.hot) extra.push("持続回復（次の自分のターン開始時にも同量回復）");
+    if(sk.buff) for(var hk in sk.buff) extra.push(paramName2(hk)+" "+(sk.buff[hk]>0?"+":"")+sk.buff[hk]+"%（"+(sk.bt||2)+"巡）");
+    if(sk.shield) extra.push("シールド "+sk.shield+"%軽減（"+(sk.bt||1)+"巡）");
+    return head+'<div class="bp-row"><div class="r1"><span>'+esc(tgt.name)+'</span><span>HP '+tgt.hp+' → '+hAfter+'</span></div>'
+      +'<div class="bp-bar heal"><i style="width:'+Math.round(tgt.hp/tgt.maxhp*100)+'%"></i><s style="width:'+Math.round(gain/tgt.maxhp*100)+'%"></s></div>'
+      +'<div>回復量 <b>+'+gain+'</b>'+(gain<amt?'（上限で頭打ち）':"")+'</div><div>命中：必中（回復・蘇生）｜反撃 なし</div>'
+      +(extra.length?'<div>追加効果：'+extra.join("・")+'</div>':"")+'</div>'+btns+'</div>';
+  }
+  /* ダメージ系（通常攻撃／単体ダメージ技／攻撃＋回復技の攻撃部分） */
+  var power = sk? sk.v : 100;
+  var hits = sk? (sk.hits||1) : 1;
+  var per = previewDamage(src,tgt,power);
+  var total = per*hits;
+  var after = Math.max(0, tgt.hp-total);
+  var hd = heightDelta(src,tgt);
+  var mods=[];
+  mods.push("高さ "+heightAt(src.x,src.y)+" → "+heightAt(tgt.x,tgt.y)+"（差 "+(hd>0?"+":"")+hd+"）：命中 "+(hd>0?"+":"")+hd+"／ダメージ ×"+heightDmgMult(src,tgt).toFixed(2));
+  mods.push("向き "+facingLabel(src,tgt)+"：ダメージ ×"+facingDmgMult(src,tgt).toFixed(2));
+  if(terrainAt(tgt.x,tgt.y)==="water") mods.push("地形 浅瀬：対象の防御+15%（実効防御 "+(Math.round(effDefWithTerrain(tgt)*10)/10)+"）");
+  var ab=buffPctSum(src,"atk"); if(ab) mods.push("攻撃側の攻撃バフ "+(ab>0?"+":"")+ab+"%");
+  var db=buffPctSum(tgt,"def"); if(db) mods.push("対象の防御バフ "+(db>0?"+":"")+db+"%");
+  var sh=shieldPct(tgt); if(sh) mods.push("対象のシールド：ダメージ "+sh+"% 軽減");
+  return head+'<div class="bp-row"><div class="r1"><span>'+esc(tgt.name)+(terrainAt(tgt.x,tgt.y)==="water"?' <span style="color:#7ec8ff;font-size:calc(var(--k)*11);font-weight:800">浅瀬 防御+15%</span>':"")+'</span><span>HP '+tgt.hp+' → '+after+'</span></div>'
+    +'<div class="bp-bar"><i style="width:'+Math.round(after/tgt.maxhp*100)+'%"></i><s style="width:'+Math.round((tgt.hp-after)/tgt.maxhp*100)+'%"></s></div>'
+    +'<div>ダメージ <b>'+total+'</b>'+(hits>1?'（'+per+' × '+hits+'回）':"")+'｜命中 <b>'+hitChance(src,tgt)+'%</b>｜反撃 <b>なし</b>'+(after===0?'｜<span class="bp-ko">撃破！</span>':"")+'</div></div>'
+    +'<div class="bp-mods">'+mods.join("<br>")+'</div>'+btns+'</div>';
+}
+/* 予測パネルの「実行する」：ここで初めて実処理が走る（通常攻撃は従来の
+   onCellTap 内の実行処理と同一の流れをそのまま使う） */
+function executePredicted(){
+  var p=B.predict; if(!p||!B.sel) return;
+  B.predict=null;
+  if(p.kind==="atk"){
+    var u=unitAt(p.x,p.y);
+    if(u&&u.side==="e"&&dist(B.sel,u)<=1){
+      dealDamage(B.sel,u,100,null);
+      if(B.over){ renderBattle(); return; }
+      if(!B.foes.some(function(f){return f.alive;})){ finishAction(); endBattle(true); return; }
+      openFacingPicker(); renderBattle();
+    } else renderBattle();
+    return;
+  }
+  executeSkill(p.x,p.y);
 }
 function dealDamage(src,tgt,power,skill){
   setFacing(src,tgt.x,tgt.y); /* 攻撃時は対象の方向を向く */
@@ -2136,11 +2243,11 @@ function undoMove(){
   u.x=px; u.y=py;
   if(B.preMove.face) u.faceDir=B.preMove.face.slice(); /* 移動で変わった向きも移動前に戻す */
   B.preMove=null; B.moved=false;
-  B.mode="move"; B.targets=moveTargets(u); B.showSkills=false; B.confirm=null; B.pendingSkill=null; B.focus={x:px,y:py};
+  B.mode="move"; B.targets=moveTargets(u); B.showSkills=false; B.confirm=null; B.pendingSkill=null; B.predict=null; B.focus={x:px,y:py};
   renderBattle();
 }
 function chooseAttack(){
-  var u=B.sel; B.mode="target"; B.pendingSkill=null; B.showSkills=false; /* B.preMove は残す：対象を選んでいる途中でも全キャンセルで元の位置に戻れる */
+  var u=B.sel; B.mode="target"; B.pendingSkill=null; B.predict=null; B.showSkills=false; /* B.preMove は残す：対象を選んでいる途中でも全キャンセルで元の位置に戻れる */
   B.targets=B.foes.filter(function(f){ return f.alive&&dist(u,f)<=1; });
   if(!B.targets.length){ toast("隣接する敵がいません"); B.mode="action"; }
   renderBattle();
@@ -2148,7 +2255,7 @@ function chooseAttack(){
 function chooseSkill(cat,idx){
   var u=B.sel; var sk=SKILLS[G.god][cat][idx];
   if(u.mp<sk.mp){ toast("神力が足りません"); return; }
-  B.pendingSkill={cat:cat,idx:idx,sk:sk}; B.showSkills=false; B.confirm=null; /* B.preMove は残す：対象を選んでいる途中でも全キャンセルで元の位置に戻れる */
+  B.pendingSkill={cat:cat,idx:idx,sk:sk}; B.showSkills=false; B.confirm=null; B.predict=null; /* B.preMove は残す：対象を選んでいる途中でも全キャンセルで元の位置に戻れる */
   if(sk.r==="all"||sk.r==="self"){ executeSkill(null,null); return; }
   B.mode="target";
   if(sk.r==="s"){
@@ -2165,7 +2272,7 @@ function chooseSkill(cat,idx){
 }
 function executeSkill(tx,ty){
   var u=B.sel; var ps=B.pendingSkill; var sk=ps.sk;
-  B.confirm=null;
+  B.confirm=null; B.predict=null;
   B.preMove=null; /* 技の実行が確定したので、ここから先は全キャンセル不可 */
   u.mp-=sk.mp;
   blog("🔷 "+u.name+" の技「<b>"+sk.n+"</b>」！");
@@ -2306,7 +2413,7 @@ function processTurns(){
 function finishAction(){
   if(B.sel){ B.sel.acted=true; endTurnTicks(B.sel); }
   var cur=B.cur;
-  B.sel=null; B.mode="select"; B.targets=[]; B.pendingSkill=null; B.showSkills=false; B.confirm=null; B.preMove=null;
+  B.sel=null; B.mode="select"; B.targets=[]; B.pendingSkill=null; B.showSkills=false; B.confirm=null; B.predict=null; B.preMove=null;
   if(B.over) return;
   if(!B.foes.some(function(f){return f.alive;})) return; /* 勝利判定は呼び出し側の endBattle に任せる */
   if(cur&&B.order[B.turnIdx]===cur) B.turnIdx++;
@@ -2319,7 +2426,7 @@ function finishAction(){
    敵のターンや「残りの味方全員 待機」の順送りは finishAction を直接使うため、ここには入らない。 */
 function openFacingPicker(){
   var u=B.sel; if(!u){ finishAction(); return; }
-  B.mode="facing"; B.targets=[]; B.pendingSkill=null; B.showSkills=false; B.confirm=null; B.preMove=null;
+  B.mode="facing"; B.targets=[]; B.pendingSkill=null; B.showSkills=false; B.confirm=null; B.predict=null; B.preMove=null;
   B.faceSel = u.faceDir ? u.faceDir.slice() : (u.side==="e"?[0,1]:[0,-1]);
 }
 function confirmFacing(){
@@ -2538,7 +2645,7 @@ function renderBattle(){
         menu+='<button class="bm-btn" id="btn-backskills">＜ もどる</button>';
       }
     } else if(B.mode==="target"){
-      menu+='<p class="bm-guide">'+(B.pendingSkill?"赤〜ピンクのマス／対象を選んでください。":"隣接する敵を選んでください。")+'</p>'
+      menu+='<p class="bm-guide">'+(B.pendingSkill?"赤〜ピンクのマス／対象を選ぶと、実行前に戦闘予測が出ます。":"隣接する敵を選ぶと、実行前に戦闘予測が出ます。")+'</p>'
        +'<button class="bm-btn" id="btn-cancel">もどる</button>';
       if(B.preMove) menu+='<button class="bm-btn" id="btn-fullcancel">全キャンセル（元の位置に戻る）</button>';
     }
@@ -2567,6 +2674,8 @@ function renderBattle(){
     predict='<div class="b-predict"><div class="bp-t">攻撃予測</div><div class="bp-name">'+esc(sk3.n)+'<span class="bp-cost">消費神力 '+sk3.mp+'</span><span style="font-size:calc(var(--k)*12);color:#b9cdc2">範囲：3×3</span></div>'
      +rowsHtml+'<div class="bp-btns"><button class="btn gold" id="btn-confirm-ok">決定する</button><button class="btn ghost" id="btn-confirm-no" style="background:transparent;color:#eef3e6;border-color:rgba(120,200,210,.6)">やめる</button></div></div>';
   }
+  /* 戦闘予測パネル（通常攻撃・単体技）：範囲技の確認パネルとは排他 */
+  if(!predict && B.predict && B.mode==="target" && B.sel) predict=predictPanelHtml();
   var result="";
   if(B.over){
     result='<div class="b-result"><h3>'+(B.retreated?"撤退しました":(B.foes.some(function(f){return f.alive;})?"敗北…":"🎉 勝利！"))+'</h3><p style="font-size:calc(var(--k)*13.5);line-height:1.7">'+esc(G.lastResult)+'</p><button class="btn gold" id="btn-leave" style="width:100%">拠点へ戻る</button></div>';
@@ -2590,8 +2699,9 @@ function renderBattle(){
   else if(B.cur && B.cur!==lastCenteredCur){ lastCenteredCur=B.cur; centerCameraOn(B.cur.x,B.cur.y,true); }
   else applyCam(false);
   positionMenu();
+  positionPredict();
   /* センタリングのアニメーション（.45s）が終わった最終位置でもう一度合わせる */
-  setTimeout(positionMenu, 500);
+  setTimeout(function(){ positionMenu(); positionPredict(); }, 500);
 }
 /* ============ 戦闘エフェクト再生（FXQ の見た目イベントを DOM に流す） ============
    1アクション分が数百ミリ秒で終わる軽い CSS アニメーションのみ。
@@ -2662,11 +2772,12 @@ function onCellTap(x,y){
         var ok=B.targets.some(function(t){return t.x===x&&t.y===y;});
         if(ok){
           if(B.pendingSkill.sk.r==="area" && !B.confirm){ B.confirm={x:x,y:y}; renderBattle(); return; }
+          if(B.pendingSkill.sk.r==="s"){ B.predict={kind:"skill",x:x,y:y}; renderBattle(); return; } /* 単体技は実行前に戦闘予測パネルを出す */
           executeSkill(x,y);
         }
         return;
       }
-      if(u&&u.side==="e"&&dist(B.sel,u)<=1){ dealDamage(B.sel,u,100,null); if(B.over){ renderBattle(); return; } if(!B.foes.some(function(f){return f.alive;})){ finishAction(); endBattle(true); return; } openFacingPicker(); renderBattle(); }
+      if(u&&u.side==="e"&&dist(B.sel,u)<=1){ B.predict={kind:"atk",x:u.x,y:u.y}; renderBattle(); } /* 通常攻撃も実行前に戦闘予測パネルを出す */
       return;
     }
 }
@@ -2714,7 +2825,9 @@ function bindBattle(){
   var ret=$("btn-retreat"); if(ret) ret.addEventListener("click", function(){ B.retreatAsk=true; renderBattle(); });
   var retok=$("btn-retreat-ok"); if(retok) retok.addEventListener("click", retreatBattle);
   var retno=$("btn-retreat-no"); if(retno) retno.addEventListener("click", function(){ B.retreatAsk=false; renderBattle(); });
-  var cancelFn=function(){ B.mode="action"; B.pendingSkill=null; B.targets=[]; B.confirm=null; renderBattle(); };
+  var cancelFn=function(){ B.mode="action"; B.pendingSkill=null; B.targets=[]; B.confirm=null; B.predict=null; renderBattle(); };
+  var pok=$("btn-predict-ok"); if(pok) pok.addEventListener("click", executePredicted);
+  var pno=$("btn-predict-no"); if(pno) pno.addEventListener("click", function(){ B.predict=null; renderBattle(); }); /* キャンセル＝対象選択に戻る（移動の巻き戻しはしない） */
   var cancel=$("btn-cancel"); if(cancel) cancel.addEventListener("click", cancelFn);
   var cancel2=$("btn-cancel2"); if(cancel2) cancel2.addEventListener("click", cancelFn);
   var cok=$("btn-confirm-ok"); if(cok) cok.addEventListener("click", function(){ var cx=B.confirm.x, cy=B.confirm.y; executeSkill(cx,cy); });
