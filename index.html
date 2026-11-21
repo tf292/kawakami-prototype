@@ -286,19 +286,30 @@ select{font-family:inherit;font-size:calc(var(--k)*15);padding:calc(var(--k)*8);
 .b-skillbar .cancel{margin-left:auto;background:rgba(255,255,255,.08);border:1px solid rgba(230,200,120,.7);color:#ffe9a8;border-radius:calc(var(--k)*99);padding:calc(var(--k)*4) calc(var(--k)*14);font-weight:800;font-size:calc(var(--k)*12.5);min-height:30px}
 .b-stage{position:relative;margin:0;border-radius:0;overflow:hidden;border:none;flex:1;min-height:0}
 .b-stage>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.iso-board{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(99%,calc(var(--k)*1230));aspect-ratio:47/20;box-shadow:0 calc(var(--k)*10) calc(var(--k)*16) rgba(4,20,16,.45),0 calc(var(--k)*26) calc(var(--k)*30) rgba(30,24,10,.5),0 calc(var(--k)*46) calc(var(--k)*60) rgba(4,20,16,.55),inset 0 0 0 2px rgba(52,38,16,.55),inset 0 0 calc(var(--k)*70) rgba(20,26,8,.38);background:#39543c}
+.iso-board{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(99%,calc(var(--k)*1230));aspect-ratio:47/20;box-shadow:0 calc(var(--k)*7) calc(var(--k)*13) rgba(4,20,16,.38),0 calc(var(--k)*16) calc(var(--k)*24) rgba(30,24,10,.32),inset 0 0 0 2px rgba(52,38,16,.45),inset 0 0 calc(var(--k)*70) rgba(20,26,8,.30);background:#39543c}
 .iso-board::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;box-shadow:inset 0 0 calc(var(--k)*54) rgba(24,30,10,.42),inset 0 calc(var(--k)*-18) calc(var(--k)*30) rgba(24,30,10,.3)}
 .iso-board>img.iso-map{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0;transform-origin:50% 50%}
-/* ---- マス表示は最小限：起伏・段差は背景画（ジオラマ画）側に描き込み、ここは枠と淡い地形色だけ ---- */
+/* ---- マス表示：上面は枠と淡い地形色だけ。段差はブロック式の側面で表す ----
+   側面（.blk-l/.blk-r）は手前2方向の隣マスとの高さ差ぶんだけ菱形の下辺から垂らす。
+   色は背景画の水彩に合わせた土・岩の質感（芝の縁取り＋土の層＋根元の陰影）にし、
+   輪郭線は引かず、接地部を暗く落として景色に馴染ませる。寸法とclip-pathは
+   renderBattle がマスごとにインラインで与える（高さデータ・ルールは不変）。 */
 .iso-cell.t-high .diamond{background:rgba(226,205,130,.16);box-shadow:inset 0 0 0 1.5px rgba(250,240,200,.5)}
 .iso-cell{position:absolute;width:11.7647%;height:11.0588%;background:none;border:none;padding:0;margin:0;min-height:0;cursor:default;pointer-events:none}
 .iso-cell .hit{position:absolute;inset:-26% -14%;z-index:4;pointer-events:auto;background:transparent}
-.iso-cell .diamond{position:absolute;inset:0;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);background:rgba(255,255,255,.03);box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)}
-.iso-cell.t-grass .diamond{background:rgba(120,190,95,.10);box-shadow:inset 0 0 0 1px rgba(225,245,195,.45)}
+.iso-cell .diamond{position:absolute;inset:0;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);background:rgba(255,255,255,.03);box-shadow:inset 0 0 0 1px rgba(252,248,228,.30)}
+.iso-cell.t-grass .diamond{background:rgba(120,190,95,.10);box-shadow:inset 0 0 0 1px rgba(225,245,195,.38)}
 .iso-cell.t-water .diamond{background:rgba(60,170,230,.20);box-shadow:inset 0 0 0 1.5px rgba(170,230,255,.75)}
-.iso-cell.t-water .side{background:rgba(18,84,120,.35)}
-.iso-cell.t-rock .diamond{background:rgba(150,140,120,.16);box-shadow:inset 0 0 0 1px rgba(235,226,200,.45)}
-.iso-cell .side{position:absolute;left:6%;right:6%;top:52%;height:calc(var(--k)*9);clip-path:polygon(0 0,100% 0,50% 100%);background:rgba(30,60,50,.35)}
+.iso-cell.t-rock .diamond{background:rgba(150,140,120,.16);box-shadow:inset 0 0 0 1px rgba(235,226,200,.40)}
+.iso-cell .blk{position:absolute;pointer-events:none;opacity:.9}
+.iso-cell .blk-l{background:repeating-linear-gradient(96deg,rgba(46,28,8,.08) 0 3px,rgba(255,240,200,.04) 3px 7px,rgba(46,28,8,0) 7px 12px),repeating-linear-gradient(178deg,rgba(52,32,10,.07) 0 5px,rgba(52,32,10,0) 5px 11px),linear-gradient(180deg,#7c9a4e 0%,#7d8f4c 5%,#7d5c33 14%,#6b4a26 58%,#4e3315 88%,#38230d 100%)}
+.iso-cell .blk-r{background:repeating-linear-gradient(84deg,rgba(46,28,8,.06) 0 3px,rgba(255,244,210,.04) 3px 7px,rgba(46,28,8,0) 7px 12px),repeating-linear-gradient(178deg,rgba(52,32,10,.06) 0 5px,rgba(52,32,10,0) 5px 11px),linear-gradient(180deg,#8fae5c 0%,#8da254 5%,#96703c 14%,#7d5a2e 58%,#5f421e 88%,#46300f 100%)}
+.iso-cell.t-high .blk-l{background:repeating-linear-gradient(96deg,rgba(46,28,8,.08) 0 3px,rgba(255,240,200,.04) 3px 7px,rgba(46,28,8,0) 7px 12px),repeating-linear-gradient(178deg,rgba(52,32,10,.07) 0 5px,rgba(52,32,10,0) 5px 11px),linear-gradient(180deg,#a3ad58 0%,#a3a656 5%,#8a6536 14%,#73512a 58%,#553a17 88%,#3e270d 100%)}
+.iso-cell.t-high .blk-r{background:repeating-linear-gradient(84deg,rgba(46,28,8,.06) 0 3px,rgba(255,244,210,.04) 3px 7px,rgba(46,28,8,0) 7px 12px),repeating-linear-gradient(178deg,rgba(52,32,10,.06) 0 5px,rgba(52,32,10,0) 5px 11px),linear-gradient(180deg,#b3bc66 0%,#adb45f 5%,#a1763e 14%,#86602f 58%,#68471f 88%,#4c320f 100%)}
+.iso-cell.t-rock .blk-l{background:repeating-linear-gradient(96deg,rgba(20,16,10,.09) 0 3px,rgba(255,250,235,.04) 3px 7px,rgba(20,16,10,0) 7px 12px),linear-gradient(180deg,#8b8378 0%,#7e7668 10%,#6a6154 55%,#4e463c 88%,#38312a 100%)}
+.iso-cell.t-rock .blk-r{background:repeating-linear-gradient(84deg,rgba(20,16,10,.07) 0 3px,rgba(255,250,235,.04) 3px 7px,rgba(20,16,10,0) 7px 12px),linear-gradient(180deg,#a29a8b 0%,#948b7c 10%,#7d7466 55%,#5d554a 88%,#453e35 100%)}
+.iso-cell.t-water .blk-l{background:linear-gradient(180deg,#5d6b46 0%,#4c4a30 22%,#3a3320 62%,#28220f 100%)}
+.iso-cell.t-water .blk-r{background:linear-gradient(180deg,#6b7a50 0%,#585636 22%,#453e24 62%,#2f2712 100%)}
 .iso-cell.is-move{cursor:pointer;z-index:3}
 .iso-cell.is-move .diamond{background:rgba(64,200,235,.5);box-shadow:inset 0 0 0 2px #35b6e8;animation:movePulse 1.1s ease-in-out infinite}
 .iso-cell.is-move:hover .diamond{background:rgba(64,200,235,.78)}
@@ -310,20 +321,20 @@ select{font-family:inherit;font-size:calc(var(--k)*15);padding:calc(var(--k)*8);
 .iso-cell .blocked-x{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#a33d08;font-weight:900;font-size:clamp(calc(var(--k)*13),2.4vw,calc(var(--k)*22));text-shadow:0 1px 0 rgba(255,255,255,.65);z-index:2;pointer-events:none}
 .iso-cell.is-sel{z-index:5}
 .iso-cell.is-sel .diamond{box-shadow:inset 0 0 0 3px #fff,inset 0 0 0 calc(var(--k)*5.5) #e6c878}
-.unit{position:absolute;left:50%;bottom:30%;transform:translateX(-50%);width:170%;max-width:calc(var(--k)*104);display:flex;flex-direction:column;align-items:center;pointer-events:none;z-index:6}
-.unit .u-shadow{position:absolute;left:50%;bottom:calc(var(--k)*13);transform:translateX(-50%);width:78%;height:calc(var(--k)*13);border-radius:50%;background:radial-gradient(ellipse at center,rgba(6,20,12,.52),rgba(6,20,12,0) 68%);z-index:0}
+.unit{position:absolute;left:50%;bottom:calc(50% - var(--k)*38);transform:translateX(-50%);width:170%;max-width:calc(var(--k)*104);display:flex;flex-direction:column;align-items:center;pointer-events:none;z-index:6}
+.unit .u-shadow{position:absolute;left:50%;bottom:calc(var(--k)*26);transform:translateX(-50%);width:72%;height:calc(var(--k)*12);border-radius:50%;background:radial-gradient(ellipse at center,rgba(6,20,12,.55),rgba(6,20,12,0) 68%);z-index:0}
 .unit .u-art{position:relative;z-index:1}
 .unit .u-dir{position:absolute;left:50%;bottom:calc(var(--k)*12);width:calc(var(--k)*13);height:calc(var(--k)*13);background:#ffd94d;clip-path:polygon(50% 0,88% 100%,50% 74%,12% 100%);filter:drop-shadow(0 1px 1px rgba(0,0,0,.65));z-index:3}
 .unit.enemy .u-dir{background:#ff9a8a}
 .unit .u-art{width:auto;filter:drop-shadow(0 calc(var(--k)*5) calc(var(--k)*4) rgba(10,35,25,.45));display:flex;justify-content:center}
-.unit .u-art svg{width:calc(var(--k)*54)}
-.unit.god .u-art svg{width:calc(var(--k)*88)}
-.unit img.u-img-sprite{height:calc(var(--k)*104);width:auto;display:block}
-.unit.god img.u-img-sprite{height:calc(var(--k)*98)}
-.unit img.u-img-bust{width:calc(var(--k)*68);height:calc(var(--k)*68);object-fit:cover;object-position:top center;border-radius:calc(var(--k)*14);border:2.5px solid #e6c878;display:block;background:#dfe9e2}
-.unit img.u-img-fish{width:calc(var(--k)*72);height:calc(var(--k)*58);object-fit:cover;object-position:center;border-radius:calc(var(--k)*10);border:2px solid rgba(255,255,255,.85);display:block}
-.unit img.u-img-pix{height:calc(var(--k)*94);width:auto;display:block;image-rendering:pixelated}
-.unit.god img.u-img-pix{height:calc(var(--k)*102)}
+.unit .u-art svg{width:calc(var(--k)*42)}
+.unit.god .u-art svg{width:calc(var(--k)*64)}
+.unit img.u-img-sprite{height:calc(var(--k)*84);width:auto;display:block}
+.unit.god img.u-img-sprite{height:calc(var(--k)*88)}
+.unit img.u-img-bust{width:calc(var(--k)*60);height:calc(var(--k)*60);object-fit:cover;object-position:top center;border-radius:calc(var(--k)*14);border:2.5px solid #e6c878;display:block;background:#dfe9e2}
+.unit img.u-img-fish{width:calc(var(--k)*64);height:calc(var(--k)*52);object-fit:cover;object-position:center;border-radius:calc(var(--k)*10);border:2px solid rgba(255,255,255,.85);display:block}
+.unit img.u-img-pix{height:calc(var(--k)*74);width:auto;display:block;image-rendering:pixelated}
+.unit.god img.u-img-pix{height:calc(var(--k)*80)}
 .unit .u-ring{width:64%;height:calc(var(--k)*13);border-radius:50%;margin-top:-calc(var(--k)*9);border:3.5px solid #4a90d9;background:rgba(74,144,217,.25);box-shadow:0 3px calc(var(--k)*6) rgba(0,0,0,.35)}
 .unit.enemy .u-ring{border-color:#ef5350;background:rgba(239,83,80,.22)}
 .unit .u-hpbar{width:76%;height:calc(var(--k)*6);background:rgba(10,25,20,.65);border-radius:calc(var(--k)*99);overflow:hidden;margin-top:calc(var(--k)*4);border:1px solid rgba(255,255,255,.55)}
@@ -1816,7 +1827,25 @@ function renderBattle(){
     if(B.sel&&u===B.sel) cls+=" is-sel";
     var left, top, z;
     var lt=cellLeftTop(x,y); left=lt.left.toFixed(2); top=lt.top.toFixed(2); z=lt.z;
-    var inner='<span class="side"></span><span class="diamond"></span><span class="hit"></span>';
+    /* 段差ブロックの側面（見た目のみ）：表示グリッドで手前2方向の隣マスとの
+       高さ差ぶんだけ、菱形の下辺から土の側面を垂らす。回転時も論理マスと一致する
+       よう隣接判定は表示座標→unrotXY で戻して行う。盤外は段差なし（自マスと同じ
+       高さ）として、盤の縁に壁が立たないようにする。
+       高さ1あたりの垂れ量はマス高の2.2%（差7→約0.15マス、差13→約0.29マス、上限0.5）。 */
+    var rp=rotXY(x,y), drx=rp[0], dry=rp[1], dRW=rp[2], dRD=rp[3];
+    function dispH(nx,ny){ if(nx<0||ny<0||nx>=dRW||ny>=dRD) return lt.h; var q=unrotXY(nx,ny); return heightAt(q[0],q[1]); }
+    function blkSpan(cls, drop){
+      var f=Math.max(0, Math.min(0.5, drop*0.022));
+      if(f<0.05) return "";
+      var bh=50+100*f, p1=(50/bh*100).toFixed(1), p2=(100*f/bh*100).toFixed(1);
+      var poly = cls==="blk-l" ? ("0 0,100% "+p1+"%,100% 100%,0 "+p2+"%") : ("0 "+p1+"%,100% 0,100% "+p2+"%,0 100%");
+      var pos = cls==="blk-l" ? "left:0" : "left:50%";
+      /* マスごとに明暗をわずかにずらし、側面が均一な帯に見えないようにする（決定的な疑似乱数） */
+      var br=(0.94+((x*7+y*13+(cls==="blk-l"?0:3))%5)*0.03).toFixed(2);
+      return '<span class="blk '+cls+'" style="'+pos+';top:50%;width:50%;height:'+bh.toFixed(1)+'%;clip-path:polygon('+poly+');filter:brightness('+br+')"></span>';
+    }
+    var blocks = blkSpan("blk-l", lt.h-dispH(drx,dry+1)) + blkSpan("blk-r", lt.h-dispH(drx+1,dry));
+    var inner=blocks+'<span class="diamond"></span><span class="hit"></span>';
     if(blocked) inner+='<span class="blocked-x">×</span>';
     if(u){
       var isCur = B.sel===u && !B.over;
