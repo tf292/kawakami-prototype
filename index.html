@@ -399,16 +399,21 @@ select{font-family:inherit;font-size:calc(var(--k)*15);padding:calc(var(--k)*8);
 @keyframes fxFloat{0%{opacity:0;transform:translate(-50%,-30%) scale(.7)}18%{opacity:1;transform:translate(-50%,-70%) scale(1.12)}38%{transform:translate(-50%,-95%) scale(1)}100%{opacity:0;transform:translate(-50%,-215%) scale(1)}}
 @media(prefers-reduced-motion:reduce){.unit.fx-hit,.unit.fx-lunge,.unit.fx-heal,.unit.fx-die{animation:none}.fx-float{animation-duration:.45s}}
 /* floating command menu (渓流の一手 v3 style) */
-.b-menu{position:absolute;left:0;top:0;z-index:20;width:calc(var(--k)*206);background:linear-gradient(170deg,rgba(18,58,71,.97),rgba(10,34,43,.98));border:1.5px solid rgba(42,160,175,.85);border-radius:calc(var(--k)*14);padding:calc(var(--k)*13) calc(var(--k)*14);color:#eef3e6;box-shadow:0 calc(var(--k)*10) calc(var(--k)*26) rgba(0,0,0,.45)}
-.b-menu .bm-name{font-family:"Shippori Mincho",serif;font-size:calc(var(--k)*18.5);font-weight:800}
-.b-menu .bm-sub{font-size:calc(var(--k)*12);color:#b9cdc2;border-bottom:1px solid rgba(42,160,175,.6);padding-bottom:calc(var(--k)*8);margin-bottom:calc(var(--k)*9)}
-.b-menu .bm-btn{display:block;width:100%;text-align:left;background:rgba(46,110,120,.35);border:1.5px solid rgba(120,200,210,.55);color:#fff;border-radius:calc(var(--k)*9);padding:calc(var(--k)*10) calc(var(--k)*13);font-size:calc(var(--k)*15);font-weight:800;margin-bottom:calc(var(--k)*7)}
+/* スリム化：メニューは .cam-world の外（.b-stage 直下）に置き、寸法はステージ基準の
+   --k だけで決める。カメラのズーム（CAM.z）では拡大縮小しない。 */
+.b-menu{position:absolute;left:0;top:0;z-index:20;width:calc(var(--k)*184);background:linear-gradient(170deg,rgba(18,58,71,.97),rgba(10,34,43,.98));border:1.5px solid rgba(42,160,175,.85);border-radius:calc(var(--k)*12);padding:calc(var(--k)*10) calc(var(--k)*11);color:#eef3e6;box-shadow:0 calc(var(--k)*10) calc(var(--k)*26) rgba(0,0,0,.45)}
+.b-menu .bm-name{font-family:"Shippori Mincho",serif;font-size:calc(var(--k)*16.5);font-weight:800}
+.b-menu .bm-sub{font-size:calc(var(--k)*11);color:#b9cdc2;border-bottom:1px solid rgba(42,160,175,.6);padding-bottom:calc(var(--k)*6);margin-bottom:calc(var(--k)*7)}
+.b-menu .bm-btn{display:block;width:100%;text-align:left;background:rgba(46,110,120,.35);border:1.5px solid rgba(120,200,210,.55);color:#fff;border-radius:calc(var(--k)*8);padding:calc(var(--k)*7) calc(var(--k)*11);font-size:calc(var(--k)*13.5);font-weight:800;margin-bottom:calc(var(--k)*5)}
+.b-menu .bm-subrow{display:flex;flex-wrap:wrap;gap:0 calc(var(--k)*8);border-top:1px solid rgba(42,160,175,.45);margin-top:calc(var(--k)*6);padding-top:calc(var(--k)*2)}
+.b-menu .bm-subbtn{background:none;border:none;color:#a9c6bb;font-size:calc(var(--k)*11.5);font-weight:700;text-decoration:underline;text-underline-offset:3px;padding:calc(var(--k)*3) calc(var(--k)*6);min-height:36px;text-align:left}
+.b-menu .bm-subbtn:hover{color:var(--gold2)}
 .b-menu .bm-btn:hover{border-color:var(--gold2)}
 .b-menu .bm-btn.sel{border-color:var(--gold);background:rgba(217,180,92,.18);color:#ffe9a8}
 .b-menu .bm-btn:disabled{opacity:.45}
 .b-menu .bm-btn .cost{color:var(--gold2);font-size:calc(var(--k)*12.5);font-weight:900}
 .b-menu .bm-btn .rng{font-size:calc(var(--k)*11);color:#b9cdc2;font-weight:700}
-.b-menu .bm-guide{font-size:calc(var(--k)*12.5);color:#c8d4bd;line-height:1.65}
+.b-menu .bm-guide{font-size:calc(var(--k)*11.5);color:#c8d4bd;line-height:1.55;margin:calc(var(--k)*2) 0 calc(var(--k)*6)}
 .face-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:calc(var(--k)*5);margin:calc(var(--k)*4) 0 calc(var(--k)*8)}
 .face-pad .fp-btn{background:rgba(46,110,120,.35);border:1.5px solid rgba(120,200,210,.55);color:#fff;border-radius:calc(var(--k)*9);padding:calc(var(--k)*5) 0 calc(var(--k)*4);font-weight:900;line-height:1.15;min-height:44px}
 .face-pad .fp-btn .fa{display:block;font-size:calc(var(--k)*19)}
@@ -502,7 +507,7 @@ select{font-family:inherit;font-size:calc(var(--k)*15);padding:calc(var(--k)*8);
   .b-side{padding:calc(var(--k)*12) calc(var(--k)*10)}
   .b-side .bs-title{font-size:calc(var(--k)*16)}
   .b-log{max-height:calc(var(--k)*96)}
-  .b-menu{width:calc(var(--k)*190)}
+  .b-menu{width:calc(var(--k)*172)}
   .b-terrain{display:none}
   .iso-board{width:min(99%,calc(var(--k)*1230))}
 }
@@ -2628,26 +2633,29 @@ function renderBattle(){
        +'<span></span>'+fp([0,1])+'<span></span></div>'
        +'<button class="bm-btn sel" id="btn-face-ok">'+faceDirName(fs)+' を向いて終了</button>';
     } else if(B.mode==="move"){
-      menu+='<p class="bm-guide">水色のマスが移動範囲です。岩マス（オレンジ枠＋×）には入れません。隣との高さ差が8以上のマス（崖）へは直接移動できません。高い所から攻撃すると命中・ダメージが上がります。</p>'
+      menu+='<p class="bm-guide">水色のマスが移動範囲です。岩と崖（高さ差8以上）には入れません。</p>'
        +'<button class="bm-btn sel" id="btn-stay">移動しない</button>';
     } else if(B.mode==="action"){
       if(!B.showSkills){
         menu+='<button class="bm-btn" id="btn-atk">攻撃</button>';
         if(u2.god) menu+='<button class="bm-btn" id="btn-skills">技 ＞</button>';
         menu+='<button class="bm-btn" id="btn-wait">待機</button>';
-        if(!B.preMove && !B.moved) menu+='<button class="bm-btn" id="btn-backmove">移動に戻る</button>'; /* 「移動しない」を選んだ直し：まだ動いていないので移動フェーズへ戻れる */
-        if(B.preMove) menu+='<button class="bm-btn" id="btn-undomove">移動キャンセル</button>';
+        var subActs="";
+        if(!B.preMove && !B.moved) subActs+='<button class="bm-subbtn" id="btn-backmove">移動に戻る</button>'; /* 「移動しない」を選んだ直し：まだ動いていないので移動フェーズへ戻れる（補助操作は下端の小リンクに格下げ） */
+        if(B.preMove) subActs+='<button class="bm-subbtn" id="btn-undomove">移動キャンセル</button>';
+        if(subActs) menu+='<div class="bm-subrow">'+subActs+'</div>';
       } else {
         var ls=learnedSkills();
         if(!ls.length) menu+='<p class="bm-guide">まだ技を覚えていません。スキルツリーで解放できます。</p>';
         ls.forEach(function(l){ var sk2=l.sk; menu+='<button class="bm-btn" data-bskill="'+l.cat+'-'+l.idx+'" '+(u2.mp>=sk2.mp?"":"disabled")+'><span>'+esc(sk2.n)+'</span> <span class="cost">神力'+sk2.mp+'</span><br><span class="rng">'+rangeLabel(sk2)+'｜'+esc(skillDesc(sk2))+'</span></button>'; });
-        if(B.preMove) menu+='<button class="bm-btn" id="btn-undomove">移動キャンセル</button>';
-        menu+='<button class="bm-btn" id="btn-backskills">＜ もどる</button>';
+        var subSk='<button class="bm-subbtn" id="btn-backskills">＜ もどる</button>';
+        if(B.preMove) subSk='<button class="bm-subbtn" id="btn-undomove">移動キャンセル</button>'+subSk;
+        menu+='<div class="bm-subrow">'+subSk+'</div>';
       }
     } else if(B.mode==="target"){
       menu+='<p class="bm-guide">'+(B.pendingSkill?"赤〜ピンクのマス／対象を選ぶと、実行前に戦闘予測が出ます。":"隣接する敵を選ぶと、実行前に戦闘予測が出ます。")+'</p>'
        +'<button class="bm-btn" id="btn-cancel">もどる</button>';
-      if(B.preMove) menu+='<button class="bm-btn" id="btn-fullcancel">全キャンセル（元の位置に戻る）</button>';
+      if(B.preMove) menu+='<div class="bm-subrow"><button class="bm-subbtn" id="btn-fullcancel">全キャンセル（元の位置に戻る）</button></div>';
     }
     menu+='</div>';
   }
