@@ -293,8 +293,9 @@ select{font-family:inherit;font-size:calc(var(--k)*15);padding:calc(var(--k)*8);
 .b-skillbar .cancel{margin-left:auto;background:rgba(255,255,255,.08);border:1px solid rgba(230,200,120,.7);color:#ffe9a8;border-radius:calc(var(--k)*99);padding:calc(var(--k)*4) calc(var(--k)*14);font-weight:800;font-size:calc(var(--k)*12.5);min-height:30px}
 .b-stage{position:relative;margin:0;border-radius:0;overflow:hidden;border:none;flex:1;min-height:0}
 .b-stage>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.iso-board{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(99%,calc(var(--k)*1230));aspect-ratio:2/1.24}
-.iso-cell{position:absolute;width:12.5%;height:10.1%;background:none;border:none;padding:0;margin:0;min-height:0;cursor:default;pointer-events:none}
+.iso-board{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(99%,calc(var(--k)*1230));aspect-ratio:2/0.92;box-shadow:0 calc(var(--k)*18) calc(var(--k)*44) rgba(4,20,16,.55)}
+.iso-board>img.iso-map{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0}
+.iso-cell{position:absolute;width:12.5%;height:10.87%;background:none;border:none;padding:0;margin:0;min-height:0;cursor:default;pointer-events:none}
 .iso-cell .hit{position:absolute;inset:-26% -14%;z-index:4;pointer-events:auto;background:transparent}
 .iso-cell .diamond{position:absolute;inset:0;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);background:rgba(255,255,255,.05);box-shadow:inset 0 0 0 1px rgba(255,255,255,.28)}
 .iso-cell.t-grass .diamond{background:rgba(86,158,80,.38);box-shadow:inset 0 0 0 1.5px rgba(205,238,175,.55)}
@@ -989,9 +990,13 @@ function viewExplore(){
    +'<button class="scene-back" data-goto="home">← 戻る</button>'
    +'</div>';
 }
-/* ---------- 手入れマップ（探索と同じ周辺マップ上の場所をタップして選ぶ） ---------- */
+/* ---------- 手入れマップ（手入れ専用マップ上の場所をタップして選ぶ） ---------- */
 var careSel=0;
-var CARE_POS=[[22,90],[35,84],[18,74],[44,70],[55,79],[49,60],[57,50],[50,42],[60,32]]; /* % : x,y（川の流れに沿って下流→上流） */
+/* % : x,y（手入れ専用マップ assets/map-care.jpg に描かれた9か所の実測位置。
+   1:ゴミのたまり場（右下の流木・ゴミの岸） 2:壊れた魚道（水路の壊れた木組み） 3:水門
+   4:橋のたもと（木橋） 5:葦原（右下寄りの岸の葦） 6:休耕田と水路（中央の田畑）
+   7:崩れた護岸（左の石垣の崩れ） 8:水車小屋（上流の水車） 9:寂れた祠（右上の丘の祠） */
+var CARE_POS=[[84,87],[59,54],[67,62],[31,80],[64,83],[50,52],[26,61],[53,18],[86,9]];
 function viewCare(){
   var god=GODS[G.god];
   if(careSel<0||careSel>8) careSel=0;
@@ -1016,12 +1021,9 @@ function viewCare(){
     panel+='<p style="font-size:calc(var(--k)*13.5);color:#ffe9a8;margin-top:calc(var(--k)*10);line-height:1.7">🔒 '+lockMsg+'</p>';
   }
   panel+='<div class="mp-line" style="font-size:calc(var(--k)*11.5);color:#b9c4ae;margin-top:calc(var(--k)*10)">所持素材：'+MATS.map(function(m){return m+" "+G.mats[m];}).join("｜")+'</div></div>';
-  return '<div class="map-scene"><img class="map-bg" src="assets/map-'+G.god+'.jpg" alt="'+esc(god.short)+'エリアのマップ">'
+  return '<div class="map-scene"><img class="map-bg" src="assets/map-care.jpg" alt="手入れ専用マップ">'
    +'<div class="map-title"><span class="mt-big">手入れ</span><span class="mt-sub">場所を選ぶ（'+esc(god.short)+'）</span></div>'
-   +'<div class="map-godtree">源流の神（御神木）</div>'
    +panel+spots
-   +(G.god==="akayu"?'<div class="map-onsen">温泉</div>':"")
-   +'<div class="map-village">村</div>'
    +'<button class="scene-back" data-goto="home">← 戻る</button>'
    +'</div>';
 }
@@ -1617,7 +1619,7 @@ function renderBattle(){
     if(isMoveCell) cls+=" is-move"; else if((isTgt&&B.mode==="target")||inConfirm) cls+=" is-target";
     if(blocked) cls+=" is-blocked";
     if(B.sel&&u===B.sel) cls+=" is-sel";
-    var left=((x-y+7)*6.25).toFixed(2); var top=((x+y)*5.9).toFixed(2);
+    var left=((x-y+7)*6.25).toFixed(2); var top=((x+y)*5.4348+4.02).toFixed(2);
     var z=(x+y)*10+5;
     var inner='<span class="side"></span><span class="diamond"></span><span class="hit"></span>';
     if(blocked) inner+='<span class="blocked-x">×</span>';
@@ -1720,7 +1722,7 @@ function renderBattle(){
   app.innerHTML='<div class="battle-scene">'
    +'<aside class="b-side">'+sideHtml+'</aside>'
    +'<div class="b-main">'+topbar+skillbar
-   +'<div class="b-stage"><img src="assets/bg-battle-real.jpg" alt="水彩の川辺の戦闘背景"><div class="iso-board">'+cells+'</div>'+menu+hint+terrain+predict+result+'</div>'
+   +'<div class="b-stage"><img src="assets/bg-battle-real.jpg" alt="水彩の川辺の戦闘背景"><div class="iso-board"><img class="iso-map" src="assets/map-battle.jpg" alt="戦闘マップ">'+cells+'</div>'+menu+hint+terrain+predict+result+'</div>'
    +'</div>'
    +'<aside class="b-rail">'+rail+'</aside></div>';
   bindBattle();
@@ -1741,7 +1743,7 @@ function playFX(){
     var d=document.createElement("div");
     d.className="fx-float "+cls; d.textContent=text;
     d.style.left=(((x-y+7)*6.25)+6.25)+"%";
-    d.style.top=(((x+y)*5.9)+1.5)+"%";
+    d.style.top=(((x+y)*5.4348)+5.5)+"%";
     board.appendChild(d);
     setTimeout(function(){ if(d.parentNode) d.parentNode.removeChild(d); },1050);
   }
@@ -1754,7 +1756,7 @@ function playFX(){
     if(ev.t==="slide"){
       var u=unitEl(ev.x,ev.y); if(!u||!rect.width) return;
       var dx=((ev.fx-ev.fy)-(ev.x-ev.y))*0.0625*rect.width;
-      var dy=((ev.fx+ev.fy)-(ev.x+ev.y))*0.059*rect.height;
+      var dy=((ev.fx+ev.fy)-(ev.x+ev.y))*0.054348*rect.height;
       if(!dx&&!dy) return;
       u.style.transition="none";
       u.style.transform="translate(calc(-50% + "+Math.round(dx)+"px), "+Math.round(dy)+"px)";
@@ -1822,8 +1824,8 @@ function bindBattle(){
     var px=(ev.clientX-r.left)/r.width*100, py=(ev.clientY-r.top)/r.height*100;
     var best=null, bd=1e9;
     for(var yy=0;yy<8;yy++) for(var xx=0;xx<8;xx++){
-      var cx=(xx-yy+7)*6.25+6.25, cy=(xx+yy)*5.9+5.05;
-      var dx=(px-cx)/6.9, dy=(py-cy)/5.6, d=dx*dx+dy*dy;
+      var cx=(xx-yy+7)*6.25+6.25, cy=(xx+yy)*5.4348+9.4548;
+      var dx=(px-cx)/6.9, dy=(py-cy)/5.2, d=dx*dx+dy*dy;
       if(d<bd){ bd=d; best=[xx,yy]; }
     }
     if(best&&bd<=1.9) onCellTap(best[0],best[1]);

@@ -32,7 +32,9 @@ var CORE_ASSETS = [
   "./bg-tree.jpg",
   "./map-akayu.jpg",
   "./map-dobu.jpg",
-  "./map-kare.jpg"
+  "./map-kare.jpg",
+  "./map-care.jpg",
+  "./map-battle.jpg"
 ];
 
 self.addEventListener("install", function (event) {
