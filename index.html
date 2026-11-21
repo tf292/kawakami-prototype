@@ -432,19 +432,19 @@ select{font-family:inherit;font-size:calc(var(--k)*15);padding:calc(var(--k)*8);
 /* floating command menu：ボタンラベルのみで構成する（見出し・説明文なし）。
    メニューは .cam-world の外（.b-stage 直下）に置き、寸法はステージ基準の
    --k だけで決める。カメラのズーム（CAM.z）では拡大縮小しない。 */
-.b-menu{position:absolute;left:0;top:0;z-index:20;width:calc(var(--k)*168);background:linear-gradient(170deg,rgba(18,58,71,.97),rgba(10,34,43,.98));border:1.5px solid rgba(42,160,175,.85);border-radius:calc(var(--k)*12);padding:calc(var(--k)*8) calc(var(--k)*9);color:#eef3e6;box-shadow:0 calc(var(--k)*10) calc(var(--k)*26) rgba(0,0,0,.45)}
-.b-menu .bm-btn{display:block;width:100%;text-align:left;background:rgba(46,110,120,.35);border:1.5px solid rgba(120,200,210,.55);color:#fff;border-radius:calc(var(--k)*8);padding:calc(var(--k)*7) calc(var(--k)*11);font-size:calc(var(--k)*13.5);font-weight:800;margin-bottom:calc(var(--k)*4)}
+.b-menu{position:absolute;left:0;top:0;z-index:20;width:calc(var(--k)*120);background:linear-gradient(170deg,rgba(18,58,71,.97),rgba(10,34,43,.98));border:1.5px solid rgba(42,160,175,.85);border-radius:calc(var(--k)*8);padding:calc(var(--k)*4) calc(var(--k)*5);color:#eef3e6;box-shadow:0 calc(var(--k)*8) calc(var(--k)*20) rgba(0,0,0,.45)}
+.b-menu .bm-btn{display:block;width:100%;text-align:left;background:rgba(46,110,120,.35);border:1.5px solid rgba(120,200,210,.55);color:#fff;border-radius:calc(var(--k)*6);padding:calc(var(--k)*2) calc(var(--k)*7);font-size:calc(var(--k)*13);font-weight:800;line-height:1.35;min-height:calc(var(--k)*26);margin-bottom:calc(var(--k)*2)}
 .b-menu .bm-btn:last-child{margin-bottom:0}
-.b-menu .bm-subrow{display:flex;flex-wrap:wrap;gap:0 calc(var(--k)*8);border-top:1px solid rgba(42,160,175,.45);margin-top:calc(var(--k)*6);padding-top:calc(var(--k)*2)}
-.b-menu .bm-subbtn{background:none;border:none;color:#a9c6bb;font-size:calc(var(--k)*11.5);font-weight:700;text-decoration:underline;text-underline-offset:3px;padding:calc(var(--k)*3) calc(var(--k)*6);min-height:36px;text-align:left}
+.b-menu .bm-subrow{display:flex;flex-wrap:wrap;gap:0 calc(var(--k)*5);border-top:1px solid rgba(42,160,175,.45);margin-top:calc(var(--k)*3);padding-top:calc(var(--k)*1)}
+.b-menu .bm-subbtn{background:none;border:none;color:#a9c6bb;font-size:calc(var(--k)*11);font-weight:700;text-decoration:underline;text-underline-offset:3px;padding:calc(var(--k)*1) calc(var(--k)*3);min-height:calc(var(--k)*18);line-height:1.3;text-align:left}
 .b-menu .bm-subbtn:hover{color:var(--gold2)}
 .b-menu .bm-btn:hover{border-color:var(--gold2)}
 .b-menu .bm-btn.sel{border-color:var(--gold);background:rgba(217,180,92,.18);color:#ffe9a8}
 .b-menu .bm-btn:disabled{opacity:.45}
-.b-menu .bm-btn .cost{color:var(--gold2);font-size:calc(var(--k)*12.5);font-weight:900;float:right}
-.face-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:calc(var(--k)*5);margin:calc(var(--k)*4) 0 calc(var(--k)*8)}
-.face-pad .fp-btn{background:rgba(46,110,120,.35);border:1.5px solid rgba(120,200,210,.55);color:#fff;border-radius:calc(var(--k)*9);padding:calc(var(--k)*5) 0 calc(var(--k)*4);font-weight:900;line-height:1.15;min-height:44px}
-.face-pad .fp-btn .fa{display:block;font-size:calc(var(--k)*19)}
+.b-menu .bm-btn .cost{color:var(--gold2);font-size:calc(var(--k)*11);font-weight:900;float:right}
+.face-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:calc(var(--k)*3);margin:calc(var(--k)*3) 0 calc(var(--k)*5)}
+.face-pad .fp-btn{background:rgba(46,110,120,.35);border:1.5px solid rgba(120,200,210,.55);color:#fff;border-radius:calc(var(--k)*6);padding:calc(var(--k)*3) 0 calc(var(--k)*2);font-weight:900;line-height:1.15;min-height:calc(var(--k)*30)}
+.face-pad .fp-btn .fa{display:block;font-size:calc(var(--k)*15)}
 .face-pad .fp-btn .fl{display:block;font-size:calc(var(--k)*10.5);color:#b9cdc2;font-weight:800}
 .face-pad .fp-btn.sel{border-color:var(--gold);background:rgba(217,180,92,.22);color:#ffe9a8}
 .face-pad .fp-btn.sel .fl{color:var(--gold2)}
@@ -534,7 +534,7 @@ select{font-family:inherit;font-size:calc(var(--k)*15);padding:calc(var(--k)*8);
   .b-side{padding:calc(var(--k)*12) calc(var(--k)*10)}
   .b-side .bs-title{font-size:calc(var(--k)*16)}
   .b-log{max-height:calc(var(--k)*96)}
-  .b-menu{width:calc(var(--k)*160)}
+  .b-menu{width:calc(var(--k)*116)}
   .b-terrain{display:none}
   .iso-board{width:min(99%,calc(var(--k)*1230))}
 }
@@ -542,7 +542,7 @@ select{font-family:inherit;font-size:calc(var(--k)*15);padding:calc(var(--k)*8);
 .ending-img{width:100%;height:auto;border-radius:calc(var(--k)*12);display:block;border:2px solid rgba(230,200,120,.7)}
 /* ---- v13: tap floors, safe-area, PWA hint ---- */
 .btn{min-height:40px}
-.b-menu .bm-btn{min-height:40px}
+.b-menu .bm-btn{min-height:calc(var(--k)*26)}
 .depth-btn{min-height:40px}
 .map-marker{width:max(40px,calc(var(--k)*52));height:max(40px,calc(var(--k)*52))}
 .map-marker.sel{width:max(46px,calc(var(--k)*62));height:max(46px,calc(var(--k)*62))}
