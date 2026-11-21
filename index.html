@@ -1397,10 +1397,16 @@ function commonCanvas(){
   html+='<div class="tnode gold done" style="left:52%;top:97.5%"><span class="nc" style="width:calc(var(--k)*30);height:calc(var(--k)*30);font-size:calc(var(--k)*11)">起点</span></div>';
   return '<div class="tree-canvas">'+html+'</div>';
 }
-/* パラメータツリー配置（基準イメージ「川型」v22）：下の起点から川が蛇行して上り、
-   頂上の進化ロックへ至る1本の流れ。座標はキャンバス内の %（段階1→14の順）。 */
-var PARAM_POS=[[63,88],[71,82],[78.5,76.5],[82,70],[82.5,63],[73,57.5],[61,54],[52.5,47.5],[57,40.5],[64.5,35.5],[56,29],[47.5,23.5],[44,18],[49.5,12]];
-var PARAM_START=[60,95.5], PARAM_CAP=[58,4.8];
+/* パラメータツリー配置（基準イメージ「川型」v22・仕様書どおり全14段階／項目22個）：
+   本流14項目＋支流8項目＝22項目。座標は基準画像のノード位置をキャンバス内の % に
+   写したもの（段階1→14の順）。支流は本流から分かれて再合流する2本で、
+   支流の項目は同じ段階の項目として扱う（解放は段階単位で従来どおり）。 */
+var PARAM_POS=[[51,86.5],[61,81],[68.5,75],[73,69.5],[72.5,63.5],[68.5,58],[60.5,52],[51,46],[41.5,40.5],[34,35],[30,29.5],[30,23.5],[34,18],[42,12]];
+/* 支流の項目：s=属する段階の index（0始まり）。左の支流は第3段階から分かれ第10段階で合流、
+   右の支流は第5段階から分かれ第12段階で合流する（基準画像の並びどおり）。 */
+var PARAM_BRANCH_L=[{s:2,x:45,y:75},{s:5,x:45,y:58},{s:6,x:37.5,y:52.5},{s:8,x:18,y:40}];
+var PARAM_BRANCH_R=[{s:4,x:93,y:63.5},{s:6,x:84,y:52.5},{s:7,x:74.5,y:46.5},{s:10,x:53,y:29.5}];
+var PARAM_START=[51,94], PARAM_CAP=[42,4.8];
 function dominantIcon(fx){
   var best="atk", bv=-1; ["atk","hp","def","spd","mp"].forEach(function(k){ if((fx[k]||0)>bv){ bv=fx[k]; best=k; } });
   return {atk:"⚔",hp:"♥",def:"🛡",spd:"≋",mp:"✦"}[best];
@@ -1411,14 +1417,18 @@ function dominantFxStr(fx){
 }
 function paramCanvas(pid){
   var flowPts=[PARAM_START].concat(PARAM_POS).concat([PARAM_CAP]);
-  /* 本流：幅のある淡い青の帯＋中心線。支流：途中で分かれて再合流する細い流れ（装飾） */
+  /* 支流の流れ：左は本流の第3段階→支流4項目→第10段階へ合流、右は第5段階→支流4項目→第12段階へ合流 */
+  var brL=[[PARAM_POS[2][0],PARAM_POS[2][1]]].concat(PARAM_BRANCH_L.map(function(b){return [b.x,b.y];})).concat([[PARAM_POS[9][0],PARAM_POS[9][1]]]);
+  var brR=[[PARAM_POS[4][0],PARAM_POS[4][1]]].concat(PARAM_BRANCH_R.map(function(b){return [b.x,b.y];})).concat([[PARAM_POS[11][0],PARAM_POS[11][1]]]);
   var river='<svg class="tree-links" viewBox="0 0 100 100" preserveAspectRatio="none">'
     +'<path d="'+smoothPath(flowPts)+'" fill="none" stroke="rgba(125,195,230,.38)" stroke-width="3.6" stroke-linecap="round"/>'
-    +'<path d="'+smoothPath([[82,70],[93,60],[94.5,47],[86,38],[64.5,35.5]])+'" fill="none" stroke="rgba(125,195,230,.30)" stroke-width="1.7" stroke-linecap="round"/>'
+    +'<path d="'+smoothPath(brL)+'" fill="none" stroke="rgba(125,195,230,.30)" stroke-width="1.7" stroke-linecap="round"/>'
+    +'<path d="'+smoothPath(brR)+'" fill="none" stroke="rgba(125,195,230,.30)" stroke-width="1.7" stroke-linecap="round"/>'
     +'</svg>';
   var segs=[[PARAM_START[0],PARAM_START[1],PARAM_POS[0][0],PARAM_POS[0][1], G.tree[pid]>0]];
   for(var i=0;i<PARAM_POS.length-1;i++) segs.push([PARAM_POS[i][0],PARAM_POS[i][1],PARAM_POS[i+1][0],PARAM_POS[i+1][1], G.tree[pid]>i]);
   segs.push([PARAM_POS[13][0],PARAM_POS[13][1],PARAM_CAP[0],PARAM_CAP[1], G.tree[pid]>=14]);
+  [brL,brR].forEach(function(br){ for(var j=0;j<br.length-1;j++) segs.push([br[j][0],br[j][1],br[j+1][0],br[j+1][1], false]); });
   var html=river+linkSvg(segs);
   for(var s=0;s<14;s++){
     var done=G.tree[pid]>s;
@@ -1429,6 +1439,15 @@ function paramCanvas(pid){
       sub: done?"解放済":(isNext?paramName(pid)+"累計 "+G.pts[pid]+" / "+THRESH[s]:"順番に解放"),
       badge: isNext?String(THRESH[s]):"", badgeCls:"num", attrs:'data-ptree="'+pid+'-'+s+'" title="第'+(s+1)+"段階 "+esc(TREE_NAMES[pid][s])+'"'});
   }
+  /* 支流の項目（8個）：属する段階と連動する。段階が解放されれば支流側も解放済みになり、
+     次の段階のときは支流側からも解放できる（データ・条件は本流側と同一）。 */
+  PARAM_BRANCH_L.concat(PARAM_BRANCH_R).forEach(function(b){
+    var s=b.s, done=G.tree[pid]>s, isNext=(!done && G.tree[pid]===s), avail=isNext && G.pts[pid]>=THRESH[s];
+    html+=tnodeHtml({x:b.x, y:b.y, cls:pid, state:done?"done":(avail?"avail":"locked"),
+      icon:dominantIcon(TREE_FX[pid][s]), label:esc(TREE_NAMES[pid][s]), fx:fxStr(TREE_FX[pid][s]),
+      sub:"支流｜第"+(s+1)+"段階",
+      attrs:'data-ptree="'+pid+'-'+s+'" title="第'+(s+1)+"段階 "+esc(TREE_NAMES[pid][s])+'（支流）"'});
+  });
   /* 頂上：進化ロック解除（第2進化）の到達点。解放の実行は左パネルのボタンとここ両方から */
   var e2=evo2Status();
   var capState = G.evo>=2 ? "done" : (e2.ok ? "avail" : "locked");
@@ -1438,22 +1457,26 @@ function paramCanvas(pid){
   html+='<div class="tnode gold done" style="left:'+PARAM_START[0]+'%;top:'+PARAM_START[1]+'%"><span class="nc" style="width:calc(var(--k)*34);height:calc(var(--k)*34);font-size:calc(var(--k)*11)">起点</span></div>';
   return '<div class="tree-canvas">'+html+'</div>';
 }
-var SKILL_OFF={0:[0,92],1:[-8.5,77],2:[8.5,77],3:[-10,62],5:[-2.5,62],4:[8.5,62],6:[-10,47],7:[8.5,47],8:[-0.75,33]};
+/* スキルツリー配置（基準イメージ「派生式」v29）：第1段階（下）→第2段階で左右に派生→
+   第3段階は3つ→第4段階は2つ→第5段階（奥義）1つ、の5段構成×3カテゴリ＋複合6。
+   座標はカテゴリ中心からの [xずれ, y]（キャンバス内の %）。 */
+var SKILL_OFF={0:[0,88],1:[-8,74],2:[8,74],3:[-13.5,60],5:[-3,60],4:[9.5,60],6:[-9.5,46],7:[9.5,46],8:[0,33]};
 var SKILL_ICON={water:"💧",life:"★",res:"◆"};
 var SKILL_LINK={water:"rgba(110,180,235,",life:"rgba(120,215,135,",res:"rgba(235,175,95,"};
 function skillCanvas(){
-  var colX={water:19,life:50,res:81};
+  var colX={water:20,life:50,res:80};
   var segs=[];
   ["water","life","res"].forEach(function(cat){
     /* 起点から各カテゴリの根へ。リンクはカテゴリ色（水量=青／生命=緑／資源=橙）で、
        習得済みの区間は濃く、未習得は淡く引く（基準イメージ「派生式」v29） */
-    segs.push([50,96.5,colX[cat],92, SKILL_LINK[cat]+(hasSkill(cat,0)?"0.95)":"0.45)")]);
+    segs.push([50,95,colX[cat],88, SKILL_LINK[cat]+(hasSkill(cat,0)?"0.95)":"0.45)")]);
     for(var idx=0;idx<9;idx++){ var pre=PRE[idx]; if(pre!==null&&pre!==undefined){ segs.push([colX[cat]+SKILL_OFF[pre][0],SKILL_OFF[pre][1],colX[cat]+SKILL_OFF[idx][0],SKILL_OFF[idx][1], SKILL_LINK[cat]+((hasSkill(cat,pre)&&hasSkill(cat,idx))?"0.95)":"0.45)")]); } }
   });
-  var compPos=[[31,17],[31,4.5],[52.5,17],[52.5,4.5],[74,17],[74,4.5]];
-  segs.push([31,17,31,4.5,"rgba(230,200,120,.75)"]); segs.push([52.5,17,52.5,4.5,"rgba(230,200,120,.75)"]); segs.push([74,17,74,4.5,"rgba(230,200,120,.75)"]);
+  /* 複合技は基準画像どおり上部の中央寄りに3組×2段階で並ぶ */
+  var compPos=[[23,15.5],[23,5],[38.5,15.5],[38.5,5],[54,15.5],[54,5]];
+  segs.push([23,15.5,23,5,"rgba(230,200,120,.75)"]); segs.push([38.5,15.5,38.5,5,"rgba(230,200,120,.75)"]); segs.push([54,15.5,54,5,"rgba(230,200,120,.75)"]);
   var html=linkSvg(segs);
-  html+='<div class="cat-head water" style="left:19%;top:26.5%">水量</div><div class="cat-head life" style="left:50%;top:26.5%">生命</div><div class="cat-head res" style="left:81%;top:26.5%">資源</div>';
+  html+='<div class="cat-head water" style="left:20%;top:24%">水量</div><div class="cat-head life" style="left:50%;top:24%">生命</div><div class="cat-head res" style="left:80%;top:24%">資源</div>';
   ["water","life","res"].forEach(function(cat){
     SKILLS[G.god][cat].forEach(function(sk,idx){
       var done=hasSkill(cat,idx), av=skillAvailable(cat,idx), vis=skillVisible(cat,idx);
@@ -1469,7 +1492,7 @@ function skillCanvas(){
     html+=tnodeHtml({x:compPos[idx][0], y:compPos[idx][1], cls:mixCls[idx], state:done?"done":(av?"avail":"locked"),
       icon:"★", label:(done||av)?esc(sk.n):"？？？", sub:"複合｜神力"+sk.mp, ncStyle:"width:max(30px,calc(var(--k)*34));height:max(30px,calc(var(--k)*34));font-size:calc(var(--k)*14)", attrs:'data-skill="comp-'+idx+'"', badge: av?("解放可"):""});
   });
-  html+='<div class="tnode gold done" style="left:50%;top:96.5%"><span class="nc" style="width:calc(var(--k)*34);height:calc(var(--k)*34);font-size:calc(var(--k)*11)">起点</span></div>';
+  html+='<div class="tnode gold done" style="left:50%;top:95%"><span class="nc" style="width:calc(var(--k)*34);height:calc(var(--k)*34);font-size:calc(var(--k)*11)">起点</span></div>';
   return '<div class="tree-canvas tall">'+html+'</div>';
 }
 function viewTree(){
@@ -1672,6 +1695,7 @@ function applyCam(animate){
   e.world.style.transition = animate ? "transform .45s ease" : "none";
   e.world.style.transform = "translate("+CAM.tx+"px,"+CAM.ty+"px) scale("+CAM.z+")";
   var zp=$("zoom-pct"); if(zp) zp.textContent=Math.round(CAM.z*100)+"%";
+  positionMenu(); /* カメラが動いたら、行動コマンドもキャラ絵に追随させる */
 }
 function centerCameraOn(x,y,animate){
   var e=camEls(); if(!e.stage||!e.board) return;
@@ -1690,20 +1714,68 @@ function setZoomAt(nz, px, py){
   CAM.z=nz; CAM.tx=px-wx*nz; CAM.ty=py-wy*nz;
   applyCam(false);
 }
-/* 行動コマンドメニューを行動キャラの真下に置く（盤面端では画面内に収め、
-   下に置けない場合はキャラの上に回す）。位置はカメラ変換後の最終状態から計算する。 */
+/* ズーム／回転の中心になる「現在の選択地点」：選択中のユニット（B.sel）→
+   最後にタップしたマス（B.focus）→ 行動中のキャラ（B.cur）の順で決める。 */
+function selectionCell(){
+  if(B&&B.sel) return {x:B.sel.x, y:B.sel.y};
+  if(B&&B.focus) return {x:B.focus.x, y:B.focus.y};
+  if(B&&B.cur) return {x:B.cur.x, y:B.cur.y};
+  return {x:2, y:8};
+}
+/* 論理マス → 現在のカメラ変換でのステージ内 px 座標（中心計算の共通処理） */
+function cellScreenPx(cx, cy){
+  var e=camEls(); if(!e.stage||!e.board) return null;
+  var c=cellCenter(cx, cy);
+  return { x:(e.board.offsetLeft + c.cx/100*e.board.offsetWidth)*CAM.z + CAM.tx,
+           y:(e.board.offsetTop + c.cy/100*e.board.offsetHeight)*CAM.z + CAM.ty };
+}
+/* 選択地点が画面上の同じ位置に留まるようにズームする */
+function zoomAtSelection(nz){
+  var e=camEls(); if(!e.stage) return;
+  var sc=selectionCell(); var p=cellScreenPx(sc.x, sc.y);
+  if(!p){ setZoomAt(nz, e.stage.clientWidth/2, e.stage.clientHeight/2); return; }
+  setZoomAt(nz, p.x, p.y);
+}
+/* 行動コマンドメニューを行動キャラの「絵」の真下にぴたりと添える。
+   基準はマスではなく、実際に描かれているスプライト画像の表示矩形（実DOM）：
+   高さによる持ち上がり・カメラのズーム／回転／パンをすべて含んだ最終位置から、
+   絵の下端のすぐ下にメニューの上端が来るように置く（盤面端では画面内に収め、
+   下に置けない場合は絵の上に回す）。 */
 function positionMenu(){
   var menu=document.querySelector(".b-menu"); if(!menu||!B||!B.sel) return;
   var e=camEls(); if(!e.stage||!e.board) return;
-  var u=B.sel, c=cellCenter(u.x,u.y);
-  var cellHPx=(2*ISO_SY)/100*e.board.offsetHeight*CAM.z;
-  var ax=(e.board.offsetLeft + c.cx/100*e.board.offsetWidth)*CAM.z + CAM.tx;
-  var ay=(e.board.offsetTop + (c.cy+ISO_SY)/100*e.board.offsetHeight)*CAM.z + CAM.ty;
+  var u=B.sel;
   var vw=e.stage.clientWidth, vh=e.stage.clientHeight;
   var mw=menu.offsetWidth, mh=menu.offsetHeight;
+  var ax=null, aTop=null, aBot=null;
+  var cellEl=e.board.querySelector('[data-cell="'+u.x+','+u.y+'"]');
+  var art=cellEl?cellEl.querySelector(".unit .u-art img, .unit .u-art svg"):null;
+  if(art){
+    /* スプライトの盤面内レイアウト位置を offsetParent チェーンで求め、カメラの
+       最終変換（CAM）でステージ座標へ写す。getBoundingClientRect と違い、
+       センタリングのアニメーション途中でも最終位置がそのまま得られる。 */
+    var lx=0, ly=0, el=art, chainOk=true;
+    while(el && el!==e.board){ lx+=el.offsetLeft; ly+=el.offsetTop; el=el.offsetParent; }
+    if(el===e.board && art.offsetWidth>0){
+      var bx=e.board.offsetLeft, by=e.board.offsetTop;
+      ax=CAM.tx + (bx + lx + art.offsetWidth/2)*CAM.z;
+      aTop=CAM.ty + (by + ly)*CAM.z;
+      aBot=CAM.ty + (by + ly + art.offsetHeight)*CAM.z;
+    }
+    if(ax===null){ /* 予備：実測矩形（アニメーション完了後は正確） */
+      var sr=e.stage.getBoundingClientRect(), r=art.getBoundingClientRect();
+      if(r.width>0){ ax=r.left-sr.left+r.width/2; aTop=r.top-sr.top; aBot=r.bottom-sr.top; }
+    }
+  }
+  if(ax===null){ /* スプライトが取れない場合の予備：マス中心から計算（従来方式） */
+    var c=cellCenter(u.x,u.y);
+    ax=(e.board.offsetLeft + c.cx/100*e.board.offsetWidth)*CAM.z + CAM.tx;
+    aBot=(e.board.offsetTop + (c.cy+ISO_SY)/100*e.board.offsetHeight)*CAM.z + CAM.ty;
+    aTop=aBot-(2*ISO_SY)/100*e.board.offsetHeight*CAM.z;
+  }
   var left=Math.max(6, Math.min(vw-mw-6, ax-mw/2));
-  var top=ay+8;
-  if(top+mh>vh-6) top=ay-cellHPx-mh-8;
+  var top=aBot+4;
+  if(top+mh>vh-6) top=aTop-mh-4;
   if(top<6) top=6;
   menu.style.left=left+"px"; menu.style.top=top+"px";
 }
@@ -2254,8 +2326,8 @@ function renderBattle(){
    +'<div class="bs-round"><b>'+B.round+'</b> 巡</div>'
    +'<div class="bs-left">敵全滅まで あと'+foesLeft+'体</div>'
    +'<div class="bs-sec">全体MAP</div><div class="minimap" style="grid-template-columns:repeat('+RW+',1fr)">'+mini+'</div><div class="mini-legend"><span style="color:#7ec8ff">●</span> 味方　<span style="color:#ff8a7a">●</span> 敵　<span style="color:#b5cf7d">●</span> 高台</div>'
-   +'<button class="btn ghost sm" id="btn-rot" style="margin-top:calc(var(--k)*10);background:transparent;color:#eef3e6;border-color:rgba(120,200,210,.6)">⟳ マップ回転（'+(boardRot()*90)+'°）</button><div style="font-size:calc(var(--k)*10.5);color:#9fc3bb;margin-top:calc(var(--k)*4)">回転は表示だけを変えます</div>'
-   +'<div class="row" style="margin-top:calc(var(--k)*10);gap:calc(var(--k)*6);align-items:center;flex-wrap:nowrap"><button class="btn ghost sm" id="btn-zoomout" style="background:transparent;color:#eef3e6;border-color:rgba(120,200,210,.6);flex:1" title="縮小">−</button><span id="zoom-pct" style="font-size:calc(var(--k)*12);color:#c8d4bd;min-width:calc(var(--k)*40);text-align:center">'+Math.round(CAM.z*100)+'%</span><button class="btn ghost sm" id="btn-zoomin" style="background:transparent;color:#eef3e6;border-color:rgba(120,200,210,.6);flex:1" title="拡大">＋</button></div><div style="font-size:calc(var(--k)*10.5);color:#9fc3bb;margin-top:calc(var(--k)*4)">盤面ドラッグでスクロール／ピンチでも拡縮できます</div>'
+   +'<button class="btn ghost sm" id="btn-rot" style="margin-top:calc(var(--k)*10);background:transparent;color:#eef3e6;border-color:rgba(120,200,210,.6)">⟳ マップ回転（'+(boardRot()*90)+'°）</button><div style="font-size:calc(var(--k)*10.5);color:#9fc3bb;margin-top:calc(var(--k)*4)">選択中の地点を中心に回転します（表示だけ変更）</div>'
+   +'<div class="row" style="margin-top:calc(var(--k)*10);gap:calc(var(--k)*6);align-items:center;flex-wrap:nowrap"><button class="btn ghost sm" id="btn-zoomout" style="background:transparent;color:#eef3e6;border-color:rgba(120,200,210,.6);flex:1" title="縮小">−</button><span id="zoom-pct" style="font-size:calc(var(--k)*12);color:#c8d4bd;min-width:calc(var(--k)*40);text-align:center">'+Math.round(CAM.z*100)+'%</span><button class="btn ghost sm" id="btn-zoomin" style="background:transparent;color:#eef3e6;border-color:rgba(120,200,210,.6);flex:1" title="拡大">＋</button></div><div style="font-size:calc(var(--k)*10.5);color:#9fc3bb;margin-top:calc(var(--k)*4)">拡縮は選択中の地点が中心です。盤面ドラッグでスクロール／ピンチでも拡縮できます</div>'
    +'<div class="bs-sec">ステージ'+(B.si+1)+'</div><div class="bs-stage">'+esc(STAGES[B.si].name.replace(/^ステージ\d+ /,""))+' 深度'+(B.di+1)+'</div><div class="bs-obj">目標：敵の全滅</div>'
    +'<div class="bs-sec">戦闘ログ</div><div class="b-log">'+B.logs.slice().reverse().join("<br>")+'</div>'
    +(!B.over?'<button class="btn ghost sm" id="btn-endphase" style="margin-top:calc(var(--k)*12);background:transparent;color:#eef3e6;border-color:rgba(120,200,210,.6)">残りの味方全員 待機（この巡を順送り）</button>':"")
@@ -2354,6 +2426,8 @@ function renderBattle(){
   else if(B.cur && B.cur!==lastCenteredCur){ lastCenteredCur=B.cur; centerCameraOn(B.cur.x,B.cur.y,true); }
   else applyCam(false);
   positionMenu();
+  /* センタリングのアニメーション（.45s）が終わった最終位置でもう一度合わせる */
+  setTimeout(positionMenu, 500);
 }
 /* ============ 戦闘エフェクト再生（FXQ の見た目イベントを DOM に流す） ============
    1アクション分が数百ミリ秒で終わる軽い CSS アニメーションのみ。
@@ -2482,9 +2556,21 @@ function bindBattle(){
   var cok=$("btn-confirm-ok"); if(cok) cok.addEventListener("click", function(){ var cx=B.confirm.x, cy=B.confirm.y; executeSkill(cx,cy); });
   var cno=$("btn-confirm-no"); if(cno) cno.addEventListener("click", function(){ B.confirm=null; renderBattle(); });
   var endp=$("btn-endphase"); if(endp) endp.addEventListener("click", function(){ enemyPhase(); renderBattle(); });
-  var rotb=$("btn-rot"); if(rotb) rotb.addEventListener("click", function(){ B.rot=((B.rot||0)+1)%4; CAM.centerReq=true; renderBattle(); });
-  var zin=$("btn-zoomin"); if(zin) zin.addEventListener("click", function(){ var e=camEls(); setZoomAt(CAM.z*1.25, e.stage?e.stage.clientWidth/2:0, e.stage?e.stage.clientHeight/2:0); positionMenu(); });
-  var zout=$("btn-zoomout"); if(zout) zout.addEventListener("click", function(){ var e=camEls(); setZoomAt(CAM.z/1.25, e.stage?e.stage.clientWidth/2:0, e.stage?e.stage.clientHeight/2:0); positionMenu(); });
+  var rotb=$("btn-rot"); if(rotb) rotb.addEventListener("click", function(){
+    /* 回転は選択地点を中心に：回転前の選択地点の画面位置を記録し、
+       回転後の投影で同じマスが同じ画面位置に来るようカメラをずらす */
+    var sc=selectionCell();
+    var before=cellScreenPx(sc.x, sc.y);
+    B.rot=((B.rot||0)+1)%4;
+    if(before){
+      var e2=camEls(), nc=cellCenter(sc.x, sc.y);
+      if(e2.board){ CAM.tx=before.x-(e2.board.offsetLeft + nc.cx/100*e2.board.offsetWidth)*CAM.z;
+                    CAM.ty=before.y-(e2.board.offsetTop + nc.cy/100*e2.board.offsetHeight)*CAM.z; }
+    }
+    renderBattle();
+  });
+  var zin=$("btn-zoomin"); if(zin) zin.addEventListener("click", function(){ zoomAtSelection(CAM.z*1.25); });
+  var zout=$("btn-zoomout"); if(zout) zout.addEventListener("click", function(){ zoomAtSelection(CAM.z/1.25); });
   var bmv=$("btn-backmove"); if(bmv) bmv.addEventListener("click", function(){ if(B.sel&&!B.moved&&!B.preMove){ B.mode="move"; B.targets=moveTargets(B.sel); B.showSkills=false; B.confirm=null; B.pendingSkill=null; } renderBattle(); });
   bindCameraInput();
   var leave=$("btn-leave"); if(leave) leave.addEventListener("click", leaveBattle);
@@ -2526,7 +2612,7 @@ function bindCameraInput(){
       var mx=(arr[0][0]+arr[1][0])/2-r.left, my=(arr[0][1]+arr[1][1])/2-r.top;
       CAM.tx+=mx-pinch.mx; CAM.ty+=my-pinch.my; /* 中点の移動ぶんパン */
       pinch.mx=mx; pinch.my=my;
-      setZoomAt(pinch.z0*d/pinch.d0, mx, my);
+      zoomAtSelection(pinch.z0*d/pinch.d0); /* 拡縮そのものは選択地点を中心に行う */
       CAM.suppressTapUntil=Date.now()+300;
       return;
     }
@@ -2553,10 +2639,8 @@ function bindCameraInput(){
   stage.addEventListener("pointercancel", endPointer);
   stage.addEventListener("wheel", function(ev){
     ev.preventDefault();
-    var p=stageXY(ev);
     var f=ev.deltaY<0?1.12:1/1.12;
-    setZoomAt(CAM.z*f, p[0], p[1]);
-    positionMenu();
+    zoomAtSelection(CAM.z*f); /* ホイールも選択地点を中心に拡縮する */
   }, {passive:false});
 }
 </script>
