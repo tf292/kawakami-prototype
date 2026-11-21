@@ -210,6 +210,8 @@ select{font-family:inherit;font-size:calc(var(--k)*15);padding:calc(var(--k)*8);
 .tnode.locked .nc{background:linear-gradient(160deg,#4a5a60,#33424a);border-color:rgba(255,255,255,.4);color:#b9c4ae}
 .tnode:disabled{cursor:default}
 .tnode .req-badge{position:absolute;top:-calc(var(--k)*9);right:calc(var(--k)*8);background:linear-gradient(180deg,#e3c169,#c39a3e);color:#2c2410;font-size:calc(var(--k)*10.5);font-weight:900;border-radius:calc(var(--k)*99);padding:1.5px calc(var(--k)*7);border:1px solid #8a6d24;box-shadow:0 2px calc(var(--k)*6) rgba(0,0,0,.3);z-index:3}
+.tnode .req-badge.num{width:calc(var(--k)*25);height:calc(var(--k)*25);border-radius:50%;padding:0;display:flex;align-items:center;justify-content:center;font-size:calc(var(--k)*11.5);top:-calc(var(--k)*7);right:calc(var(--k)*2)}
+.tnode.ougi-node .nc{box-shadow:0 0 0 2.5px rgba(217,180,92,.95),0 0 0 calc(var(--k)*5.5) rgba(217,180,92,.35),0 calc(var(--k)*4) calc(var(--k)*10) rgba(10,40,45,.45)}
 .tnode .ougi{font-size:calc(var(--k)*9.5);color:#8a6d24;font-weight:900;letter-spacing:.2em}
 .stage-label{position:absolute;transform:translateY(-50%);background:rgba(10,32,40,.9);color:#ffe9a8;border:1px solid rgba(230,200,120,.6);border-radius:calc(var(--k)*7);padding:3px calc(var(--k)*10);font-size:calc(var(--k)*12);font-weight:800;z-index:2}
 .cat-head{position:absolute;transform:translate(-50%,-50%);border-radius:calc(var(--k)*9);color:#fff;font-weight:900;font-size:calc(var(--k)*15);padding:calc(var(--k)*5) calc(var(--k)*22);letter-spacing:.14em;box-shadow:0 calc(var(--k)*4) calc(var(--k)*10) rgba(10,40,45,.4);z-index:2}
@@ -284,9 +286,12 @@ select{font-family:inherit;font-size:calc(var(--k)*15);padding:calc(var(--k)*8);
 .b-skillbar{position:absolute;top:calc(var(--k)*10);left:50%;transform:translateX(-50%);max-width:97%;background:linear-gradient(180deg,rgba(18,58,71,.97),rgba(10,34,43,.97));border:1.5px solid rgba(230,200,120,.75);border-radius:calc(var(--k)*99);padding:calc(var(--k)*6) calc(var(--k)*16);display:flex;flex-wrap:wrap;gap:calc(var(--k)*6) calc(var(--k)*14);align-items:center;color:#eef3e6;font-size:calc(var(--k)*13.5);z-index:9}
 .b-skillbar .sk-nm{font-family:"Shippori Mincho",serif;font-weight:800;font-size:calc(var(--k)*16.5);color:var(--gold2)}
 .b-skillbar .cancel{margin-left:auto;background:rgba(255,255,255,.08);border:1px solid rgba(230,200,120,.7);color:#ffe9a8;border-radius:calc(var(--k)*99);padding:calc(var(--k)*4) calc(var(--k)*14);font-weight:800;font-size:calc(var(--k)*12.5);min-height:30px}
-.b-stage{position:relative;margin:0;border-radius:0;overflow:hidden;border:none;flex:1;min-height:0}
+.b-stage{position:relative;margin:0;border-radius:0;overflow:hidden;border:none;flex:1;min-height:0;touch-action:none}
+/* カメラ：盤面全体を内包するワールドを translate/scale して、センタリング・
+   ズーム・パンを行う。盤面の % 座標系はそのまま（タップ吸着は変換後の実座標で判定）。 */
+.cam-world{position:absolute;left:0;top:0;width:100%;height:140%;transform-origin:0 0;will-change:transform}
 .b-stage>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.iso-board{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(99%,calc(var(--k)*1230));aspect-ratio:47/20;box-shadow:0 calc(var(--k)*7) calc(var(--k)*13) rgba(4,20,16,.38),0 calc(var(--k)*16) calc(var(--k)*24) rgba(30,24,10,.32),inset 0 0 0 2px rgba(52,38,16,.45),inset 0 0 calc(var(--k)*70) rgba(20,26,8,.30);background:#39543c}
+.iso-board{position:absolute;left:0;right:0;margin:0 auto;top:10.5%;width:min(148%,calc(var(--k)*1580));aspect-ratio:47/20;box-shadow:0 calc(var(--k)*7) calc(var(--k)*13) rgba(4,20,16,.38),0 calc(var(--k)*16) calc(var(--k)*24) rgba(30,24,10,.32),inset 0 0 0 2px rgba(52,38,16,.45),inset 0 0 calc(var(--k)*70) rgba(20,26,8,.30);background:#39543c}
 .iso-board::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;box-shadow:inset 0 0 calc(var(--k)*54) rgba(24,30,10,.42),inset 0 calc(var(--k)*-18) calc(var(--k)*30) rgba(24,30,10,.3)}
 .iso-board>img.iso-map{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0;transform-origin:50% 50%}
 /* ---- マス表示：上面は枠と淡い地形色だけ。段差はブロック式の側面で表す ----
@@ -301,7 +306,7 @@ select{font-family:inherit;font-size:calc(var(--k)*15);padding:calc(var(--k)*8);
 .iso-cell.t-grass .diamond{background:rgba(120,190,95,.10);box-shadow:inset 0 0 0 1px rgba(225,245,195,.38)}
 .iso-cell.t-water .diamond{background:rgba(60,170,230,.20);box-shadow:inset 0 0 0 1.5px rgba(170,230,255,.75)}
 .iso-cell.t-rock .diamond{background:rgba(150,140,120,.16);box-shadow:inset 0 0 0 1px rgba(235,226,200,.40)}
-.iso-cell .blk{position:absolute;pointer-events:none;opacity:.9}
+.iso-cell .blk{position:absolute;pointer-events:none;opacity:.86}
 .iso-cell .blk-l{background:repeating-linear-gradient(96deg,rgba(46,28,8,.08) 0 3px,rgba(255,240,200,.04) 3px 7px,rgba(46,28,8,0) 7px 12px),repeating-linear-gradient(178deg,rgba(52,32,10,.07) 0 5px,rgba(52,32,10,0) 5px 11px),linear-gradient(180deg,#7c9a4e 0%,#7d8f4c 5%,#7d5c33 14%,#6b4a26 58%,#4e3315 88%,#38230d 100%)}
 .iso-cell .blk-r{background:repeating-linear-gradient(84deg,rgba(46,28,8,.06) 0 3px,rgba(255,244,210,.04) 3px 7px,rgba(46,28,8,0) 7px 12px),repeating-linear-gradient(178deg,rgba(52,32,10,.06) 0 5px,rgba(52,32,10,0) 5px 11px),linear-gradient(180deg,#8fae5c 0%,#8da254 5%,#96703c 14%,#7d5a2e 58%,#5f421e 88%,#46300f 100%)}
 .iso-cell.t-high .blk-l{background:repeating-linear-gradient(96deg,rgba(46,28,8,.08) 0 3px,rgba(255,240,200,.04) 3px 7px,rgba(46,28,8,0) 7px 12px),repeating-linear-gradient(178deg,rgba(52,32,10,.07) 0 5px,rgba(52,32,10,0) 5px 11px),linear-gradient(180deg,#a3ad58 0%,#a3a656 5%,#8a6536 14%,#73512a 58%,#553a17 88%,#3e270d 100%)}
@@ -364,7 +369,7 @@ select{font-family:inherit;font-size:calc(var(--k)*15);padding:calc(var(--k)*8);
 @keyframes fxFloat{0%{opacity:0;transform:translate(-50%,-30%) scale(.7)}18%{opacity:1;transform:translate(-50%,-70%) scale(1.12)}38%{transform:translate(-50%,-95%) scale(1)}100%{opacity:0;transform:translate(-50%,-215%) scale(1)}}
 @media(prefers-reduced-motion:reduce){.unit.fx-hit,.unit.fx-lunge,.unit.fx-heal,.unit.fx-die{animation:none}.fx-float{animation-duration:.45s}}
 /* floating command menu (渓流の一手 v3 style) */
-.b-menu{position:absolute;right:calc(var(--k)*12);top:calc(var(--k)*86);z-index:20;width:calc(var(--k)*206);background:linear-gradient(170deg,rgba(18,58,71,.97),rgba(10,34,43,.98));border:1.5px solid rgba(42,160,175,.85);border-radius:calc(var(--k)*14);padding:calc(var(--k)*13) calc(var(--k)*14);color:#eef3e6;box-shadow:0 calc(var(--k)*10) calc(var(--k)*26) rgba(0,0,0,.45)}
+.b-menu{position:absolute;left:0;top:0;z-index:20;width:calc(var(--k)*206);background:linear-gradient(170deg,rgba(18,58,71,.97),rgba(10,34,43,.98));border:1.5px solid rgba(42,160,175,.85);border-radius:calc(var(--k)*14);padding:calc(var(--k)*13) calc(var(--k)*14);color:#eef3e6;box-shadow:0 calc(var(--k)*10) calc(var(--k)*26) rgba(0,0,0,.45)}
 .b-menu .bm-name{font-family:"Shippori Mincho",serif;font-size:calc(var(--k)*18.5);font-weight:800}
 .b-menu .bm-sub{font-size:calc(var(--k)*12);color:#b9cdc2;border-bottom:1px solid rgba(42,160,175,.6);padding-bottom:calc(var(--k)*8);margin-bottom:calc(var(--k)*9)}
 .b-menu .bm-btn{display:block;width:100%;text-align:left;background:rgba(46,110,120,.35);border:1.5px solid rgba(120,200,210,.55);color:#fff;border-radius:calc(var(--k)*9);padding:calc(var(--k)*10) calc(var(--k)*13);font-size:calc(var(--k)*15);font-weight:800;margin-bottom:calc(var(--k)*7)}
@@ -402,6 +407,45 @@ select{font-family:inherit;font-size:calc(var(--k)*15);padding:calc(var(--k)*8);
 .b-units{display:flex;flex-wrap:wrap;gap:calc(var(--k)*8);padding:calc(var(--k)*10) calc(var(--k)*12) calc(var(--k)*12)}
 .b-uchip{display:flex;align-items:center;gap:calc(var(--k)*8);background:rgba(18,58,71,.92);border:1px solid rgba(42,160,175,.7);border-radius:calc(var(--k)*10);padding:calc(var(--k)*5) calc(var(--k)*11) calc(var(--k)*5) calc(var(--k)*6);color:#eef3e6;font-size:calc(var(--k)*12)}
 .b-uchip.cur{border-color:var(--gold);box-shadow:0 0 0 1.5px rgba(230,200,120,.5)}
+/* ---------- 手入れ演出（ドット絵アニメーション）＆結果画面 ---------- */
+.care-anim-scene{position:relative;height:100%;overflow:hidden;background:#79a86b;cursor:pointer}
+.care-anim-scene canvas,.care-result-scene canvas{position:absolute;inset:0;width:100%;height:100%;display:block;image-rendering:pixelated}
+.care-anim-title{position:absolute;top:calc(var(--k)*16);left:50%;transform:translateX(-50%);z-index:5;background:linear-gradient(180deg,var(--navy2),var(--navy3));color:#fff;border:var(--panel-border);border-radius:calc(var(--k)*10);padding:calc(var(--k)*9) calc(var(--k)*30);font-family:"Shippori Mincho",serif;font-size:calc(var(--k)*21);font-weight:800;letter-spacing:.06em;box-shadow:0 calc(var(--k)*5) calc(var(--k)*16) rgba(6,30,38,.45);white-space:nowrap}
+.care-anim-title small{display:block;text-align:center;font-family:"Zen Kaku Gothic New",sans-serif;font-size:calc(var(--k)*11.5);color:var(--gold2);font-weight:700;letter-spacing:.1em;margin-top:2px}
+.care-skip{position:absolute;right:calc(var(--k)*16);bottom:calc(var(--k)*16);z-index:5;background:rgba(10,32,40,.88);color:#e9e2c8;border:1.5px solid rgba(230,200,120,.7);border-radius:calc(var(--k)*99);padding:calc(var(--k)*8) calc(var(--k)*18);font-size:calc(var(--k)*12.5);font-weight:800}
+.care-result-scene{position:relative;height:100%;overflow:hidden;background:#79a86b}
+.cr-banner{position:absolute;top:calc(var(--k)*14);left:50%;transform:translateX(-50%);z-index:6;background:linear-gradient(180deg,var(--navy2),var(--navy3));color:#fff;border:var(--panel-border);border-radius:calc(var(--k)*10);padding:calc(var(--k)*8) calc(var(--k)*44) calc(var(--k)*10);text-align:center;box-shadow:0 calc(var(--k)*5) calc(var(--k)*16) rgba(6,30,38,.45)}
+.cr-banner .cb-t{font-family:"Shippori Mincho",serif;font-size:calc(var(--k)*27);font-weight:800;letter-spacing:.1em}
+.cr-banner .cb-t::before,.cr-banner .cb-t::after{content:"◆";color:var(--gold);font-size:calc(var(--k)*12);vertical-align:middle;margin:0 calc(var(--k)*14)}
+.cr-banner .cb-s{font-size:calc(var(--k)*13);color:var(--gold2);font-weight:700;margin-top:1px}
+.cr-gain{position:absolute;left:50%;top:21%;transform:translateX(-50%);z-index:6;width:min(calc(var(--k)*620),86%);background:linear-gradient(170deg,rgba(16,48,60,.96),rgba(9,29,38,.97));border:var(--panel-border);border-radius:calc(var(--k)*14);padding:calc(var(--k)*14) calc(var(--k)*20) calc(var(--k)*17);box-shadow:0 calc(var(--k)*10) calc(var(--k)*28) rgba(6,30,38,.5);text-align:center}
+.cr-gain .cg-t{font-family:"Shippori Mincho",serif;font-size:calc(var(--k)*26);font-weight:800;color:#fff;letter-spacing:.14em;margin-bottom:calc(var(--k)*11)}
+.cr-boxes{display:grid;grid-template-columns:repeat(3,1fr);gap:calc(var(--k)*12)}
+.cr-box{border:1.5px solid rgba(230,200,120,.85);border-radius:calc(var(--k)*10);padding:calc(var(--k)*11) calc(var(--k)*8) calc(var(--k)*9);background:rgba(255,255,255,.04)}
+.cr-box .cb-ic{font-size:calc(var(--k)*30);line-height:1.15}
+.cr-box .cb-num{font-family:"Shippori Mincho",serif;font-size:calc(var(--k)*27);font-weight:800;color:#fff}
+.cr-box .cb-nm{font-size:calc(var(--k)*12);color:#dfe7d2;font-weight:700}
+.cr-gauge{height:calc(var(--k)*7);background:rgba(255,255,255,.16);border-radius:calc(var(--k)*99);overflow:hidden;margin-top:calc(var(--k)*8);display:flex}
+.cr-gauge .old{display:block;height:100%;background:rgba(255,255,255,.38)}
+.cr-gauge .add{display:block;height:100%}
+.cr-gauge.w .add{background:#6db3e8}.cr-gauge.l .add{background:#8fd07e}.cr-gauge.r .add{background:#f0b45c}
+.cr-bottom{position:absolute;left:1.2%;right:1.2%;bottom:1.6%;z-index:6;background:linear-gradient(170deg,rgba(16,48,60,.96),rgba(9,29,38,.97));border:var(--panel-border);border-radius:calc(var(--k)*12);padding:calc(var(--k)*13) calc(var(--k)*20) calc(var(--k)*14);color:#f2ecd8;box-shadow:0 calc(var(--k)*8) calc(var(--k)*24) rgba(6,30,38,.5)}
+.cr-bottom .cb-name{color:var(--gold2);font-weight:900;font-size:calc(var(--k)*13.5)}
+.cr-bottom .cb-line{font-size:calc(var(--k)*16.5);margin:2px 0 calc(var(--k)*9)}
+.cr-row{display:flex;flex-wrap:wrap;gap:calc(var(--k)*8);align-items:center;font-size:calc(var(--k)*13)}
+.cr-row .cr-lbl{font-weight:700;color:#c8d4bd;font-size:calc(var(--k)*12.5)}
+.cr-pchip{border:1px solid rgba(230,200,120,.55);border-radius:calc(var(--k)*8);padding:calc(var(--k)*4) calc(var(--k)*11);background:rgba(255,255,255,.05);font-weight:700;white-space:nowrap}
+.cr-pchip b{color:var(--gold2)}
+.cr-mchip{border:1px solid rgba(150,205,230,.5);border-radius:calc(var(--k)*8);padding:calc(var(--k)*4) calc(var(--k)*11);background:rgba(255,255,255,.05);white-space:nowrap}
+.cr-stars{color:var(--gold2);letter-spacing:.18em;font-size:calc(var(--k)*15)}
+.cr-go{position:absolute;right:calc(var(--k)*18);bottom:calc(var(--k)*16);z-index:7;background:linear-gradient(180deg,#e3c169,#c39a3e);color:#2c2410;border:1px solid #8a6d24;border-radius:calc(var(--k)*9);padding:calc(var(--k)*13) calc(var(--k)*40);font-family:"Shippori Mincho",serif;font-size:calc(var(--k)*17);font-weight:800;letter-spacing:.1em;box-shadow:0 calc(var(--k)*6) calc(var(--k)*16) rgba(6,30,38,.45)}
+@media(max-height:500px){
+  .cr-gain{top:19%;padding:calc(var(--k)*10) calc(var(--k)*14) calc(var(--k)*12)}
+  .cr-gain .cg-t{font-size:calc(var(--k)*21);margin-bottom:calc(var(--k)*7)}
+  .cr-box .cb-ic{font-size:calc(var(--k)*22)} .cr-box .cb-num{font-size:calc(var(--k)*21)}
+  .cr-banner .cb-t{font-size:calc(var(--k)*21)}
+  .cr-bottom .cb-line{font-size:calc(var(--k)*14)}
+}
 .b-uchip.acted{opacity:.5}.b-uchip.dead{opacity:.35;filter:grayscale(1)}
 .b-uchip .mini-art{width:calc(var(--k)*30);height:calc(var(--k)*34);display:flex;align-items:flex-end}
 .b-uchip .mini-art svg{width:calc(var(--k)*30)}
@@ -858,7 +902,7 @@ function render(){
   if(!G){ nav.classList.add("hidden"); app.className="wrap"; app.innerHTML='<div class="page-bg">'+viewSelect()+'</div>'; bindSelect(); return; }
   if(view==="battle"){ nav.classList.add("hidden"); app.className="wrap wide"; renderBattle(); return; }
   saveGame(); /* 拠点系の画面描画＝操作確定のタイミングで自動保存（戦闘中は保存しない） */
-  var sceneView = (view==="home"||view==="tree"||view==="explore"||view==="care");
+  var sceneView = (view==="home"||view==="tree"||view==="explore"||view==="care"||view==="careanim"||view==="careresult");
   app.className = sceneView ? "wrap wide" : "wrap";
   nav.classList.toggle("hidden", sceneView);
   document.querySelectorAll(".navbtn").forEach(function(b){ b.classList.toggle("on", b.dataset.nav===view); });
@@ -867,6 +911,8 @@ function render(){
   else if(view==="tree") html=viewTree();
   else if(view==="explore") html=viewExplore();
   else if(view==="care") html=viewCare();
+  else if(view==="careanim") html=viewCareAnim();
+  else if(view==="careresult") html=viewCareResult();
   else {
     html='<div class="page-bg">'+topbarHtml();
     if(view==="party") html+=viewParty();
@@ -875,6 +921,8 @@ function render(){
     html+='</div>';
   }
   app.innerHTML=html; bindView();
+  if(view==="careanim") startCareAnim();
+  if(view==="careresult") drawCareResultBg();
 }
 function topbarHtml(){
   var god=GODS[G.god];
@@ -915,7 +963,7 @@ function viewSelect(){
    +'<p style="line-height:1.8;margin:0">川を育てる育成ゲームの試作です。探索で素材を集め、手入れで川を育て、ツリーを解放して神様を強くし、進化を目指します。1行動＝1週間、50ターン（1年）で一区切りです。</p></div>'
    +pwaHintHtml()
    +'<h2 class="sec-title">育てる神様を選ぶ（御三家）</h2><div class="godcards">'+cards+'</div>'
-   +'<details class="help" style="margin-top:calc(var(--k)*14)"><summary>遊び方</summary><p class="muted">① <b>探索</b>：戦闘に勝つと素材が手に入ります（負けると半分だけ持ち帰り）。ステージと深度は順に解放されます。<br>② <b>手入れ</b>：素材を消費してパラメータポイント（水量・生命・資源）が貯まります。ポイントは<b>累計方式</b>で減りません。同じ場所は回数で3段階に上がります。<br>③ <b>ツリー</b>：共通ツリー→進化→各種パラメータツリーの順に開きます。ツリー解放数に応じて<b>技</b>が解放できます（消費なし・派生式）。<br>④ <b>戦闘</b>：7×10のSRPG。移動→通常攻撃か技→待機。行動が実行される前なら「移動キャンセル」「全キャンセル」で元の位置に完全に戻れます（攻撃や技を選んで対象を選んでいる途中でも可。実行したあとは戻れません）。サイドバーの「撤退する」ボタンで、報酬なしで戦闘を終えて拠点へ戻ることもできます。地形には高さがあり（川底-10〜高台+17）、高い所から攻撃すると命中・ダメージが上がります（高さ差1ごとに命中+1・ダメージ+1%）。隣との高さ差が8以上のマスへは直接移動できません（崖）。サイドバーの⟳ボタンでマップを90°ずつ回転できます（表示だけが変わります）。神力は戦闘ごとに、HPは戦闘後に全回復します。</p></details>';
+   +'<details class="help" style="margin-top:calc(var(--k)*14)"><summary>遊び方</summary><p class="muted">① <b>探索</b>：戦闘に勝つと素材が手に入ります（負けると半分だけ持ち帰り）。ステージと深度は順に解放されます。<br>② <b>手入れ</b>：素材を消費してパラメータポイント（水量・生命・資源）が貯まります。ポイントは<b>累計方式</b>で減りません。同じ場所は回数で3段階に上がります。<br>③ <b>ツリー</b>：共通ツリー→進化→各種パラメータツリーの順に開きます。ツリー解放数に応じて<b>技</b>が解放できます（消費なし・派生式）。<br>④ <b>戦闘</b>：7×10のSRPG。移動→通常攻撃か技→待機。行動が実行される前なら「移動キャンセル」「全キャンセル」で元の位置に完全に戻れます（攻撃や技を選んで対象を選んでいる途中でも可。実行したあとは戻れません）。サイドバーの「撤退する」ボタンで、報酬なしで戦闘を終えて拠点へ戻ることもできます。地形には高さがあり（川底-10〜高台+17）、高い所から攻撃すると命中・ダメージが上がります（高さ差1ごとに命中+1・ダメージ+1%）。隣との高さ差が8以上のマスへは直接移動できません（崖）。サイドバーの⟳ボタンでマップを90°ずつ回転できます（表示だけが変わります）。カメラは行動キャラを中心に映し、盤面のドラッグでスクロール、サイドバーの＋/−ボタンやピンチでズームできます。行動コマンドは行動キャラの真下に出ます。「移動しない」を選んでも、行動を実行する前なら「移動に戻る」で移動し直せます。神力は戦闘ごとに、HPは戦闘後に全回復します。</p></details>';
 }
 function bindSelect(){ document.querySelectorAll("[data-god]").forEach(function(b){ b.addEventListener("click", function(){ newGame(b.dataset.god); toast(GODS[G.god].name+"の育成をはじめます"); }); }); bindPwaHint(); }
 /* ---------- ホーム（イメージ画像準拠） ---------- */
@@ -1064,6 +1112,199 @@ function viewCare(){
    +'<button class="scene-back" data-goto="home">← 戻る</button>'
    +'</div>';
 }
+/* ============ 手入れ演出（ドット絵アニメーション）＆結果画面 ============
+   演出は 160×90 のドット絵グリッドを canvas に描くループアニメーション。
+   場所ごとに作業（ゴミ拾い／魚道の修理／苗木植え等）と小道具が変わり、
+   進み具合 p（0→1）で「片付いていく・直っていく」様子が見える。
+   タップでスキップでき、必ず結果画面（viewCareResult）へ進む。 */
+var CARE_LINES=[
+  "見て見て！ ゴミがなくなって、川が笑ってるみたいだ！",
+  "魚道が直ったよ。これで魚たちが上流へ行けるね。",
+  "水門の土砂が取れて、水の流れが戻ってきた！",
+  "橋がしっかりしたね。これで対岸にも渡れるよ。",
+  "葦が元気に育ちますように。小さな命の隠れ家になるね。",
+  "水路が田んぼまで届いたよ。実りの季節が楽しみだね。",
+  "護岸が積み直せた。これで大雨でも崩れにくいはず。",
+  "水車が回り出した！ カタカタって、いい音だね。",
+  "祠がきれいになった。川の神様たちも喜んでくれるかな。"
+];
+var CARE_ACTION=["pick","hammer","shovel","hammer","plant","hoe","carry","hammer","broom"];
+var CARE_GODX=[40,64,52,44,40,38,48,84,84];
+function viewCareAnim(){
+  var c=CARES[careResult.i];
+  return '<div class="care-anim-scene" id="care-anim"><canvas id="care-canvas" width="480" height="270"></canvas>'
+   +'<div class="care-anim-title">'+esc(c.name.replace(/^\d+\.\s*/,""))+'<small>手入れ中…</small></div>'
+   +'<div class="care-skip">タップでスキップ ▸</div></div>';
+}
+function viewCareResult(){
+  var r=careResult, c=CARES[r.i], god=GODS[G.god];
+  var spotName=c.name.replace(/^\d+\.\s*/,"");
+  var gv={water:r.gains[0], life:r.gains[1], res:r.gains[2]};
+  var order=[["life","🌿","生命ポイント","l"],["water","💧","水量ポイント","w"],["res","◆","資源ポイント","r"]];
+  var boxes=order.map(function(o){
+    var before=r.before[o[0]], gain=gv[o[0]];
+    var oldW=Math.min(100,before), addW=Math.min(100-oldW,gain);
+    return '<div class="cr-box"><div class="cb-ic">'+o[1]+'</div><div class="cb-num">+'+gain+'</div><div class="cb-nm">'+o[2]+'</div>'
+     +'<div class="cr-gauge '+o[3]+'"><span class="old" style="width:'+oldW+'%"></span><span class="add" style="width:'+addW+'%"></span></div></div>';
+  }).join("");
+  var chips=order.map(function(o){
+    var before=r.before[o[0]], gain=gv[o[0]];
+    return '<span class="cr-pchip">'+o[2]+' '+before+' <b>+'+gain+'</b> → '+(before+gain)+'</span>';
+  }).join("");
+  var mats=Object.keys(r.cost).map(function(m){ return '<span class="cr-mchip">'+MAT_ICON[m]+m+'×'+r.cost[m]+'</span>'; }).join("");
+  var stageNow=r.tierBefore+1;
+  var stars=""; for(var si2=0;si2<3;si2++) stars+= si2<stageNow?"●":"○";
+  var stageNote = r.countAfter>=3 ? "この場所は最大段階（3段階目）です" : ("次回は段階 "+(stageNow+1)+" の手入れになります");
+  return '<div class="care-result-scene"><canvas id="care-result-canvas" width="480" height="270"></canvas>'
+   +'<div class="cr-banner"><div class="cb-t">手入れ完了！</div><div class="cb-s">'+esc(spotName)+'</div></div>'
+   +'<div class="cr-gain"><div class="cg-t">獲得！</div><div class="cr-boxes">'+boxes+'</div>'
+   +'<div style="font-size:calc(var(--k)*10.5);color:#9fc3bb;margin-top:calc(var(--k)*8)">ゲージはパラメータツリー頂上（累計100）までの進みです</div></div>'
+   +'<div class="cr-bottom"><div class="cb-name">'+esc(god.name)+'</div><div class="cb-line">'+esc(CARE_LINES[r.i])+'</div>'
+   +'<div class="cr-row"><span class="cr-lbl">ポイント変化：</span>'+chips+'</div>'
+   +'<div class="cr-row" style="margin-top:calc(var(--k)*7)"><span class="cr-lbl">使った素材：</span>'+mats
+   +'<span class="cr-lbl" style="margin-left:calc(var(--k)*10)">この場所の段階：</span><span class="cr-stars">'+stars+'</span><span>段階 '+stageNow+' / 3 で実施（'+r.countAfter+' 回目）｜'+stageNote+'</span></div>'
+   +'</div>'
+   +'<button class="cr-go" id="btn-carecont">つづける</button></div>';
+}
+var careAnimRAF=null;
+function startCareAnim(){
+  var cv=$("care-canvas"); if(!cv||!careResult) return;
+  var ctx=cv.getContext("2d");
+  var reduced = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var dur = reduced?700:3400;
+  var t0=performance.now();
+  function frame(now){
+    var el=now-t0, p=Math.min(1, el/dur);
+    drawCareScene(ctx, careResult.i, el/1000, p);
+    if(el<dur){ careAnimRAF=requestAnimationFrame(frame); }
+    else { careAnimRAF=null; finishCareAnim(); }
+  }
+  careAnimRAF=requestAnimationFrame(frame);
+}
+function finishCareAnim(){
+  if(careAnimRAF){ cancelAnimationFrame(careAnimRAF); careAnimRAF=null; }
+  if(view!=="careanim"||!careResult) return;
+  view="careresult"; render();
+}
+function drawCareResultBg(){
+  var cv=$("care-result-canvas"); if(!cv||!careResult) return;
+  drawCareScene(cv.getContext("2d"), careResult.i, 1.3, 1);
+}
+/* ---- ドット絵シーン描画（160×90グリッド） ---- */
+function drawCareScene(ctx, spot, t, p){
+  var S=3;
+  function R(x,y,w,h,c){ ctx.fillStyle=c; ctx.fillRect(Math.round(x*S),Math.round(y*S),Math.ceil(w*S),Math.ceil(h*S)); }
+  var fr=Math.floor(t*4)%2, fr5=Math.floor(t*5)%2;
+  function riverCX(gy){ return 138-(gy-24)*1.15; }
+  /* 空と遠景 */
+  R(0,0,160,24,"#a9d3e8"); R(0,24,160,4,"#c4e2da");
+  var ci;
+  for(ci=0;ci<3;ci++){ var cx=((t*2.5+ci*58)%185)-12; R(cx,3+ci*4,13,2.5,"#eef8fc"); R(cx+3,5.5+ci*4,8,2,"#eef8fc"); }
+  R(0,20,160,9,"#8fbc7a");
+  [[8,15],[30,13],[120,14],[146,16],[58,16]].forEach(function(tr){ R(tr[0],tr[1],7,6,"#5d8a4a"); R(tr[0]+2.5,tr[1]+5,2,5,"#7a5a34"); });
+  /* 川（右上→左下へ流れる帯）と岸 */
+  for(var gy=24;gy<90;gy++){
+    var cx=riverCX(gy), w=11+2.5*Math.sin(gy*0.32);
+    R(cx-w-3,gy,3,1,"#e0cd96"); R(cx+w,gy,3,1,"#e0cd96");
+    R(cx-w,gy,w*2,1,(gy%6<3)?"#5ea9d6":"#56a0cd");
+    if(((gy+Math.floor(t*9))%7)<2) R(cx-w+3+(gy%5),gy,5,1,"#c4e9f8");
+  }
+  /* 手前の草地（作業場） */
+  R(0,64,66,26,"#7fae62"); R(0,62,66,3,"#8fbc72");
+  for(var d=0;d<26;d++){ R((d*37)%64+1, 66+((d*23)%22), 1.6,1.6, d%2?"#6f9e54":"#9cc47e"); }
+  var godX=CARE_GODX[spot], feetY=80;
+  /* ---- 場所ごとの小道具と作業の進み ---- */
+  if(spot===0){ /* ゴミのたまり場：ゴミ山が減り、袋がふくらむ */
+    var n=Math.max(0, Math.ceil(6*(1-p)));
+    for(var gi=0;gi<n;gi++){ R(58+(gi%3)*4, 74-Math.floor(gi/3)*3.5, 4.5,3.5, gi%2?"#8a8474":"#a34a3a"); }
+    R(godX+13, feetY-6-Math.floor(p*2), 5.5, 6+Math.floor(p*2), "#e9e5da"); R(godX+14.5, feetY-8-Math.floor(p*2), 2.5,2, "#cfc9ba");
+  } else if(spot===1){ /* 壊れた魚道：木の段が1つずつ直る */
+    var steps=Math.floor(p*4.99);
+    for(var fi=0;fi<4;fi++){ var fgy=46+fi*5.5, fx=riverCX(fgy)-5; if(fi<steps){ R(fx,fgy,11,2,"#a4762a"); R(fx,fgy+2,2,3,"#7d5a2e"); R(fx+9,fgy+2,2,3,"#7d5a2e"); } else { R(fx,fgy,11,1,"rgba(122,90,46,.55)"); } }
+    R(godX+11, feetY-3, 9, 2, "#b08344");
+  } else if(spot===2){ /* 水門：土砂山が減り、門が開く */
+    var gy2=40, gx=riverCX(gy2);
+    R(gx-14,gy2-6,3,26,"#7d5a2e"); R(gx+11,gy2-6,3,26,"#7d5a2e"); R(gx-14,gy2-8,31,3,"#96703c");
+    R(gx-11,gy2-2+p*7,25,3,"#8a6420");
+    var sn=Math.max(0, Math.ceil(5*(1-p)));
+    for(var si3=0;si3<sn;si3++) R(54+(si3%3)*3.6, 76-Math.floor(si3/3)*3, 4,3, "#d8c690");
+  } else if(spot===3){ /* 橋のたもと：板が1枚ずつ渡る */
+    var planks=Math.floor(p*10.99);
+    for(var bi=0;bi<11;bi++){ if(bi<planks) R(56+bi*6.2, 56, 6, 2.2, "#b08344"); }
+    R(56,60,68,1.6,"#7d5a2e"); R(58,58,2,10,"#7d5a2e"); R(118,58,2,10,"#7d5a2e");
+  } else if(spot===4){ /* 葦原：葦が揺れ、苗が増える */
+    for(var ri=0;ri<7;ri++){ var rx=68+ri*2.6, sw=fr?(ri%2?1:-1):0; R(rx+sw, 66, 1.4, 14, "#4e7d3a"); R(rx+sw*1.6, 63, 1.2, 4, "#8a6a3a"); }
+    var sprouts=Math.floor(p*5.99);
+    for(var pi=0;pi<sprouts;pi++){ R(28+pi*5, 82, 1.2, 3, "#477a34"); R(26.8+pi*5, 80.4, 3.6, 1.6, "#6fae56"); }
+  } else if(spot===5){ /* 休耕田と水路：畝が1列ずつ耕される */
+    R(22,67,46,19,"#8a6a44");
+    var rows=Math.floor(p*4.99);
+    for(var fi2=0;fi2<4;fi2++){ if(fi2<rows) R(24, 69.5+fi2*4.2, 42, 2.2, "#65482a"); }
+    R(66,67,2.5,19,"#5ea9d6");
+  } else if(spot===6){ /* 崩れた護岸：石垣が積み上がる */
+    var layers=Math.floor(p*3.99);
+    for(var li=0;li<3;li++){ if(li<layers){ for(var st2=0;st2<5;st2++){ R(63+st2*4.6+(li%2)*2, 77-li*3.4, 4.2, 3.2, st2%2?"#9a958a":"#8a8474"); } } }
+    if(p<1) R(63,80,4.2,3.2,"#7d7668");
+  } else if(spot===7){ /* 水車小屋：水車が回り出す */
+    R(96,36,27,17,"#c9b18a"); R(93,32,33,5,"#8a4a3a"); R(104,42,6,11,"#6b4a26");
+    var wx=88, wy=58, wr=8.5, ang=t*(1+p*3);
+    for(var wi=0;wi<8;wi++){ var a=ang+wi*Math.PI/4; R(wx+Math.cos(a)*wr-1, wy+Math.sin(a)*wr*0.8-1, 2.4, 2.4, "#7d5a2e"); }
+    for(var wj=0;wj<4;wj++){ var a2=ang+wj*Math.PI/2; R(wx+Math.cos(a2)*wr*0.5-0.8, wy+Math.sin(a2)*wr*0.4-0.8, 1.8, 1.8, "#96703c"); }
+    R(wx-1.6,wy-1.6,3.2,3.2,"#5d4020");
+  } else if(spot===8){ /* 寂れた祠：掃除で葉が減り、祠が輝く */
+    R(96,58,22,3,"#8a8474"); R(98,46,2.6,12,"#7d7668"); R(113,46,2.6,12,"#7d7668");
+    R(94,42,26,4.5,"#5d4a66"); R(99,49,16,8,"#a39a8b"); R(104.5,51.5,5,5.5,"#4a3a2a");
+    var ln=Math.max(0, Math.ceil(5*(1-p)));
+    for(var li2=0;li2<ln;li2++) R(92+(li2%3)*4, 60+Math.floor(li2/3)*3, 3, 1.8, "#b98d3e");
+  }
+  /* ---- お供たち ---- */
+  var ay=62, ax=riverCX(ay)-3, hop=Math.abs(Math.sin(t*2.3))*3.2;
+  R(ax, ay-hop, 9, 3, "#eef1f4"); R(ax+8.5, ay-1-hop, 3, 4.5, fr?"#f0a24a":"#e88f3a"); R(ax+2, ay+0.6-hop, 1.6, 1.6, "#22382f");
+  var djx=godX+16, djy=83;
+  R(djx, djy+(fr5?0:0.8), 9, 2.2, "#7a5a34"); R(djx+8, djy-0.6+(fr5?0.8:0), 2.6, 2.6, "#8a6a3f");
+  /* ---- 神様（作業アクション） ---- */
+  drawCareGod(ctx, godX, feetY, t, CARE_ACTION[spot], p);
+  /* 完了のきらめき */
+  if(p>=1){
+    [[30,52],[74,40],[120,66],[52,30],[100,24]].forEach(function(sp,ix){
+      if((Math.floor(t*2)+ix)%2) return;
+      R(sp[0],sp[1]-2,1.4,5.4,"#ffe9a8"); R(sp[0]-2,sp[1],5.4,1.4,"#ffe9a8");
+    });
+  }
+}
+function drawCareGod(ctx, x, feetY, t, action, p){
+  var S=3;
+  function R(x2,y2,w,h,c){ ctx.fillStyle=c; ctx.fillRect(Math.round(x2*S),Math.round(y2*S),Math.ceil(w*S),Math.ceil(h*S)); }
+  var god=GODS[G.god];
+  var hair={dobu:"#7a9a5d",kare:"#8a6a3a",akayu:"#c46a4a"}[G.god]||"#7a9a5d";
+  var fr5=Math.floor(t*5)%2;
+  var bend=(action==="plant"||action==="pick")&&fr5?2:0;
+  var bob=fr5?0:-0.8;
+  R(x+2, feetY-4, 2.2, 4, "#2e3a4a"); R(x+6.2, feetY-4, 2.2, 4, "#2e3a4a");
+  R(x+1, feetY-11+bob+bend*0.4, 9, 7.2, "#46689c");
+  R(x+1, feetY-6.4+bob+bend*0.4, 9, 1.8, "#d9b45c");
+  R(x+2, feetY-17+bob+bend, 7, 6, "#f6cfa8");
+  R(x+1.4, feetY-18+bob+bend, 8.2, 2.8, hair); R(x+1.4, feetY-15.4+bob+bend, 1.8, 3.6, hair); R(x+7.8, feetY-15.4+bob+bend, 1.8, 3.6, hair);
+  if(G.god==="dobu"){ R(x-1.2, feetY-16.4+bob+bend, 13.4, 1.8, "#d9b45c"); R(x+2.2, feetY-19+bob+bend, 6.6, 3, "#e3c169"); }
+  var hx=x+10.5, hy=feetY-10+bob+bend;
+  R(x+8.6, feetY-10.6+bob+bend, 3, 2, "#f6cfa8");
+  if(action==="hammer"){
+    if(fr5){ R(hx,hy-4.6,1.6,4.6,"#8a6420"); R(hx-1.2,hy-6,4.6,2.2,"#9aa3a8"); }
+    else { R(hx,hy-0.6,4.4,1.6,"#8a6420"); R(hx+3.4,hy-1.8,3,3.4,"#9aa3a8"); }
+  } else if(action==="shovel"||action==="hoe"){
+    var c1=action==="hoe"?"#6f5233":"#9aa3a8";
+    if(fr5){ R(hx,hy+1,5.5,1.5,"#8a6420"); R(hx+5,hy+0.4,2.6,2.8,c1); }
+    else { R(hx,hy-3.4,1.6,5,"#8a6420"); R(hx-0.4,hy-4.6,3.4,2,c1); }
+  } else if(action==="broom"){
+    if(fr5){ R(hx,hy-1,6.5,1.4,"#8a6420"); R(hx+5.6,hy+0.6,3.4,3.6,"#d9b45c"); }
+    else { R(hx-2,hy-1,6.5,1.4,"#8a6420"); R(hx-4.6,hy+0.6,3.4,3.6,"#d9b45c"); }
+  } else if(action==="carry"){
+    R(x+2.2, feetY-16.5+bob, 6.4, 4.2, "#9a958a"); R(x+0.6, feetY-13+bob, 2, 3.4, "#f6cfa8"); R(x+8.2, feetY-13+bob, 2, 3.4, "#f6cfa8");
+  } else { /* pick / plant：かがんで手を伸ばす */
+    if(fr5){ R(hx-1,hy+2.6,4.6,1.6,"#f6cfa8"); }
+    else { R(hx-1,hy-0.6,4.6,1.6,"#f6cfa8"); }
+  }
+}
 </script>
 <script>
 "use strict";
@@ -1096,7 +1337,7 @@ function tnodeHtml(o){
   /* o: x,y,cls,state(done/avail/locked),icon,label,sub,fx,badge,attrs,sq,ougi */
   var st = o.state;
   var dis = st!=="avail" ? " disabled" : "";
-  var badge = (st==="avail" && o.badge) ? '<span class="req-badge">'+o.badge+'</span>' : "";
+  var badge = (st==="avail" && o.badge) ? '<span class="req-badge'+(o.badgeCls?" "+o.badgeCls:"")+'">'+o.badge+'</span>' : "";
   return '<button class="tnode '+o.cls+" "+st+'" style="left:'+o.x+'%;top:'+o.y+'%" '+(o.attrs||"")+dis+'>'
    +badge+'<span class="nc'+(o.sq?" sq":"")+'"'+(o.ncStyle?' style="'+o.ncStyle+'"':"")+'>'+o.icon+'</span>'
    +(o.ougi?'<span class="ougi">奥義</span>':"")
@@ -1105,9 +1346,21 @@ function tnodeHtml(o){
 function linkSvg(segs){
   var out='<svg class="tree-links" viewBox="0 0 100 100" preserveAspectRatio="none">';
   segs.forEach(function(sg){
-    out+='<line x1="'+sg[0]+'" y1="'+sg[1]+'" x2="'+sg[2]+'" y2="'+sg[3]+'" stroke="'+(sg[4]?"rgba(230,200,120,.95)":"rgba(150,205,230,.75)")+'" stroke-width="'+(sg[4]?0.85:0.65)+'" stroke-linecap="round"/>';
+    var col = typeof sg[4]==="string" ? sg[4] : (sg[4]?"rgba(230,200,120,.95)":"rgba(150,205,230,.75)");
+    out+='<line x1="'+sg[0]+'" y1="'+sg[1]+'" x2="'+sg[2]+'" y2="'+sg[3]+'" stroke="'+col+'" stroke-width="'+(sg[4]?0.85:0.65)+'" stroke-linecap="round"/>';
   });
   return out+'</svg>';
+}
+/* 点列をなめらかな曲線（川の流れ）にする Catmull-Rom→ベジェ変換 */
+function smoothPath(pts){
+  var d="M"+pts[0][0]+" "+pts[0][1];
+  for(var i=0;i<pts.length-1;i++){
+    var p0=pts[Math.max(0,i-1)], p1=pts[i], p2=pts[i+1], p3=pts[Math.min(pts.length-1,i+2)];
+    var c1x=p1[0]+(p2[0]-p0[0])/6, c1y=p1[1]+(p2[1]-p0[1])/6;
+    var c2x=p2[0]-(p3[0]-p1[0])/6, c2y=p2[1]-(p3[1]-p1[1])/6;
+    d+="C"+c1x.toFixed(1)+" "+c1y.toFixed(1)+","+c2x.toFixed(1)+" "+c2y.toFixed(1)+","+p2[0]+" "+p2[1];
+  }
+  return d;
 }
 var PARAM_ICON = {water:"⚔", life:"♥", res:"🛡"};
 function commonCanvas(){
@@ -1144,48 +1397,70 @@ function commonCanvas(){
   html+='<div class="tnode gold done" style="left:52%;top:97.5%"><span class="nc" style="width:calc(var(--k)*30);height:calc(var(--k)*30);font-size:calc(var(--k)*11)">起点</span></div>';
   return '<div class="tree-canvas">'+html+'</div>';
 }
-var PARAM_POS=[[52,90],[37,80],[67,80],[37,67],[67,67],[37,54],[67,54],[37,41],[67,41],[37,28],[67,28],[37,15],[67,15],[52,5.5]];
+/* パラメータツリー配置（基準イメージ「川型」v22）：下の起点から川が蛇行して上り、
+   頂上の進化ロックへ至る1本の流れ。座標はキャンバス内の %（段階1→14の順）。 */
+var PARAM_POS=[[63,88],[71,82],[78.5,76.5],[82,70],[82.5,63],[73,57.5],[61,54],[52.5,47.5],[57,40.5],[64.5,35.5],[56,29],[47.5,23.5],[44,18],[49.5,12]];
+var PARAM_START=[60,95.5], PARAM_CAP=[58,4.8];
 function dominantIcon(fx){
   var best="atk", bv=-1; ["atk","hp","def","spd","mp"].forEach(function(k){ if((fx[k]||0)>bv){ bv=fx[k]; best=k; } });
   return {atk:"⚔",hp:"♥",def:"🛡",spd:"≋",mp:"✦"}[best];
 }
+function dominantFxStr(fx){
+  var best="atk", bv=-1; ["atk","hp","def","spd","mp"].forEach(function(k){ if((fx[k]||0)>bv){ bv=fx[k]; best=k; } });
+  return paramName2(best)+"+"+bv;
+}
 function paramCanvas(pid){
-  var segs=[];
-  var river='<svg class="tree-links" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M52 97 ';
-  PARAM_POS.forEach(function(p,i){ river+=(i===0?"L":"L")+p[0]+" "+p[1]+" "; });
-  river+='" fill="none" stroke="rgba(125,195,230,.4)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  var flowPts=[PARAM_START].concat(PARAM_POS).concat([PARAM_CAP]);
+  /* 本流：幅のある淡い青の帯＋中心線。支流：途中で分かれて再合流する細い流れ（装飾） */
+  var river='<svg class="tree-links" viewBox="0 0 100 100" preserveAspectRatio="none">'
+    +'<path d="'+smoothPath(flowPts)+'" fill="none" stroke="rgba(125,195,230,.38)" stroke-width="3.6" stroke-linecap="round"/>'
+    +'<path d="'+smoothPath([[82,70],[93,60],[94.5,47],[86,38],[64.5,35.5]])+'" fill="none" stroke="rgba(125,195,230,.30)" stroke-width="1.7" stroke-linecap="round"/>'
+    +'</svg>';
+  var segs=[[PARAM_START[0],PARAM_START[1],PARAM_POS[0][0],PARAM_POS[0][1], G.tree[pid]>0]];
   for(var i=0;i<PARAM_POS.length-1;i++) segs.push([PARAM_POS[i][0],PARAM_POS[i][1],PARAM_POS[i+1][0],PARAM_POS[i+1][1], G.tree[pid]>i]);
+  segs.push([PARAM_POS[13][0],PARAM_POS[13][1],PARAM_CAP[0],PARAM_CAP[1], G.tree[pid]>=14]);
   var html=river+linkSvg(segs);
   for(var s=0;s<14;s++){
     var done=G.tree[pid]>s;
     var isNext=(!done && G.tree[pid]===s);
     var avail=isNext && G.pts[pid]>=THRESH[s];
     html+=tnodeHtml({x:PARAM_POS[s][0], y:PARAM_POS[s][1], cls:pid, state:done?"done":(avail?"avail":"locked"),
-      icon:dominantIcon(TREE_FX[pid][s]), label:"第"+(s+1)+"段階 "+esc(TREE_NAMES[pid][s]), fx:fxStr(TREE_FX[pid][s]),
+      icon:dominantIcon(TREE_FX[pid][s]), label:dominantFxStr(TREE_FX[pid][s]), fx:esc(TREE_NAMES[pid][s])+"｜"+fxStr(TREE_FX[pid][s]),
       sub: done?"解放済":(isNext?paramName(pid)+"累計 "+G.pts[pid]+" / "+THRESH[s]:"順番に解放"),
-      badge: isNext?("必要 "+THRESH[s]):"", attrs:'data-ptree="'+pid+'-'+s+'"'});
+      badge: isNext?String(THRESH[s]):"", badgeCls:"num", attrs:'data-ptree="'+pid+'-'+s+'" title="第'+(s+1)+"段階 "+esc(TREE_NAMES[pid][s])+'"'});
   }
+  /* 頂上：進化ロック解除（第2進化）の到達点。解放の実行は左パネルのボタンとここ両方から */
+  var e2=evo2Status();
+  var capState = G.evo>=2 ? "done" : (e2.ok ? "avail" : "locked");
+  html+=tnodeHtml({x:PARAM_CAP[0], y:PARAM_CAP[1], cls:"gold", state:capState,
+    icon: G.evo>=2?"🔓":"🔒", label:"進化ロック解除", sub: G.evo>=2?"第2進化 到達":(e2.ok?"解放できます":"方向の最後まで＋一定数で解放"),
+    attrs: e2.ok?'data-evo="2"':""});
+  html+='<div class="tnode gold done" style="left:'+PARAM_START[0]+'%;top:'+PARAM_START[1]+'%"><span class="nc" style="width:calc(var(--k)*34);height:calc(var(--k)*34);font-size:calc(var(--k)*11)">起点</span></div>';
   return '<div class="tree-canvas">'+html+'</div>';
 }
-var SKILL_OFF={0:[0,92],1:[-8.5,77],2:[8.5,77],3:[-10,62],5:[-2.5,62],4:[8.5,62],6:[-10,47],7:[8.5,47],8:[-5,33.5]};
+var SKILL_OFF={0:[0,92],1:[-8.5,77],2:[8.5,77],3:[-10,62],5:[-2.5,62],4:[8.5,62],6:[-10,47],7:[8.5,47],8:[-0.75,33]};
 var SKILL_ICON={water:"💧",life:"★",res:"◆"};
+var SKILL_LINK={water:"rgba(110,180,235,",life:"rgba(120,215,135,",res:"rgba(235,175,95,"};
 function skillCanvas(){
   var colX={water:19,life:50,res:81};
   var segs=[];
   ["water","life","res"].forEach(function(cat){
-    segs.push([50,98.5,colX[cat],92,false]);
-    for(var idx=0;idx<9;idx++){ var pre=PRE[idx]; if(pre!==null&&pre!==undefined){ segs.push([colX[cat]+SKILL_OFF[pre][0],SKILL_OFF[pre][1],colX[cat]+SKILL_OFF[idx][0],SKILL_OFF[idx][1], hasSkill(cat,pre)&&hasSkill(cat,idx)]); } }
+    /* 起点から各カテゴリの根へ。リンクはカテゴリ色（水量=青／生命=緑／資源=橙）で、
+       習得済みの区間は濃く、未習得は淡く引く（基準イメージ「派生式」v29） */
+    segs.push([50,96.5,colX[cat],92, SKILL_LINK[cat]+(hasSkill(cat,0)?"0.95)":"0.45)")]);
+    for(var idx=0;idx<9;idx++){ var pre=PRE[idx]; if(pre!==null&&pre!==undefined){ segs.push([colX[cat]+SKILL_OFF[pre][0],SKILL_OFF[pre][1],colX[cat]+SKILL_OFF[idx][0],SKILL_OFF[idx][1], SKILL_LINK[cat]+((hasSkill(cat,pre)&&hasSkill(cat,idx))?"0.95)":"0.45)")]); } }
   });
   var compPos=[[31,17],[31,4.5],[52.5,17],[52.5,4.5],[74,17],[74,4.5]];
-  segs.push([31,17,31,4.5,false]); segs.push([52.5,17,52.5,4.5,false]); segs.push([74,17,74,4.5,false]);
+  segs.push([31,17,31,4.5,"rgba(230,200,120,.75)"]); segs.push([52.5,17,52.5,4.5,"rgba(230,200,120,.75)"]); segs.push([74,17,74,4.5,"rgba(230,200,120,.75)"]);
   var html=linkSvg(segs);
   html+='<div class="cat-head water" style="left:19%;top:26.5%">水量</div><div class="cat-head life" style="left:50%;top:26.5%">生命</div><div class="cat-head res" style="left:81%;top:26.5%">資源</div>';
   ["water","life","res"].forEach(function(cat){
     SKILLS[G.god][cat].forEach(function(sk,idx){
       var done=hasSkill(cat,idx), av=skillAvailable(cat,idx), vis=skillVisible(cat,idx);
-      html+=tnodeHtml({x:colX[cat]+SKILL_OFF[idx][0], y:SKILL_OFF[idx][1], cls:cat, state:done?"done":(av?"avail":"locked"),
-        icon:SKILL_ICON[cat], label:vis?esc(sk.n):"？？？", sub:vis?("神力"+sk.mp+"｜第"+STG[idx]+"段階"):skillReqText(cat,idx), ncStyle:"width:max(32px,calc(var(--k)*40));height:max(32px,calc(var(--k)*40));font-size:calc(var(--k)*16)",
-        ougi: idx===8, attrs:'data-skill="'+cat+'-'+idx+'"', badge: av?("解放可"):""});
+      var isOugi = idx===8;
+      html+=tnodeHtml({x:colX[cat]+SKILL_OFF[idx][0], y:SKILL_OFF[idx][1], cls:cat+(isOugi?" ougi-node":""), state:done?"done":(av?"avail":"locked"),
+        icon:SKILL_ICON[cat], label:vis?esc(sk.n):"？？？", sub:vis?("神力"+sk.mp+"｜第"+STG[idx]+"段階"):skillReqText(cat,idx), ncStyle:"width:max(32px,calc(var(--k)*"+(isOugi?46:40)+"));height:max(32px,calc(var(--k)*"+(isOugi?46:40)+"));font-size:calc(var(--k)*16)",
+        sq: cat==="res", ougi: isOugi, attrs:'data-skill="'+cat+'-'+idx+'"', badge: av?("解放可"):""});
     });
   });
   var mixCls=["mix","mix","mix2","mix2","mix3","mix3"];
@@ -1194,6 +1469,7 @@ function skillCanvas(){
     html+=tnodeHtml({x:compPos[idx][0], y:compPos[idx][1], cls:mixCls[idx], state:done?"done":(av?"avail":"locked"),
       icon:"★", label:(done||av)?esc(sk.n):"？？？", sub:"複合｜神力"+sk.mp, ncStyle:"width:max(30px,calc(var(--k)*34));height:max(30px,calc(var(--k)*34));font-size:calc(var(--k)*14)", attrs:'data-skill="comp-'+idx+'"', badge: av?("解放可"):""});
   });
+  html+='<div class="tnode gold done" style="left:50%;top:96.5%"><span class="nc" style="width:calc(var(--k)*34);height:calc(var(--k)*34);font-size:calc(var(--k)*11)">起点</span></div>';
   return '<div class="tree-canvas tall">'+html+'</div>';
 }
 function viewTree(){
@@ -1244,6 +1520,8 @@ function bindView(){
   document.querySelectorAll("[data-explore-go]").forEach(function(b){ b.addEventListener("click", function(){ var p=b.dataset.exploreGo.split("-"); startBattle(parseInt(p[0]), parseInt(p[1])); }); });
   document.querySelectorAll("[data-carespot]").forEach(function(b){ b.addEventListener("click", function(){ careSel=parseInt(b.dataset.carespot); render(); }); });
   document.querySelectorAll("[data-care]").forEach(function(b){ b.addEventListener("click", function(){ doCare(parseInt(b.dataset.care)); }); });
+  var caEl=$("care-anim"); if(caEl) caEl.addEventListener("click", finishCareAnim);
+  var ccb=$("btn-carecont"); if(ccb) ccb.addEventListener("click", function(){ careResult=null; view=G.finished?"ending":"care"; render(); });
   document.querySelectorAll("[data-common]").forEach(function(b){ b.addEventListener("click", function(){ var i=parseInt(b.dataset.common); if(totalPts()>=COMMON[i].req && G.common.indexOf(i)<0){ G.common.push(i); toast("共通ツリー「"+COMMON[i].label+"」を解放！ "+fxStr(COMMON[i].fx)); render(); } }); });
   document.querySelectorAll("[data-ptree]").forEach(function(b){ b.addEventListener("click", function(){ var p=b.dataset.ptree.split("-"); var cat=p[0], s=parseInt(p[1]); if(G.tree[cat]===s && G.pts[cat]>=THRESH[s]){ G.tree[cat]++; toast(paramName(cat)+"ツリー第"+(s+1)+"段階を解放！ "+fxStr(TREE_FX[cat][s])); render(); } }); });
   document.querySelectorAll("[data-skill]").forEach(function(b){ b.addEventListener("click", function(){ var p=b.dataset.skill.split("-"); var cat=p[0], idx=parseInt(p[1]); if(skillAvailable(cat,idx)){ G.skills.push(skillKey(cat,idx)); toast("技「"+SKILLS[G.god][cat][idx].n+"」を覚えた！ 戦闘で使えます"); render(); } }); });
@@ -1251,15 +1529,19 @@ function bindView(){
   var rst=$("btn-reset"); if(rst) rst.addEventListener("click", function(){ if(rst.dataset.arm){ clearSave(); G=null; view="select"; render(); } else { rst.dataset.arm="1"; rst.textContent="本当に最初から？ もう一度押すと保存データも消えます"; } });
   var ag=$("btn-again"); if(ag) ag.addEventListener("click", function(){ clearSave(); G=null; view="select"; render(); });
 }
+/* 手入れの結果（演出→結果画面へ渡す一時データ。計算は doCare で従来どおり完了させる） */
+var careResult=null;
 function doCare(i){
   var c=CARES[i]; if(!careUnlocked(i)||!canAfford(c.cost)||G.finished) return;
+  var before={water:G.pts.water, life:G.pts.life, res:G.pts.res};
+  var cntBefore=G.careCounts[i];
   for(var m in c.cost) G.mats[m]-=c.cost[m];
   var g=c.gains[Math.min(2,G.careCounts[i])];
   G.pts.water+=g[0]; G.pts.life+=g[1]; G.pts.res+=g[2];
   G.careCounts[i]++;
   G.lastResult="手入れ「"+c.name+"」をしました！：水量ポイント+"+g[0]+"、生命ポイント+"+g[1]+"、資源ポイント+"+g[2];
-  toast("手入れ完了：水量+"+g[0]+"・生命+"+g[1]+"・資源+"+g[2]);
-  advanceTurn(); view = G.finished?"ending":"care"; render();
+  careResult={ i:i, gains:g.slice(), before:before, cost:Object.assign({}, c.cost), tierBefore:Math.min(2,cntBefore), countAfter:G.careCounts[i] };
+  advanceTurn(); view="careanim"; render();
 }
 document.querySelectorAll(".navbtn").forEach(function(b){ b.addEventListener("click", function(){ if(!G||view==="battle") return; view=b.dataset.nav; if(view==="tree") treeTab="common"; render(); }); });
 var _restored = loadSave();
@@ -1351,9 +1633,80 @@ function unrotXY(rx,ry){ var r=boardRot();
   if(r===2) return [COLS-1-rx, ROWS-1-ry];
   if(r===3) return [COLS-1-ry, rx];
   return [rx, ry]; }
-function cellLeftTop(x,y){ var p=rotXY(x,y); var rx=p[0], ry=p[1], RD=p[3];
-  return { left:(rx-ry+RD-1)*ISO_SX, top:(rx+ry)*ISO_SY+ISO_TOP, z:(rx+ry)*10 + 5, h:heightAt(x,y) }; }
+/* マスの表示位置は高さに応じて上下させる：高いマスは実際に持ち上がり、川（低）は沈む。
+   ELEV_PCT = 高さ1あたり盤面高の何%持ち上げるか。ユニット・タップ吸着・FX・
+   カメラの中心計算はすべて cellLeftTop/cellCenter 経由なので、この1か所で全て連動する。 */
+var ELEV_PCT=0.55;
+function cellLeftTop(x,y){ var p=rotXY(x,y); var rx=p[0], ry=p[1], RD=p[3]; var h=heightAt(x,y);
+  return { left:(rx-ry+RD-1)*ISO_SX, top:(rx+ry)*ISO_SY+ISO_TOP - h*ELEV_PCT, z:(rx+ry)*10 + 5, h:h }; }
 function cellCenter(x,y){ var lt=cellLeftTop(x,y); return { cx:lt.left+ISO_SX, cy:lt.top+ISO_SY }; }
+/* ============ カメラ（センタリング／ズーム／パン） ============
+   .cam-world への translate/scale で実現する。状態は CAM に持ち、renderBattle の
+   再描画をまたいで保持する（戦闘開始時に startBattle がリセット）。
+   センタリングは「行動者が切り替わったとき」だけ行い、プレイヤーが手動で
+   スクロールした直後に引き戻すことはしない。 */
+var CAM={z:1, tx:0, ty:0, zMin:0.5, suppressTapUntil:0, centerReq:false};
+var lastCenteredCur=null;
+function camEls(){ return { stage:document.querySelector(".b-stage"), world:document.querySelector(".cam-world"), board:document.querySelector(".iso-board") }; }
+function clampCam(){
+  var e=camEls(); if(!e.stage||!e.board) return;
+  var vw=e.stage.clientWidth, vh=e.stage.clientHeight;
+  CAM.zMin=Math.min(vw/e.board.offsetWidth, vh/e.board.offsetHeight)*0.94;
+  if(CAM.z<CAM.zMin) CAM.z=CAM.zMin;
+  if(CAM.z>2.4) CAM.z=2.4;
+  var bl=e.board.offsetLeft-24, bt=e.board.offsetTop-24, br=bl+e.board.offsetWidth+48, bb=bt+e.board.offsetHeight+48;
+  function clampAxis(t, vsize, c0, c1){
+    var span=(c1-c0)*CAM.z;
+    if(span<=vsize) return (vsize-span)/2 - c0*CAM.z;
+    /* 盤面のどのマスでも画面中心に持ってこられる範囲まで許しつつ、
+       盤面の範囲が画面中心を常に含むようにして、盤面を見失わないようにする */
+    var lo=vsize/2 - c1*CAM.z, hi=vsize/2 - c0*CAM.z;
+    return Math.max(lo, Math.min(hi, t));
+  }
+  CAM.tx=clampAxis(CAM.tx, vw, bl, br);
+  CAM.ty=clampAxis(CAM.ty, vh, bt, bb);
+}
+function applyCam(animate){
+  var e=camEls(); if(!e.world) return;
+  clampCam();
+  e.world.style.transition = animate ? "transform .45s ease" : "none";
+  e.world.style.transform = "translate("+CAM.tx+"px,"+CAM.ty+"px) scale("+CAM.z+")";
+  var zp=$("zoom-pct"); if(zp) zp.textContent=Math.round(CAM.z*100)+"%";
+}
+function centerCameraOn(x,y,animate){
+  var e=camEls(); if(!e.stage||!e.board) return;
+  var c=cellCenter(x,y);
+  var wx=e.board.offsetLeft + c.cx/100*e.board.offsetWidth;
+  var wy=e.board.offsetTop + c.cy/100*e.board.offsetHeight;
+  CAM.tx=e.stage.clientWidth/2 - wx*CAM.z;
+  CAM.ty=e.stage.clientHeight/2 - wy*CAM.z;
+  applyCam(animate);
+}
+function setZoomAt(nz, px, py){
+  var e=camEls(); if(!e.stage) return;
+  clampCam();
+  nz=Math.max(CAM.zMin, Math.min(2.4, nz));
+  var wx=(px-CAM.tx)/CAM.z, wy=(py-CAM.ty)/CAM.z;
+  CAM.z=nz; CAM.tx=px-wx*nz; CAM.ty=py-wy*nz;
+  applyCam(false);
+}
+/* 行動コマンドメニューを行動キャラの真下に置く（盤面端では画面内に収め、
+   下に置けない場合はキャラの上に回す）。位置はカメラ変換後の最終状態から計算する。 */
+function positionMenu(){
+  var menu=document.querySelector(".b-menu"); if(!menu||!B||!B.sel) return;
+  var e=camEls(); if(!e.stage||!e.board) return;
+  var u=B.sel, c=cellCenter(u.x,u.y);
+  var cellHPx=(2*ISO_SY)/100*e.board.offsetHeight*CAM.z;
+  var ax=(e.board.offsetLeft + c.cx/100*e.board.offsetWidth)*CAM.z + CAM.tx;
+  var ay=(e.board.offsetTop + (c.cy+ISO_SY)/100*e.board.offsetHeight)*CAM.z + CAM.ty;
+  var vw=e.stage.clientWidth, vh=e.stage.clientHeight;
+  var mw=menu.offsetWidth, mh=menu.offsetHeight;
+  var left=Math.max(6, Math.min(vw-mw-6, ax-mw/2));
+  var top=ay+8;
+  if(top+mh>vh-6) top=ay-cellHPx-mh-8;
+  if(top<6) top=6;
+  menu.style.left=left+"px"; menu.style.top=top+"px";
+}
 /* マップ画像の回転：アイソメ投影（縦圧縮0.40）のもとでグリッド回転と等価になる
    線形変換を画像に適用する。格子の中心＝盤面の中心なので transform-origin は 50% 50%。
    90°/270°は matrix(0,±0.4,∓2.5,0)、180°は通常の回転と一致する。 */
@@ -1445,7 +1798,8 @@ function startBattle(si,di){
   allies.forEach(function(u){ faceNearestOpponent(u,foes); });
   foes.forEach(function(u){ faceNearestOpponent(u,allies); });
   allies.concat(foes).forEach(function(u){ TERRAIN[tIdx(u.x,u.y)]="grass"; });
-  B={si:si,di:di,rot:0,loot:STAGES[si].loot[di],allies:allies,foes:foes,round:1,sel:null,moved:false,preMove:null,mode:"select",targets:[],pendingSkill:null,showSkills:false,confirm:null,focus:null,logs:["<b>"+STAGES[si].name+" 深度"+(di+1)+"</b> の戦闘開始！ 敵を全て倒すと勝利、神様が倒れると敗北です。","行動順は各巡の開始時に素早さ順（味方・敵混在）で確定します。素早さの増減は次巡の順序から反映されます。","地形には高さがあります（川底-10〜高台+17）。高い所から攻撃すると命中・ダメージが上がり（高さ差1ごとに命中+1・ダメージ+1%）、隣との高さ差が8以上のマスへは直接移動できません（崖）。⟳ボタンでマップを90°ずつ回転できます。","向き：側面からの攻撃は与ダメージ+15%、背面からは+30%（正面は変動なし）。待機・攻撃・技のあとに、ターンを終える向きを選べます。足元の矢印が今の向きです。"],over:false,order:[],turnIdx:0,skipAllies:false,cur:null,faceSel:null};
+  CAM={z:1, tx:0, ty:0, zMin:0.5, suppressTapUntil:0, centerReq:false}; lastCenteredCur=null;
+  B={si:si,di:di,rot:0,loot:STAGES[si].loot[di],allies:allies,foes:foes,round:1,sel:null,moved:false,preMove:null,mode:"select",targets:[],pendingSkill:null,showSkills:false,confirm:null,focus:null,logs:["<b>"+STAGES[si].name+" 深度"+(di+1)+"</b> の戦闘開始！ 敵を全て倒すと勝利、神様が倒れると敗北です。","行動順は各巡の開始時に素早さ順（味方・敵混在）で確定します。素早さの増減は次巡の順序から反映されます。","地形には高さがあります（川底-10〜高台+17）。高い所から攻撃すると命中・ダメージが上がり（高さ差1ごとに命中+1・ダメージ+1%）、隣との高さ差が8以上のマスへは直接移動できません（崖）。⟳ボタンでマップを90°ずつ回転できます。","向き：側面からの攻撃は与ダメージ+15%、背面からは+30%（正面は変動なし）。待機・攻撃・技のあとに、ターンを終える向きを選べます。足元の矢印が今の向きです。","カメラ：行動するキャラクターが画面の中心に来ます。盤面をドラッグすると上下左右にスクロール、サイドバーの＋/−ボタンやピンチ操作でズームできます。"],over:false,order:[],turnIdx:0,skipAllies:false,cur:null,faceSel:null};
   var roleNotes=[], roleSeen={};
   foes.forEach(function(f){ var p=ENEMY_PROFILES[f.art]; if(p&&!roleSeen[f.art]){ roleSeen[f.art]=1; roleNotes.push(f.name+"＝"+p.label); } });
   if(roleNotes.length) B.logs.push("敵の個性："+roleNotes.join("／")+"。種類ごとに狙い方と倒し方が変わります。");
@@ -1849,16 +2203,18 @@ function renderBattle(){
     if(B.sel&&u===B.sel) cls+=" is-sel";
     var left, top, z;
     var lt=cellLeftTop(x,y); left=lt.left.toFixed(2); top=lt.top.toFixed(2); z=lt.z;
-    /* 段差ブロックの側面（見た目のみ）：表示グリッドで手前2方向の隣マスとの
-       高さ差ぶんだけ、菱形の下辺から土の側面を垂らす。回転時も論理マスと一致する
-       よう隣接判定は表示座標→unrotXY で戻して行う。盤外は段差なし（自マスと同じ
-       高さ）として、盤の縁に壁が立たないようにする。
-       高さ1あたりの垂れ量はマス高の2.2%（差7→約0.15マス、差13→約0.29マス、上限0.5）。 */
+    /* 段差（崖面）の側面：マス自体を持ち上げたうえで、手前2方向の隣マスとの
+       高さ差ぶんだけ、高い側のマスの下辺から崖面を垂らす。段差の位置・大きさは
+       高さデータそのものと一致する（差0なら面は出ない）。回転時も隣接判定は
+       表示座標→unrotXY で戻して行う。盤外は段差なし（自マスと同じ高さ）として、
+       盤の縁に壁が立たないようにする。
+       崖面の長さは高さ差×ELEV_PCT（盤面高%）をマス高（2*ISO_SY%）で割った割合。 */
     var rp=rotXY(x,y), drx=rp[0], dry=rp[1], dRW=rp[2], dRD=rp[3];
     function dispH(nx,ny){ if(nx<0||ny<0||nx>=dRW||ny>=dRD) return lt.h; var q=unrotXY(nx,ny); return heightAt(q[0],q[1]); }
     function blkSpan(cls, drop){
-      var f=Math.max(0, Math.min(0.5, drop*0.022));
-      if(f<0.05) return "";
+      var f=drop*ELEV_PCT/(2*ISO_SY);
+      if(f<0.04) return "";
+      f=Math.min(1.15, f);
       var bh=50+100*f, p1=(50/bh*100).toFixed(1), p2=(100*f/bh*100).toFixed(1);
       var poly = cls==="blk-l" ? ("0 0,100% "+p1+"%,100% 100%,0 "+p2+"%") : ("0 "+p1+"%,100% 0,100% "+p2+"%,0 100%");
       var pos = cls==="blk-l" ? "left:0" : "left:50%";
@@ -1899,6 +2255,7 @@ function renderBattle(){
    +'<div class="bs-left">敵全滅まで あと'+foesLeft+'体</div>'
    +'<div class="bs-sec">全体MAP</div><div class="minimap" style="grid-template-columns:repeat('+RW+',1fr)">'+mini+'</div><div class="mini-legend"><span style="color:#7ec8ff">●</span> 味方　<span style="color:#ff8a7a">●</span> 敵　<span style="color:#b5cf7d">●</span> 高台</div>'
    +'<button class="btn ghost sm" id="btn-rot" style="margin-top:calc(var(--k)*10);background:transparent;color:#eef3e6;border-color:rgba(120,200,210,.6)">⟳ マップ回転（'+(boardRot()*90)+'°）</button><div style="font-size:calc(var(--k)*10.5);color:#9fc3bb;margin-top:calc(var(--k)*4)">回転は表示だけを変えます</div>'
+   +'<div class="row" style="margin-top:calc(var(--k)*10);gap:calc(var(--k)*6);align-items:center;flex-wrap:nowrap"><button class="btn ghost sm" id="btn-zoomout" style="background:transparent;color:#eef3e6;border-color:rgba(120,200,210,.6);flex:1" title="縮小">−</button><span id="zoom-pct" style="font-size:calc(var(--k)*12);color:#c8d4bd;min-width:calc(var(--k)*40);text-align:center">'+Math.round(CAM.z*100)+'%</span><button class="btn ghost sm" id="btn-zoomin" style="background:transparent;color:#eef3e6;border-color:rgba(120,200,210,.6);flex:1" title="拡大">＋</button></div><div style="font-size:calc(var(--k)*10.5);color:#9fc3bb;margin-top:calc(var(--k)*4)">盤面ドラッグでスクロール／ピンチでも拡縮できます</div>'
    +'<div class="bs-sec">ステージ'+(B.si+1)+'</div><div class="bs-stage">'+esc(STAGES[B.si].name.replace(/^ステージ\d+ /,""))+' 深度'+(B.di+1)+'</div><div class="bs-obj">目標：敵の全滅</div>'
    +'<div class="bs-sec">戦闘ログ</div><div class="b-log">'+B.logs.slice().reverse().join("<br>")+'</div>'
    +(!B.over?'<button class="btn ghost sm" id="btn-endphase" style="margin-top:calc(var(--k)*12);background:transparent;color:#eef3e6;border-color:rgba(120,200,210,.6)">残りの味方全員 待機（この巡を順送り）</button>':"")
@@ -1935,6 +2292,7 @@ function renderBattle(){
         menu+='<button class="bm-btn" id="btn-atk">攻撃</button>';
         if(u2.god) menu+='<button class="bm-btn" id="btn-skills">技 ＞</button>';
         menu+='<button class="bm-btn" id="btn-wait">待機</button>';
+        if(!B.preMove && !B.moved) menu+='<button class="bm-btn" id="btn-backmove">移動に戻る</button>'; /* 「移動しない」を選んだ直し：まだ動いていないので移動フェーズへ戻れる */
         if(B.preMove) menu+='<button class="bm-btn" id="btn-undomove">移動キャンセル</button>';
       } else {
         var ls=learnedSkills();
@@ -1985,11 +2343,17 @@ function renderBattle(){
   app.innerHTML='<div class="battle-scene">'
    +'<aside class="b-side">'+sideHtml+'</aside>'
    +'<div class="b-main">'+skillbar
-   +'<div class="b-stage"><img src="assets/bg-battle-real.jpg" alt="水彩の川辺の戦闘背景"><div class="iso-board"><img class="iso-map" src="assets/map-battle.jpg" alt="戦闘マップ"'+(mapImgTransform()?' style="transform:'+mapImgTransform()+'"':"")+'>'+cells+'</div>'+menu+hint+terrain+predict+result+retreat+'</div>'
+   +'<div class="b-stage"><img src="assets/bg-battle-real.jpg" alt="水彩の川辺の戦闘背景"><div class="cam-world"><div class="iso-board"><img class="iso-map" src="assets/map-battle.jpg" alt="戦闘マップ"'+(mapImgTransform()?' style="transform:'+mapImgTransform()+'"':"")+'>'+cells+'</div></div>'+menu+hint+terrain+predict+result+retreat+'</div>'
    +'</div>'
    +'<aside class="b-rail">'+rail+'</aside></div>';
   bindBattle();
   playFX();
+  /* カメラ：行動者が切り替わったとき（または回転直後）だけセンタリングし、
+     それ以外の再描画ではプレイヤーのスクロール位置をそのまま保つ */
+  if(CAM.centerReq){ CAM.centerReq=false; if(B.cur) centerCameraOn(B.cur.x,B.cur.y,true); else applyCam(false); }
+  else if(B.cur && B.cur!==lastCenteredCur){ lastCenteredCur=B.cur; centerCameraOn(B.cur.x,B.cur.y,true); }
+  else applyCam(false);
+  positionMenu();
 }
 /* ============ 戦闘エフェクト再生（FXQ の見た目イベントを DOM に流す） ============
    1アクション分が数百ミリ秒で終わる軽い CSS アニメーションのみ。
@@ -2020,8 +2384,9 @@ function playFX(){
     if(ev.t==="slide"){
       var u=unitEl(ev.x,ev.y); if(!u||!rect.width) return;
       var ca=cellCenter(ev.fx,ev.fy), cb=cellCenter(ev.x,ev.y);
-      var dx=(ca.cx-cb.cx)/100*rect.width;
-      var dy=(ca.cy-cb.cy)/100*rect.height;
+      /* ユニットの transform は盤面ローカル座標系なので、%→px 変換はレイアウト寸法で行う（カメラの拡縮に影響されない） */
+      var dx=(ca.cx-cb.cx)/100*board.offsetWidth;
+      var dy=(ca.cy-cb.cy)/100*board.offsetHeight;
       if(!dx&&!dy) return;
       u.style.transition="none";
       u.style.transform="translate(calc(-50% + "+Math.round(dx)+"px), "+Math.round(dy)+"px)";
@@ -2085,6 +2450,7 @@ function bindBattle(){
   var board=document.querySelector(".iso-board");
   if(board) board.addEventListener("click", function(ev){
     if(!B||B.over) return;
+    if(Date.now()<CAM.suppressTapUntil) return; /* ドラッグ（スクロール）の直後のクリックはタップとして扱わない */
     var cellBtn=(ev.target&&ev.target.closest)?ev.target.closest("[data-cell]"):null;
     if(ev.detail===0&&cellBtn){ var kp=cellBtn.dataset.cell.split(","); onCellTap(parseInt(kp[0]),parseInt(kp[1])); return; } /* キーボード操作 */
     var r=board.getBoundingClientRect(); if(!r.width) return;
@@ -2116,9 +2482,82 @@ function bindBattle(){
   var cok=$("btn-confirm-ok"); if(cok) cok.addEventListener("click", function(){ var cx=B.confirm.x, cy=B.confirm.y; executeSkill(cx,cy); });
   var cno=$("btn-confirm-no"); if(cno) cno.addEventListener("click", function(){ B.confirm=null; renderBattle(); });
   var endp=$("btn-endphase"); if(endp) endp.addEventListener("click", function(){ enemyPhase(); renderBattle(); });
-  var rotb=$("btn-rot"); if(rotb) rotb.addEventListener("click", function(){ B.rot=((B.rot||0)+1)%4; renderBattle(); });
+  var rotb=$("btn-rot"); if(rotb) rotb.addEventListener("click", function(){ B.rot=((B.rot||0)+1)%4; CAM.centerReq=true; renderBattle(); });
+  var zin=$("btn-zoomin"); if(zin) zin.addEventListener("click", function(){ var e=camEls(); setZoomAt(CAM.z*1.25, e.stage?e.stage.clientWidth/2:0, e.stage?e.stage.clientHeight/2:0); positionMenu(); });
+  var zout=$("btn-zoomout"); if(zout) zout.addEventListener("click", function(){ var e=camEls(); setZoomAt(CAM.z/1.25, e.stage?e.stage.clientWidth/2:0, e.stage?e.stage.clientHeight/2:0); positionMenu(); });
+  var bmv=$("btn-backmove"); if(bmv) bmv.addEventListener("click", function(){ if(B.sel&&!B.moved&&!B.preMove){ B.mode="move"; B.targets=moveTargets(B.sel); B.showSkills=false; B.confirm=null; B.pendingSkill=null; } renderBattle(); });
+  bindCameraInput();
   var leave=$("btn-leave"); if(leave) leave.addEventListener("click", leaveBattle);
   document.querySelectorAll("[data-bskill]").forEach(function(b){ b.addEventListener("click", function(){ var p=b.dataset.bskill.split("-"); chooseSkill(p[0], parseInt(p[1])); }); });
+}
+/* ============ カメラ入力（ドラッグでパン／ピンチ・ホイールでズーム） ============
+   タップとドラッグは移動量で判定する：10px 未満の動きはタップ（通常の click に任せ）、
+   それ以上はドラッグとしてパンし、直後の click を CAM.suppressTapUntil で無効化する。
+   メニューやパネルの上から始まった操作はパンにしない。 */
+function bindCameraInput(){
+  var stage=document.querySelector(".b-stage");
+  if(!stage||stage._camBound) return;
+  stage._camBound=true;
+  var pts=new Map();
+  var drag=null; /* {moved,lastX,lastY} */
+  var pinch=null; /* {d0,z0,mx,my} */
+  function stageXY(ev){ var r=stage.getBoundingClientRect(); return [ev.clientX-r.left, ev.clientY-r.top]; }
+  stage.addEventListener("pointerdown", function(ev){
+    if(ev.target.closest && ev.target.closest(".b-menu,.b-terrain,.b-predict,.b-result,.b-skillbar")) return;
+    pts.set(ev.pointerId, [ev.clientX, ev.clientY]);
+    if(pts.size===1){ var p=stageXY(ev); drag={moved:false,lastX:p[0],lastY:p[1],totX:0,totY:0}; pinch=null; }
+    else if(pts.size===2){
+      var arr=Array.from(pts.values());
+      var mx=(arr[0][0]+arr[1][0])/2, my=(arr[0][1]+arr[1][1])/2;
+      var r=stage.getBoundingClientRect();
+      pinch={ d0:Math.hypot(arr[0][0]-arr[1][0], arr[0][1]-arr[1][1])||1, z0:CAM.z, mx:mx-r.left, my:my-r.top };
+      drag=null;
+      CAM.suppressTapUntil=Date.now()+300;
+    }
+    try{ stage.setPointerCapture(ev.pointerId); }catch(e){}
+  });
+  stage.addEventListener("pointermove", function(ev){
+    if(!pts.has(ev.pointerId)) return;
+    pts.set(ev.pointerId, [ev.clientX, ev.clientY]);
+    if(pinch && pts.size===2){
+      var arr=Array.from(pts.values());
+      var d=Math.hypot(arr[0][0]-arr[1][0], arr[0][1]-arr[1][1])||1;
+      var r=stage.getBoundingClientRect();
+      var mx=(arr[0][0]+arr[1][0])/2-r.left, my=(arr[0][1]+arr[1][1])/2-r.top;
+      CAM.tx+=mx-pinch.mx; CAM.ty+=my-pinch.my; /* 中点の移動ぶんパン */
+      pinch.mx=mx; pinch.my=my;
+      setZoomAt(pinch.z0*d/pinch.d0, mx, my);
+      CAM.suppressTapUntil=Date.now()+300;
+      return;
+    }
+    if(drag){
+      var p=stageXY(ev);
+      var dx=p[0]-drag.lastX, dy=p[1]-drag.lastY;
+      drag.lastX=p[0]; drag.lastY=p[1];
+      drag.totX+=dx; drag.totY+=dy;
+      if(!drag.moved){
+        if(Math.hypot(drag.totX,drag.totY)<10) return; /* 10px 未満はタップとして扱い、パンしない（タップの微小なブレを許容） */
+        drag.moved=true;
+      }
+      CAM.tx+=dx; CAM.ty+=dy;
+      applyCam(false);
+      CAM.suppressTapUntil=Date.now()+300;
+    }
+  });
+  function endPointer(ev){
+    pts.delete(ev.pointerId);
+    if(pts.size<2) pinch=null;
+    if(pts.size===0){ if(drag&&drag.moved) CAM.suppressTapUntil=Date.now()+250; drag=null; }
+  }
+  stage.addEventListener("pointerup", endPointer);
+  stage.addEventListener("pointercancel", endPointer);
+  stage.addEventListener("wheel", function(ev){
+    ev.preventDefault();
+    var p=stageXY(ev);
+    var f=ev.deltaY<0?1.12:1/1.12;
+    setZoomAt(CAM.z*f, p[0], p[1]);
+    positionMenu();
+  }, {passive:false});
 }
 </script>
 <script>
