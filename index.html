@@ -1,0 +1,1710 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light" />
+<meta name="description" content="川を育てるゲーム『川神』（かわかみ）の試作プロトタイプ。探索・手入れ・スキルツリー・SRPG戦闘が遊べます。" />
+<!-- PWA: ホーム画面に追加してアプリとして使うための設定 -->
+<link rel="manifest" href="assets/manifest.json" />
+<meta name="theme-color" content="#0d2b36" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="川神" />
+<link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png" />
+<link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png" />
+<link rel="icon" type="image/png" sizes="512x512" href="assets/icon-512.png" />
+<title>川神プロトタイプ｜かわかみ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1d2b2a; --navy:#0d2b36; --navy2:#123a47; --navy3:#0a222b;
+  --gold:#d9b45c; --gold2:#e6c878; --goldline:#c9a44a;
+  --teal:#2e7d74; --river:#3d8fa8; --red:#b6503f;
+  --water:#2f7fa8; --life:#5d9a4e; --res:#a4762a;
+  --card:#fffdf4; --line:#d8cdb0; --muted:#6d7263;
+  --panel-border:1.5px solid rgba(217,180,92,.85);
+}
+*{box-sizing:border-box} html,body{margin:0;padding:0;height:100%}
+body{font-family:"Zen Kaku Gothic New",sans-serif;color:var(--ink);background:#07161d;overflow:hidden;display:flex;align-items:center;justify-content:center}
+/* ---------- 16:9 fixed game stage (landscape only) ---------- */
+#stage{position:relative;width:min(100vw,177.78vh);width:min(100vw,177.78dvh);height:min(100vh,56.25vw);height:min(100dvh,56.25vw);overflow:hidden;background:#dcebe4;flex:none}
+#rotate{display:none;position:fixed;inset:0;z-index:300;background:linear-gradient(170deg,#123a47,#07161d);color:#f2ecd8;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:24px}
+#rotate .ric{font-size:52px;animation:rotpulse 2.2s ease-in-out infinite}
+@keyframes rotpulse{0%,100%{transform:rotate(0deg)}50%{transform:rotate(90deg)}}
+@media(prefers-reduced-motion:reduce){#rotate .ric{animation:none}}
+#rotate .rt{font-family:"Shippori Mincho",serif;font-size:26px;font-weight:800;letter-spacing:.08em;color:#ffe9a8}
+#rotate .rs{font-size:14px;line-height:1.9;color:#c8d4bd}
+@media(orientation:portrait){#rotate{display:flex}}
+button,[role="button"],select,summary{ min-height:36px; }
+button{font-family:inherit;cursor:pointer}
+h1,h2,h3,.mincho{font-family:"Shippori Mincho",serif}
+.wrap{position:absolute;inset:0;overflow:hidden}
+.wrap.wide{position:absolute;inset:0;overflow:hidden}
+img.scene-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+/* ---------- generic panels (care/party/setting on watercolor) ---------- */
+.page-bg{position:relative;height:100%;overflow-y:auto;overflow-x:hidden;padding:14px 14px 92px;background:#e9f1e4 url('assets/bg-tree.jpg') center/cover}
+.page-bg::before{content:"";position:absolute;inset:0;background:rgba(244,248,238,.72)}
+.page-bg>*{position:relative}
+.topbar{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch;justify-content:space-between;margin-bottom:12px}
+.datebox{background:linear-gradient(180deg,var(--navy2),var(--navy));color:#f2ecd8;border-radius:10px;padding:9px 18px;border:var(--panel-border);box-shadow:0 3px 10px rgba(6,30,38,.35)}
+.datebox .big{font-family:"Shippori Mincho",serif;font-size:21px;font-weight:800;letter-spacing:.04em}
+.datebox .sub{font-size:12px;color:var(--gold2)}
+.turnbar{flex:1;min-width:200px;background:rgba(13,43,54,.92);border:var(--panel-border);border-radius:10px;padding:9px 14px;color:#e9e2c8}
+.turnbar .lbl{font-size:12px;color:#c8d4bd;display:flex;justify-content:space-between}
+.meter{height:10px;background:rgba(255,255,255,.16);border-radius:99px;overflow:hidden;margin-top:6px}
+.meter>i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:99px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:0 2px 10px rgba(60,60,30,.08)}
+.panel.dark{background:linear-gradient(165deg,var(--navy2),var(--navy3));color:#f0ead2;border:var(--panel-border)}
+.panel.dark .muted{color:#b9c4ae}
+.sec-title{font-family:"Shippori Mincho",serif;font-size:20px;font-weight:800;margin:0 0 4px;display:flex;align-items:center;gap:8px}
+.sec-title::before{content:"";width:8px;height:22px;background:var(--gold);border-radius:3px;display:inline-block}
+.muted{color:var(--muted);font-size:13px;line-height:1.6}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:760px){.grid2{grid-template-columns:1fr}}
+/* god select */
+.godcards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:760px){.godcards{grid-template-columns:1fr}}
+.godcard{border:2px solid var(--line);border-radius:16px;padding:16px;background:var(--card);text-align:left;width:100%}
+.godcard:hover{border-color:var(--gold)}
+.godface-art{display:flex;justify-content:center;padding:8px 8px 2px;border-radius:12px;margin-bottom:8px}
+.godcard-img{width:100%;height:168px;object-fit:cover;object-position:top center;border-radius:10px;display:block}
+.kv-banner{width:100%;height:17vw;max-height:248px;object-fit:cover;object-position:center 30%;display:block;border-radius:12px;margin-bottom:12px;border:1px solid rgba(230,200,120,.5)}
+.godname{font-family:"Shippori Mincho",serif;font-size:22px;font-weight:800;text-align:center}
+.godrole{text-align:center;font-size:12px;font-weight:700;letter-spacing:.08em;margin:4px 0 8px}
+/* chips & buttons */
+.chip{display:inline-block;font-size:11px;font-weight:700;border-radius:99px;padding:2px 9px;margin:2px 4px 2px 0;background:#ece4c8;color:#5c543a}
+.chip.w{ background:#dceef5;color:#1f5b74}.chip.l{background:#e4efd6;color:#40642a}.chip.r{background:#f3e6c8;color:#7a5a16}
+.chip.ok{background:#d9ecd2;color:#2f6423}.chip.ng{background:#f3d9d2;color:#8c3527}
+.btn{border:1px solid #0e2a29;background:var(--navy);color:#f5efdb;border-radius:10px;padding:10px 18px;font-weight:700;font-size:15px}
+.btn.gold{background:linear-gradient(180deg,#e3c169,#c39a3e);color:#2c2410;border-color:#8a6d24}
+.btn.ghost{background:#fffefa;color:var(--ink);border-color:var(--line)}
+.btn.red{background:var(--red);border-color:#7e3527}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.sm{padding:7px 12px;font-size:13px;min-height:36px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.spread{justify-content:space-between}
+.itemcard{border:1px solid var(--line);border-radius:12px;padding:13px 14px;background:#fffefa;margin-bottom:10px}
+.itemcard.locked{opacity:.62;background:#efe9d6}
+.itemcard h3{margin:0 0 4px;font-size:16px;font-family:"Shippori Mincho",serif}
+.mats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+@media(min-width:761px){.mats{grid-template-columns:repeat(5,1fr)}}
+.mat{background:#f6f1de;border:1px solid var(--line);border-radius:10px;padding:8px;text-align:center;font-size:13px}
+.mat b{display:block;font-size:18px;font-family:"Shippori Mincho",serif}
+.mat.zero{opacity:.45}
+.kv{font-size:13px;line-height:1.9}
+details.help{background:#fffefa;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:14px}
+details.help summary{font-weight:900;cursor:pointer;padding:4px 0}
+.prog{font-size:12px;color:var(--muted)}
+select{font-family:inherit;font-size:15px;padding:8px;border-radius:8px;border:1px solid var(--line);background:#fffefa}
+.toast{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:var(--navy);color:#ffe9a8;padding:11px 20px;border-radius:99px;font-weight:700;font-size:14px;z-index:99;box-shadow:0 8px 24px rgba(0,0,0,.3);max-width:92vw;text-align:center;border:var(--panel-border)}
+.hidden{display:none!important}
+/* bottom nav (inside stage) */
+.bottomnav{position:absolute;left:0;right:0;bottom:0;background:rgba(10,34,43,.97);padding:8px 10px;z-index:50;box-shadow:0 -4px 18px rgba(0,0,0,.3);border-top:1.5px solid rgba(217,180,92,.6)}
+.bottomnav .in{max-width:1060px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.navbtn{background:rgba(255,255,255,.04);border:1px solid rgba(230,207,138,.45);color:#e9e2c8;border-radius:10px;padding:8px 4px;font-size:13px;font-weight:700}
+.navbtn.on{background:linear-gradient(180deg,#e3c169,#c39a3e);color:#2c2410;border-color:var(--gold)}
+.navbtn .ic{display:block;font-size:16px;line-height:1.2}
+/* ---------- gauges (home / tree side panel) ---------- */
+.gauge{display:grid;grid-template-columns:44px 1fr 40px;align-items:center;gap:8px;margin:5px 0;font-size:13px}
+.gauge .gl{font-weight:700}
+.gauge .gtrack{height:13px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35);border-radius:99px;overflow:hidden}
+.gauge .gtrack>i{display:block;height:100%;border-radius:99px}
+.gauge .gv{font-family:"Shippori Mincho",serif;font-weight:800;text-align:right;font-size:15px}
+.g-hp>i{background:linear-gradient(90deg,#f2705c,#ef5350)} .g-mp>i{background:linear-gradient(90deg,#6db3e8,#4a90d9)}
+.g-atk>i{background:linear-gradient(90deg,#f5a94b,#ef8f2e)} .g-def>i{background:linear-gradient(90deg,#9ccc8a,#6faf57)}
+.g-spd>i{background:linear-gradient(90deg,#f6dd6b,#eec93f)}
+/* ---------- HOME scene ---------- */
+.scene{position:relative;height:100%;overflow:hidden}
+.date-chip{position:absolute;top:14px;left:14px;z-index:5;background:linear-gradient(180deg,var(--navy2),var(--navy3));color:#fff;border:var(--panel-border);border-radius:10px;padding:10px 22px;font-family:"Shippori Mincho",serif;font-size:clamp(17px,2.6vw,24px);font-weight:800;letter-spacing:.05em;box-shadow:0 4px 14px rgba(6,30,38,.4)}
+.speech{position:absolute;top:86px;right:16px;z-index:5;width:min(430px,58vw);background:linear-gradient(180deg,#fffbe9,#fdf3d3);border:1.5px solid #d9c07a;border-radius:14px;padding:14px 18px;font-size:14px;line-height:1.75;color:#3d3423;box-shadow:0 6px 18px rgba(60,50,20,.25)}
+.speech::after{content:"✦";position:absolute;left:50%;bottom:-15px;transform:translateX(-50%);color:#d9b45c;font-size:15px;text-shadow:0 1px 0 #fff}
+.speech b{font-size:15px}
+.home-god{position:absolute;right:2.5%;bottom:118px;z-index:4;width:min(212px,32vw);text-align:center;filter:drop-shadow(0 10px 10px rgba(20,50,30,.35))}
+.home-god img.god-full-img{width:100%;height:auto;display:block}
+.home-god img.god-full-img.framed{border-radius:16px;border:2.5px solid rgba(230,200,120,.9);box-shadow:0 10px 24px rgba(6,30,38,.45)}
+.home-god .god-nameplate{display:inline-block;margin-top:-8px;background:linear-gradient(180deg,var(--navy2),var(--navy3));color:#ffe9a8;border:var(--panel-border);border-radius:8px;padding:3px 16px;font-family:"Shippori Mincho",serif;font-weight:800;font-size:15px}
+.status-panel{position:absolute;left:14px;bottom:14px;z-index:5;width:min(330px,52vw);background:linear-gradient(170deg,rgba(18,58,71,.96),rgba(10,34,43,.97));color:#f2ecd8;border:var(--panel-border);border-radius:14px;padding:15px 18px 13px;box-shadow:0 8px 22px rgba(6,30,38,.45)}
+.status-panel .sp-title{font-family:"Shippori Mincho",serif;color:var(--gold2);font-size:19px;font-weight:800;letter-spacing:.06em}
+.status-panel .sp-pts{font-size:16px;margin:5px 0 2px}
+.status-panel .sp-pts b{font-family:"Shippori Mincho",serif;font-size:19px}
+.status-panel hr{border:none;border-top:1px solid rgba(230,200,120,.4);margin:9px 0}
+.status-panel .sp-sub{font-size:11px;color:#b9c4ae;margin-bottom:4px}
+.cmd-bar{position:absolute;left:374px;right:14px;bottom:14px;z-index:6;display:grid;grid-template-columns:repeat(5,1fr);gap:10px;background:rgba(10,34,43,.88);border:var(--panel-border);border-radius:14px;padding:10px;box-shadow:0 10px 26px rgba(6,30,38,.5)}
+.cmd-btn{background:linear-gradient(180deg,#17424f,#0d2b36);border:1.5px solid rgba(230,200,120,.75);color:#fff;border-radius:10px;padding:16px 4px;font-family:"Shippori Mincho",serif;font-size:clamp(14px,2.2vw,20px);font-weight:800;letter-spacing:.08em;min-height:58px}
+.cmd-btn:hover{background:linear-gradient(180deg,#1d5062,#123a47);border-color:var(--gold2)}
+.cmd-btn small{display:block;font-family:"Zen Kaku Gothic New",sans-serif;font-size:10px;font-weight:700;color:var(--gold2);letter-spacing:.14em;margin-top:2px}
+@media(max-height:500px){
+  .speech{top:62px;width:min(340px,46%);font-size:12.5px;padding:10px 13px;line-height:1.6}
+  .home-god{bottom:102px;width:148px;right:1.5%}
+  .status-panel{width:302px;padding:10px 13px 9px}
+  .status-panel .sp-title{font-size:16px}
+  .gauge{margin:2.5px 0;font-size:12px}
+  .cmd-bar{left:330px;gap:6px;padding:7px}
+  .cmd-btn{padding:9px 2px;min-height:46px;font-size:15px}
+  .date-chip{font-size:17px;padding:7px 16px}
+}
+/* party */
+.party-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:760px){.party-grid{grid-template-columns:1fr}}
+.party-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;text-align:center}
+.party-card .pc-art{height:190px;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;border-radius:10px}
+.party-god-img{height:190px;width:100%;object-fit:cover;object-position:top center;display:block}
+.party-ally-img{height:180px;width:100%;object-fit:cover;object-position:center;display:block;border-radius:10px}
+.party-card h3{font-family:"Shippori Mincho",serif;margin:6px 0 2px;font-size:19px}
+/* ---------- TREE screens ---------- */
+.tree-scene{position:relative;height:100%;overflow:hidden}
+.tree-scene .tree-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.tree-scene .tree-veil{position:absolute;inset:0;background:linear-gradient(180deg,rgba(240,246,238,.18),rgba(230,240,232,.05) 40%,rgba(20,50,55,.10))}
+.tree-inner{position:relative;padding:12px 14px;height:100%;display:flex;flex-direction:column}
+.tree-titlebar{max-width:640px;margin:2px auto 12px;background:linear-gradient(180deg,var(--navy2),var(--navy3));border:var(--panel-border);border-radius:12px;color:#fff;text-align:center;font-family:"Shippori Mincho",serif;font-size:clamp(20px,3.4vw,29px);font-weight:800;letter-spacing:.1em;padding:10px 16px;box-shadow:0 6px 18px rgba(6,30,38,.4)}
+.tree-tabs{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-bottom:10px;flex:none}
+.ttab{background:rgba(13,43,54,.88);border:1.5px solid rgba(230,200,120,.55);color:#e9e2c8;border-radius:99px;padding:8px 16px;font-weight:800;font-size:13.5px}
+.ttab.on{background:linear-gradient(180deg,#e3c169,#c39a3e);color:#2c2410;border-color:var(--gold)}
+.ttab.locked{opacity:.62;border-style:dashed}
+.tree-layout{display:grid;grid-template-columns:264px minmax(0,1fr);gap:14px;flex:1;min-height:0}
+@media(max-width:820px){.tree-layout{grid-template-columns:218px minmax(0,1fr)}}
+.side-panel{background:linear-gradient(170deg,rgba(18,58,71,.97),rgba(10,34,43,.98));color:#f2ecd8;border:var(--panel-border);border-radius:14px;padding:14px 16px;box-shadow:0 8px 22px rgba(6,30,38,.45);overflow-y:auto;min-height:0}
+.side-panel .sp-head{display:flex;align-items:center;gap:11px;margin-bottom:8px}
+.side-panel .sp-face{width:54px;height:54px;border-radius:50%;object-fit:cover;object-position:top center;border:2.5px solid var(--gold2);flex:none;background:#dfe9e2}
+.side-panel .god-nm{font-family:"Shippori Mincho",serif;font-size:20px;font-weight:800;line-height:1.3}
+.side-panel .god-stage{font-size:12px;color:#b9c4ae}
+.side-panel .pt-head{font-family:"Shippori Mincho",serif;color:var(--gold2);font-size:15.5px;font-weight:800;margin-top:10px;letter-spacing:.05em}
+.side-panel .pt-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+.side-panel .pt-table th{color:var(--gold2);font-size:11.5px;text-align:right;font-weight:700}
+.side-panel .pt-table th:first-child{text-align:left}
+.side-panel .pt-table td{padding:3px 0;text-align:right;font-family:"Shippori Mincho",serif;font-weight:700}
+.side-panel .pt-table td:first-child{text-align:left;font-family:"Zen Kaku Gothic New",sans-serif}
+.pdot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.evo-box{border:1.5px solid var(--gold);border-radius:10px;padding:10px 12px;margin-top:12px;background:rgba(217,180,92,.08);font-size:12.5px;line-height:1.7}
+.evo-box .eb-t{color:var(--gold2);font-weight:900;font-family:"Shippori Mincho",serif;font-size:14.5px}
+.tree-canvas-wrap{position:relative;display:flex;flex-direction:column;min-height:0;min-width:0}
+.tree-canvas{position:relative;width:100%;flex:1;min-height:0}
+.scene-back{position:absolute;right:14px;bottom:12px;z-index:30;background:linear-gradient(180deg,var(--navy2),var(--navy3));color:#fff;border:var(--panel-border);border-radius:10px;padding:11px 26px;font-family:"Shippori Mincho",serif;font-size:16px;font-weight:800;letter-spacing:.06em;box-shadow:0 6px 16px rgba(6,30,38,.45)}
+.tree-links{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.tnode{position:absolute;transform:translate(-50%,-50%);background:none;border:none;padding:0;min-height:0;display:flex;flex-direction:column;align-items:center;width:104px;z-index:2}
+.tnode .nc{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;border:2.5px solid rgba(255,255,255,.85);box-shadow:0 4px 10px rgba(10,40,45,.45);position:relative;flex:none}
+.tnode .nc.sq{border-radius:13px}
+.tnode.water .nc{background:linear-gradient(160deg,#3d8fa8,#256582)}
+.tnode.life .nc{background:linear-gradient(160deg,#6fae56,#477a34)}
+.tnode.res .nc{background:linear-gradient(160deg,#b98d3e,#8a6420)}
+.tnode.gold .nc{background:linear-gradient(160deg,#d9b45c,#a87f28);color:#fff8e2}
+.tnode.mix .nc{background:linear-gradient(90deg,#2f7fa8 50%,#5d9a4e 50%)}
+.tnode.mix2 .nc{background:linear-gradient(90deg,#2f7fa8 50%,#a4762a 50%)}
+.tnode.mix3 .nc{background:linear-gradient(90deg,#5d9a4e 50%,#a4762a 50%)}
+.tnode .nl{margin-top:4px;background:rgba(10,32,40,.92);color:#fff;border:1px solid rgba(230,200,120,.55);border-radius:7px;padding:2.5px 8px;font-size:11.5px;font-weight:800;line-height:1.35;text-align:center;max-width:104px;box-shadow:0 3px 8px rgba(10,40,45,.35)}
+.tnode .nl .sub{display:block;font-size:10px;font-weight:700;color:var(--gold2)}
+.tnode .nl .fx{display:block;font-size:10px;font-weight:700;color:#cfe3c8}
+.tnode.done .nc{border-color:var(--gold2);box-shadow:0 0 0 2.5px rgba(217,180,92,.65),0 4px 10px rgba(10,40,45,.45)}
+.tnode.avail .nc{border-color:#fff;box-shadow:0 0 0 3px rgba(255,255,255,.55),0 0 16px rgba(255,240,190,.85);animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.09)}}
+@media(prefers-reduced-motion:reduce){.tnode.avail .nc{animation:none}}
+.tnode.locked{opacity:.78}
+.tnode.locked .nc{background:linear-gradient(160deg,#4a5a60,#33424a);border-color:rgba(255,255,255,.4);color:#b9c4ae}
+.tnode:disabled{cursor:default}
+.tnode .req-badge{position:absolute;top:-9px;right:8px;background:linear-gradient(180deg,#e3c169,#c39a3e);color:#2c2410;font-size:10.5px;font-weight:900;border-radius:99px;padding:1.5px 7px;border:1px solid #8a6d24;box-shadow:0 2px 6px rgba(0,0,0,.3);z-index:3}
+.tnode .ougi{font-size:9.5px;color:#8a6d24;font-weight:900;letter-spacing:.2em}
+.stage-label{position:absolute;transform:translateY(-50%);background:rgba(10,32,40,.9);color:#ffe9a8;border:1px solid rgba(230,200,120,.6);border-radius:7px;padding:3px 10px;font-size:12px;font-weight:800;z-index:2}
+.cat-head{position:absolute;transform:translate(-50%,-50%);border-radius:9px;color:#fff;font-weight:900;font-size:15px;padding:5px 22px;letter-spacing:.14em;box-shadow:0 4px 10px rgba(10,40,45,.4);z-index:2}
+.cat-head.water{background:linear-gradient(180deg,#2f7fa8,#256582)} .cat-head.life{background:linear-gradient(180deg,#5d9a4e,#477a34)} .cat-head.res{background:linear-gradient(180deg,#b98d3e,#8a6420)}
+.tree-legend{display:flex;flex-wrap:wrap;gap:16px;font-size:12px;color:#eef3e6;text-shadow:0 1px 3px rgba(0,30,30,.7);margin-top:6px;font-weight:700}
+.tree-legend .lg{display:inline-block;width:13px;height:13px;border-radius:50%;border:2.5px solid #fff;vertical-align:-2px;margin-right:5px;background:#4a5a60}
+.tree-legend .lg.d{border-color:var(--gold2);background:#2f7fa8}.tree-legend .lg.a{background:#fff;box-shadow:0 0 8px #ffe9a8}
+/* ---------- EXPLORE map ---------- */
+.map-scene{position:relative;height:100%;overflow:hidden;background:#9db98a}
+.map-scene>img.map-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.map-route{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.map-title{position:absolute;top:12px;left:14px;z-index:6;background:linear-gradient(180deg,var(--navy2),var(--navy3));color:#fff;border:var(--panel-border);border-radius:10px;padding:9px 20px;display:flex;align-items:baseline;gap:14px;box-shadow:0 4px 14px rgba(6,30,38,.4)}
+.map-title .mt-big{font-family:"Shippori Mincho",serif;font-size:25px;font-weight:800;letter-spacing:.1em}
+.map-title .mt-sub{font-size:14.5px;color:#e9e2c8}
+.map-godtree{position:absolute;top:14px;left:60.5%;z-index:6;background:rgba(10,32,40,.92);color:var(--gold2);border:1.5px solid var(--gold);border-radius:8px;padding:5px 14px;font-weight:900;font-size:14.5px;box-shadow:0 4px 10px rgba(6,30,38,.35)}
+.map-panel{position:absolute;top:9.5%;left:1.4%;z-index:7;width:min(560px,45%);max-height:87%;overflow-y:auto;background:linear-gradient(170deg,rgba(16,48,60,.97),rgba(9,29,38,.98));color:#f2ecd8;border:var(--panel-border);border-radius:12px;padding:15px 19px 16px;box-shadow:0 10px 26px rgba(6,30,38,.5)}
+.map-panel .mp-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.map-panel .mp-name{font-family:"Shippori Mincho",serif;font-size:22px;font-weight:800;line-height:1.35}
+.map-panel .mp-sel{flex:none;background:linear-gradient(180deg,#e3c169,#c39a3e);color:#2c2410;font-size:12px;font-weight:900;border-radius:7px;padding:4px 12px;margin-top:3px}
+.map-panel .mp-desc{font-size:13.5px;line-height:1.65;color:#dfe7d2;margin-top:5px}
+.map-panel .mp-line{font-size:14.5px;margin-top:7px}
+.map-panel .mp-line b{font-weight:900}
+.map-panel .stars{color:#f0b45c;letter-spacing:.12em}
+.depth-row{display:flex;gap:7px;margin-top:11px;flex-wrap:wrap}
+.depth-btn{flex:1;min-width:86px;background:rgba(255,255,255,.06);border:1.5px solid rgba(230,200,120,.55);color:#e9e2c8;border-radius:9px;padding:8px 4px;font-weight:800;font-size:13.5px;line-height:1.45}
+.depth-btn small{display:block;font-size:10.5px;font-weight:700;color:#b9c4ae}
+.depth-btn.on{background:linear-gradient(180deg,#e3c169,#c39a3e);color:#2c2410;border-color:var(--gold)}
+.depth-btn.on small{color:#5c4a16}
+.depth-btn:disabled{opacity:.45;cursor:not-allowed}
+.map-go{width:100%;margin-top:12px;background:linear-gradient(180deg,#e3c169,#c39a3e);color:#2c2410;border:1px solid #8a6d24;border-radius:9px;padding:12px;font-family:"Shippori Mincho",serif;font-size:17px;font-weight:800;letter-spacing:.08em}
+.map-go:disabled{opacity:.5;cursor:not-allowed}
+.map-marker{position:absolute;z-index:5;transform:translate(-50%,-50%);width:52px;height:52px;border-radius:50%;background:linear-gradient(180deg,#17424f,#0d2b36);border:2.5px solid rgba(230,200,120,.9);color:#fff;font-family:"Shippori Mincho",serif;font-size:21px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 5px 14px rgba(6,30,38,.5);padding:0;min-height:0}
+.map-marker.sel{background:linear-gradient(180deg,#f0cd72,#d9ab45);color:#2c2410;border-color:#fff2c8;width:62px;height:62px;font-size:25px;box-shadow:0 0 0 4px rgba(240,205,114,.45),0 6px 16px rgba(6,30,38,.5)}
+.map-marker.locked{opacity:.82;font-size:16px}
+.map-card{position:absolute;z-index:4;background:rgba(9,26,34,.93);color:#eef3e6;border:1.5px solid rgba(230,200,120,.65);border-radius:9px;padding:8px 12px 9px;width:196px;box-shadow:0 6px 16px rgba(6,30,38,.45);pointer-events:none}
+.map-card .mc-name{font-family:"Shippori Mincho",serif;font-weight:800;font-size:15.5px}
+.map-card .mc-line{font-size:11.5px;color:#c8d4bd;margin-top:2px}
+.map-card .mc-line .stars{color:#f0b45c}
+.map-card .mc-note{font-size:11.5px;color:var(--gold2);margin-top:3px;font-weight:700}
+.map-care-range{position:absolute;left:1%;bottom:1.6%;width:39.5%;height:29%;border:2.5px dashed rgba(240,205,114,.95);border-radius:6px;z-index:3;pointer-events:none}
+.map-care-tag{position:absolute;top:8px;left:10px;background:rgba(10,32,40,.94);color:#ffe9a8;border:1.5px solid rgba(230,200,120,.8);border-radius:7px;padding:5px 14px;font-weight:900;font-size:14px}
+.map-village{position:absolute;left:5.2%;bottom:9.5%;z-index:4;width:38px;height:38px;border-radius:50%;border:2.5px solid var(--gold);color:var(--gold2);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;background:rgba(10,32,40,.55)}
+.map-onsen{position:absolute;right:16.5%;top:39%;z-index:4;background:rgba(10,32,40,.9);color:#f5a94b;border:1.5px solid rgba(245,169,75,.8);border-radius:7px;padding:4px 13px;font-weight:900;font-size:14px}
+@media(max-height:500px){
+  .map-panel{padding:11px 14px 12px}
+  .map-panel .mp-name{font-size:18px}
+  .map-panel .mp-desc{font-size:12px}
+  .map-card{width:168px;padding:6px 9px}
+  .map-marker{width:44px;height:44px;font-size:18px}
+  .map-marker.sel{width:52px;height:52px;font-size:21px}
+}
+/* ---------- BATTLE ---------- */
+.battle-scene{display:grid;grid-template-columns:196px minmax(0,1fr) 78px;gap:0;height:100%;overflow:hidden;background:#0a222b}
+.b-side{background:linear-gradient(180deg,#10333f,#0a222b);color:#eef3e6;padding:16px 14px;border-right:1.5px solid rgba(42,122,134,.7);display:flex;flex-direction:column;gap:0;overflow-y:auto;min-height:0}
+.b-side .bs-title{font-family:"Shippori Mincho",serif;font-size:20px;font-weight:800;letter-spacing:.06em}
+.b-side .bs-round{font-family:"Shippori Mincho",serif;font-size:19px;margin-top:12px}
+.b-side .bs-round b{font-size:34px;color:var(--gold2)}
+.b-side .bs-left{font-size:12.5px;color:#c8d4bd;border-bottom:1px solid rgba(42,122,134,.8);padding-bottom:10px}
+.b-side .bs-sec{font-size:12px;font-weight:900;color:#9fc3bb;letter-spacing:.1em;margin:14px 0 7px}
+.minimap{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;background:rgba(0,0,0,.3);padding:6px;border-radius:8px;border:1px solid rgba(42,122,134,.7)}
+.minimap i{aspect-ratio:1;border-radius:2px;background:#5da85e;display:block}
+.minimap i.w{background:#2ea8e0}.minimap i.r{background:#8a8474}
+.minimap i.a{background:#7ec8ff;box-shadow:inset 0 0 0 2px #fff}
+.minimap i.e{background:#ff8a7a;box-shadow:inset 0 0 0 2px #7e1f14}
+.mini-legend{font-size:11px;color:#b9cdc2;margin-top:5px}
+.b-side .bs-stage{font-family:"Shippori Mincho",serif;font-size:16.5px;font-weight:800;line-height:1.5}
+.b-side .bs-obj{font-size:12px;color:#c8d4bd}
+.b-log{background:rgba(0,0,0,.32);border:1px solid rgba(42,122,134,.7);border-radius:10px;padding:9px 11px;font-size:11.5px;line-height:1.65;max-height:190px;overflow:auto;color:#cfe3c8;margin-top:4px}
+.b-log b{color:#e6c878}
+.b-main{position:relative;display:flex;flex-direction:column;min-width:0;min-height:0}
+.b-topbar{margin:10px 12px 0;background:linear-gradient(180deg,rgba(18,58,71,.97),rgba(10,34,43,.97));border:1.5px solid rgba(42,160,175,.8);border-radius:99px;padding:7px 18px;display:flex;flex-wrap:wrap;gap:6px 22px;align-items:center;justify-content:center;color:#fff;box-shadow:0 4px 14px rgba(0,0,0,.35);z-index:8;position:relative}
+.b-topbar .seg{display:flex;align-items:center;gap:9px;font-size:13.5px}
+.b-topbar .seg .nm{font-family:"Shippori Mincho",serif;font-weight:800;white-space:nowrap}
+.b-topbar .seg .bar{width:104px;height:11px;background:rgba(255,255,255,.16);border-radius:99px;overflow:hidden}
+.b-topbar .seg .bar>i{display:block;height:100%;background:linear-gradient(90deg,#f2705c,#ef5350)}
+.b-topbar .seg .hp{font-weight:800;font-size:13px;white-space:nowrap}
+.b-topbar .seg.dead{opacity:.4;filter:grayscale(.7)}
+.b-skillbar{margin:8px 12px 0;background:linear-gradient(180deg,rgba(18,58,71,.97),rgba(10,34,43,.97));border:1.5px solid rgba(230,200,120,.75);border-radius:99px;padding:6px 16px;display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;color:#eef3e6;font-size:13.5px;z-index:8;position:relative}
+.b-skillbar .sk-nm{font-family:"Shippori Mincho",serif;font-weight:800;font-size:16.5px;color:var(--gold2)}
+.b-skillbar .cancel{margin-left:auto;background:rgba(255,255,255,.08);border:1px solid rgba(230,200,120,.7);color:#ffe9a8;border-radius:99px;padding:4px 14px;font-weight:800;font-size:12.5px;min-height:30px}
+.b-stage{position:relative;margin:10px 12px 0;border-radius:14px;overflow:hidden;border:2px solid #0e2f38;flex:1;min-height:0}
+.b-stage>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.iso-board{position:absolute;left:50%;top:51%;transform:translate(-50%,-50%);width:min(96%,780px);aspect-ratio:2/1.24}
+.iso-cell{position:absolute;width:12.5%;height:10.1%;background:none;border:none;padding:0;margin:0;min-height:0;cursor:default}
+.iso-cell .diamond{position:absolute;inset:0;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);background:rgba(255,255,255,.05);box-shadow:inset 0 0 0 1px rgba(255,255,255,.28)}
+.iso-cell.t-grass .diamond{background:rgba(86,158,80,.38);box-shadow:inset 0 0 0 1.5px rgba(205,238,175,.55)}
+.iso-cell.t-water .diamond{background:rgba(38,148,205,.58);box-shadow:inset 0 0 0 2px rgba(150,225,255,.9),inset 0 0 14px rgba(120,210,255,.55)}
+.iso-cell.t-water .side{background:rgba(18,84,120,.5)}
+.iso-cell.t-rock .diamond{background:rgba(138,128,108,.42);box-shadow:inset 0 0 0 1.5px rgba(230,220,195,.5)}
+.iso-cell .side{position:absolute;left:6%;right:6%;top:52%;height:9px;clip-path:polygon(0 0,100% 0,50% 100%);background:rgba(30,60,50,.35)}
+.iso-cell.is-move{cursor:pointer;z-index:3}
+.iso-cell.is-move .diamond{background:rgba(64,200,235,.5);box-shadow:inset 0 0 0 2px #35b6e8}
+.iso-cell.is-move:hover .diamond{background:rgba(64,200,235,.78)}
+.iso-cell.is-target{cursor:pointer;z-index:3}
+.iso-cell.is-target .diamond{background:rgba(255,110,140,.55);box-shadow:inset 0 0 0 2px #e84a6a}
+.iso-cell.is-blocked .diamond{background:repeating-linear-gradient(45deg,rgba(255,170,80,.28) 0 5px,rgba(255,140,40,.12) 5px 10px);box-shadow:inset 0 0 0 2.5px #e67e22}
+.iso-cell .blocked-x{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#a33d08;font-weight:900;font-size:clamp(13px,2.4vw,22px);text-shadow:0 1px 0 rgba(255,255,255,.65);z-index:2;pointer-events:none}
+.iso-cell.is-sel{z-index:5}
+.iso-cell.is-sel .diamond{box-shadow:inset 0 0 0 3px #fff,inset 0 0 0 5.5px #e6c878}
+.unit{position:absolute;left:50%;bottom:30%;transform:translateX(-50%);width:170%;max-width:104px;display:flex;flex-direction:column;align-items:center;pointer-events:none;z-index:6}
+.unit .u-art{width:auto;filter:drop-shadow(0 5px 4px rgba(10,35,25,.45));display:flex;justify-content:center}
+.unit .u-art svg{width:54px}
+.unit.god .u-art svg{width:88px}
+.unit img.u-img-sprite{height:104px;width:auto;display:block}
+.unit.god img.u-img-sprite{height:98px}
+.unit img.u-img-bust{width:68px;height:68px;object-fit:cover;object-position:top center;border-radius:14px;border:2.5px solid #e6c878;display:block;background:#dfe9e2}
+.unit img.u-img-fish{width:72px;height:58px;object-fit:cover;object-position:center;border-radius:10px;border:2px solid rgba(255,255,255,.85);display:block}
+.unit .u-ring{width:64%;height:13px;border-radius:50%;margin-top:-9px;border:3.5px solid #4a90d9;background:rgba(74,144,217,.25);box-shadow:0 3px 6px rgba(0,0,0,.35)}
+.unit.enemy .u-ring{border-color:#ef5350;background:rgba(239,83,80,.22)}
+.unit .u-hpbar{width:76%;height:6px;background:rgba(10,25,20,.65);border-radius:99px;overflow:hidden;margin-top:4px;border:1px solid rgba(255,255,255,.55)}
+.unit .u-hpbar>i{display:block;height:100%;background:#7ed67e}
+.unit.enemy .u-hpbar>i{background:#f2705c}
+.unit .u-hpbar>i.low{background:#ef5350}
+.unit .u-nameplate{background:rgba(10,32,40,.94);color:#fff;border:1px solid rgba(120,200,210,.65);border-radius:6px;padding:1.5px 8px;font-family:"Shippori Mincho",serif;font-weight:800;font-size:clamp(8.5px,1.5vw,11.5px);white-space:nowrap;max-width:110%;overflow:hidden;text-overflow:ellipsis;box-shadow:0 2px 5px rgba(0,0,0,.4);margin-top:3px}
+.unit .u-active{position:absolute;left:-24px;top:8px;font-size:clamp(17px,3vw,26px);animation:bob .9s ease-in-out infinite alternate;filter:drop-shadow(0 2px 2px rgba(0,0,0,.4))}
+@keyframes bob{from{transform:translateX(0) rotate(-6deg)}to{transform:translateX(5px) rotate(4deg)}}
+@media(prefers-reduced-motion:reduce){.unit .u-active{animation:none}}
+.unit.dead{opacity:.35;filter:grayscale(1)}
+.unit.acted{opacity:.62}
+/* floating command menu (渓流の一手 v3 style) */
+.b-menu{position:absolute;right:12px;top:12px;z-index:20;width:228px;background:linear-gradient(170deg,rgba(18,58,71,.97),rgba(10,34,43,.98));border:1.5px solid rgba(42,160,175,.85);border-radius:14px;padding:13px 14px;color:#eef3e6;box-shadow:0 10px 26px rgba(0,0,0,.45)}
+.b-menu .bm-name{font-family:"Shippori Mincho",serif;font-size:18.5px;font-weight:800}
+.b-menu .bm-sub{font-size:12px;color:#b9cdc2;border-bottom:1px solid rgba(42,160,175,.6);padding-bottom:8px;margin-bottom:9px}
+.b-menu .bm-btn{display:block;width:100%;text-align:left;background:rgba(46,110,120,.35);border:1.5px solid rgba(120,200,210,.55);color:#fff;border-radius:9px;padding:10px 13px;font-size:15px;font-weight:800;margin-bottom:7px}
+.b-menu .bm-btn:hover{border-color:var(--gold2)}
+.b-menu .bm-btn.sel{border-color:var(--gold);background:rgba(217,180,92,.18);color:#ffe9a8}
+.b-menu .bm-btn:disabled{opacity:.45}
+.b-menu .bm-btn .cost{color:var(--gold2);font-size:12.5px;font-weight:900}
+.b-menu .bm-btn .rng{font-size:11px;color:#b9cdc2;font-weight:700}
+.b-menu .bm-guide{font-size:12.5px;color:#c8d4bd;line-height:1.65}
+.b-hint{position:absolute;left:12px;bottom:12px;z-index:15;background:rgba(10,32,40,.92);border:1px solid rgba(230,200,120,.6);color:#ffe9a8;border-radius:99px;padding:7px 16px;font-size:13px;font-weight:800;box-shadow:0 4px 12px rgba(0,0,0,.35)}
+.b-terrain{position:absolute;right:12px;bottom:12px;z-index:15;width:238px;background:linear-gradient(170deg,rgba(18,58,71,.96),rgba(10,34,43,.97));border:1.5px solid rgba(42,160,175,.8);border-radius:12px;padding:11px 14px;color:#eef3e6;box-shadow:0 8px 20px rgba(0,0,0,.4)}
+.b-terrain .tt{display:flex;justify-content:space-between;align-items:baseline}
+.b-terrain .tt b{font-family:"Shippori Mincho",serif;font-size:18px}
+.b-terrain .tt span{font-size:10.5px;color:#9fc3bb}
+.b-terrain .td{font-size:12px;line-height:1.75;color:#d8e4d2;margin-top:3px}
+.b-predict{position:absolute;left:12px;bottom:12px;z-index:22;width:min(400px,calc(100% - 24px));background:linear-gradient(170deg,rgba(18,58,71,.98),rgba(10,34,43,.99));border:1.5px solid rgba(230,200,120,.8);border-radius:14px;padding:13px 16px;color:#eef3e6;box-shadow:0 12px 30px rgba(0,0,0,.5)}
+.b-predict .bp-t{font-size:11px;color:#9fc3bb;font-weight:900;letter-spacing:.12em}
+.b-predict .bp-name{font-family:"Shippori Mincho",serif;font-size:21px;font-weight:800;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.b-predict .bp-cost{font-size:11.5px;border:1.5px solid var(--gold);color:var(--gold2);border-radius:99px;padding:2px 10px;font-weight:900}
+.b-predict .bp-row{border-top:1px solid rgba(42,160,175,.55);padding:8px 0 4px;font-size:13px}
+.b-predict .bp-row .r1{display:flex;justify-content:space-between;gap:8px}
+.b-predict .bp-bar{height:9px;background:rgba(255,255,255,.15);border-radius:99px;overflow:hidden;margin:5px 0 3px;display:flex}
+.b-predict .bp-bar>i{display:block;height:100%;background:#f2705c}
+.b-predict .bp-bar>s{display:block;height:100%;background:repeating-linear-gradient(45deg,rgba(242,112,92,.45) 0 4px,rgba(0,0,0,.25) 4px 8px)}
+.b-predict .bp-btns{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:11px}
+.b-result{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:25;width:min(400px,calc(100% - 32px));text-align:center;background:linear-gradient(170deg,rgba(18,58,71,.98),rgba(10,34,43,.99));border:var(--panel-border);border-radius:16px;padding:20px;color:#eef3e6;box-shadow:0 14px 36px rgba(0,0,0,.55)}
+.b-result h3{font-size:24px;margin:0 0 6px;color:#ffe9a8}
+.b-units{display:flex;flex-wrap:wrap;gap:8px;padding:10px 12px 12px}
+.b-uchip{display:flex;align-items:center;gap:8px;background:rgba(18,58,71,.92);border:1px solid rgba(42,160,175,.7);border-radius:10px;padding:5px 11px 5px 6px;color:#eef3e6;font-size:12px}
+.b-uchip.cur{border-color:var(--gold);box-shadow:0 0 0 1.5px rgba(230,200,120,.5)}
+.b-uchip.acted{opacity:.5}.b-uchip.dead{opacity:.35;filter:grayscale(1)}
+.b-uchip .mini-art{width:30px;height:34px;display:flex;align-items:flex-end}
+.b-uchip .mini-art svg{width:30px}
+.b-uchip .mini-art img{width:30px;height:34px;object-fit:contain;display:block;border-radius:5px}
+.b-uchip .ubar{width:64px;height:5px;background:rgba(255,255,255,.18);border-radius:99px;overflow:hidden}
+.b-uchip .ubar>i{display:block;height:100%;background:#7ed67e}
+.b-rail{background:linear-gradient(180deg,#10333f,#0a222b);border-left:1.5px solid rgba(42,122,134,.7);padding:12px 9px;display:flex;flex-direction:column;gap:9px;align-items:stretch;overflow-y:auto;min-height:0}
+.b-rail .tr-title{font-family:"Shippori Mincho",serif;font-weight:800;color:#e6c878;text-align:center;font-size:12px;border:1px solid rgba(42,160,175,.7);border-radius:9px;padding:6px 2px;background:rgba(0,0,0,.25)}
+.turn-item{background:rgba(0,0,0,.28);border:2px solid #4a90d9;border-radius:11px;padding:6px 3px 5px;text-align:center;color:#eef3e6;position:relative}
+.turn-item.enemy{border-color:#ef5350}
+.turn-item .tnum{position:absolute;top:-8px;left:-6px;width:19px;height:19px;border-radius:50%;background:linear-gradient(180deg,#e3c169,#c39a3e);color:#2c2410;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;border:1px solid #8a6d24;z-index:2}
+.turn-item .tart{height:38px;display:flex;align-items:flex-end;justify-content:center}
+.turn-item .tart svg{height:38px}
+.turn-item .tart img{height:38px;max-width:46px;object-fit:contain;display:block;border-radius:6px}
+.turn-item .tname{font-family:"Shippori Mincho",serif;font-size:9.5px;font-weight:700;line-height:1.25;word-break:break-all}
+.turn-item .tspd{font-size:9.5px;color:#e6c878;font-weight:700}
+.turn-item.done{opacity:.42}.turn-item.cur{border-color:#e6c878;box-shadow:0 0 0 2px rgba(230,200,120,.5)}
+.turn-item.dead{opacity:.3;filter:grayscale(1)}
+@media(max-width:900px){
+  .battle-scene{grid-template-columns:158px minmax(0,1fr) 62px}
+  .b-side{padding:12px 10px}
+  .b-side .bs-title{font-size:16px}
+  .b-log{max-height:130px}
+  .b-menu{width:198px}
+  .b-terrain{display:none}
+  .iso-board{width:min(98%,780px)}
+}
+.evoflash{text-align:center;padding:26px 10px}
+.ending-img{width:100%;height:auto;border-radius:12px;display:block;border:2px solid rgba(230,200,120,.7)}
+</style>
+</head>
+<body>
+<div id="stage">
+<div id="app" class="wrap"></div>
+<nav id="bottomnav" class="bottomnav hidden"><div class="in">
+  <button class="navbtn" data-nav="home"><span class="ic">🏠</span>ホーム</button>
+  <button class="navbtn" data-nav="explore"><span class="ic">🧭</span>探索</button>
+  <button class="navbtn" data-nav="care"><span class="ic">🌿</span>手入れ</button>
+  <button class="navbtn" data-nav="tree"><span class="ic">🌳</span>ツリー</button>
+  <button class="navbtn" data-nav="setting"><span class="ic">⚙️</span>設定</button>
+</div></nav>
+</div>
+<div id="rotate"><div class="ric"><svg width="72" height="72" viewBox="0 0 72 72" fill="none" aria-hidden="true"><rect x="24" y="8" width="24" height="44" rx="5" stroke="#e6c878" stroke-width="3.5"/><circle cx="36" cy="45" r="2.6" fill="#e6c878"/><path d="M14 60a26 26 0 0 0 44 0" stroke="#7ec8ff" stroke-width="3.5" stroke-linecap="round"/><path d="M58 52v8h-8" stroke="#7ec8ff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="rt">横画面にしてください</div><div class="rs">『川神』プロトタイプは横画面（16:9）専用です。<br>端末を横向きにすると、そのまま遊べます。</div></div>
+<div id="toast" class="toast hidden"></div>
+<script>
+"use strict";
+/* ============ 基本データ ============ */
+var MATS = ["流木","川石","鉄くず","木炭","清らかな水","苗木","竹","川砂","粘土"];
+var MAT_ICON = {"流木":"🪵","川石":"🪨","鉄くず":"🔩","木炭":"⬛","清らかな水":"💧","苗木":"🌱","竹":"🎋","川砂":"🏖️","粘土":"🧱"};
+var PARAMS = [
+  {id:"water", name:"水量", cls:"water", icon:"💧"},
+  {id:"life",  name:"生命", cls:"life",  icon:"🌿"},
+  {id:"res",   name:"資源", cls:"res",   icon:"⛏️"}
+];
+var GODS = {
+  dobu:{ name:"ドブ川の神", short:"ドブ川", face:"🐸", color:"#5d8a4a", bg:"#e6efdb",
+    titles:["ドブ川の神","清らかになったドブ川の神","大河へ続くドブ川の神"],
+    role:"バランス型", desc:"荒れ果てたドブ川を守る、無邪気な神様。人に頼ることを覚えていく成長物語の主人公。技は全体的にバランスが良い。"},
+  kare:{ name:"枯れ川の神", short:"枯れ川", face:"🦌", color:"#a4762a", bg:"#f3ead2",
+    titles:["枯れ川の神","潤いを取り戻した枯れ川の神","清流を守る枯れ川の神"],
+    role:"単体火力・守りと蘇生", desc:"水が減った枯れ川の神様。正義感が強く、まっすぐな剣のような技を使う。守りと蘇生にも長ける。"},
+  akayu:{ name:"赤湯川の神", short:"赤湯川", face:"🦊", color:"#b6503f", bg:"#f7e3da",
+    titles:["赤湯川の神","湯けむりの赤湯川の神","源泉かけ流しの赤湯川の神"],
+    role:"範囲攻撃・持続回復", desc:"温泉の熱を持つ泣き虫の神様。みんなのために、自分が焦げても踏み込む。範囲技と持続回復が得意。奥義「焦涙熱波」は威力230%・使用後1巡 自分の防御-50%の諸刃の技。"}
+};
+var STAGES = [
+  {name:"ステージ1 村はずれの浅瀬", diff:"弱い", loot:[
+    {"流木":3,"川石":2,"川砂":2},{"流木":4,"川石":3,"川砂":3},{"流木":5,"川石":4,"川砂":4},{"流木":6,"川石":5,"川砂":5}]},
+  {name:"ステージ2 中流の岩場", diff:"普通", loot:[
+    {"川石":6,"鉄くず":3,"川砂":1},{"川石":8,"鉄くず":4,"川砂":2},{"川石":10,"鉄くず":5,"川砂":3},{"川石":12,"鉄くず":7,"川砂":4}]},
+  {name:"ステージ3 上流の滝つぼ", diff:"強い", loot:[
+    {"木炭":1,"清らかな水":2,"粘土":3,"竹":1},{"木炭":2,"清らかな水":3,"粘土":4,"竹":2},{"木炭":2,"清らかな水":4,"粘土":5,"竹":3},{"木炭":3,"清らかな水":5,"粘土":7,"竹":4}]},
+  {name:"ステージ4 源流の森", diff:"最も強い", loot:[
+    {"苗木":6,"竹":2,"清らかな水":2,"木炭":3},{"苗木":8,"竹":3,"清らかな水":3,"木炭":4},{"苗木":10,"竹":4,"清らかな水":3,"木炭":5},{"苗木":12,"竹":5,"清らかな水":4,"木炭":7}]}
+];
+var CARES = [
+  {name:"1. ゴミのたまり場", cost:{"流木":2}, gains:[[1,3,1],[1,4,1],[1,5,1]]},
+  {name:"2. 壊れた魚道", cost:{"川石":2,"川砂":1}, gains:[[3,1,1],[4,1,1],[5,1,1]]},
+  {name:"3. 土砂のたまった水門", cost:{"川石":3,"鉄くず":2,"流木":1}, gains:[[1,1,3],[1,1,4],[1,1,5]]},
+  {name:"4. 橋のたもと", cost:{"鉄くず":3,"川石":3,"川砂":2}, gains:[[6,2,2],[7,2,3],[8,3,3]], note:"表記順は仕様どおり資源が主軸（内部では水量・生命・資源に読み替え）"},
+  {name:"5. 葦原の手入れ", cost:{"苗木":5,"竹":3,"粘土":2}, gains:[[2,6,2],[2,8,2],[3,9,2]]},
+  {name:"6. 休耕田と水路", cost:{"苗木":5,"川砂":4,"川石":2}, gains:[[6,2,2],[8,2,2],[9,3,2]]},
+  {name:"7. 崩れた護岸", cost:{"川石":9,"竹":5}, gains:[[3,3,9],[4,3,11],[5,4,12]]},
+  {name:"8. 放置された水車小屋", cost:{"流木":10,"鉄くず":8}, gains:[[9,3,3],[12,3,3],[14,4,3]]},
+  {name:"9. 寂れた祠", cost:{"木炭":9,"清らかな水":10,"粘土":3}, gains:[[3,9,3],[3,11,4],[4,13,4]]}
+];
+CARES[3].gains = [[2,2,6],[3,2,7],[3,3,8]];
+var COMMON = [
+  {p:"water", req:2,  label:"細い流れ",       fx:{atk:1}},
+  {p:"life",  req:3,  label:"小さな湧き水",   fx:{hp:8}},
+  {p:"res",   req:4,  label:"川辺の石拾い",   fx:{def:2, mp:1}},
+  {p:"water", req:6,  label:"せせらぎ",       fx:{atk:1}},
+  {p:"life",  req:8,  label:"苔むす岩",       fx:{hp:8}},
+  {p:"res",   req:10, label:"流木の橋",       fx:{def:2, mp:1}},
+  {p:"water", req:12, label:"清らかな流れ",   fx:{atk:2}},
+  {p:"life",  req:14, label:"若葉の集い",     fx:{hp:8}},
+  {p:"res",   req:17, label:"石垣づくり",     fx:{def:1, mp:1}},
+  {p:"water", req:20, label:"力強い流れ",     fx:{atk:2}},
+  {p:"life",  req:23, label:"命の集う淵",     fx:{hp:8}},
+  {p:"res",   req:26, label:"水門の整備",     fx:{def:2, mp:1}},
+  {p:"water", req:30, label:"本流のうねり",   fx:{atk:2}},
+  {p:"life",  req:34, label:"御神木の根",     fx:{hp:8}},
+  {p:"res",   req:38, label:"里の守り石",     fx:{def:1, mp:2}}
+];
+var THRESH = [4,9,14,20,27,34,42,50,58,66,74,82,91,100];
+var TREE_FX = {
+  water:[ {atk:2,hp:0,mp:0,def:0,spd:1},{atk:3,hp:1,mp:1,def:0,spd:1},{atk:3,hp:0,mp:0,def:1,spd:2},{atk:3,hp:1,mp:1,def:0,spd:1},{atk:4,hp:1,mp:0,def:1,spd:2},{atk:3,hp:0,mp:1,def:1,spd:2},{atk:4,hp:1,mp:1,def:0,spd:1},{atk:4,hp:1,mp:0,def:1,spd:2},{atk:4,hp:0,mp:1,def:1,spd:2},{atk:4,hp:1,mp:1,def:0,spd:2},{atk:4,hp:1,mp:1,def:1,spd:2},{atk:4,hp:1,mp:1,def:1,spd:2},{atk:4,hp:1,mp:1,def:1,spd:2},{atk:4,hp:1,mp:1,def:2,spd:3} ],
+  life:[ {hp:6,mp:1,atk:0,def:1,spd:0},{hp:7,mp:1,atk:0,def:1,spd:1},{hp:8,mp:1,atk:0,def:1,spd:0},{hp:8,mp:2,atk:1,def:1,spd:1},{hp:9,mp:1,atk:0,def:1,spd:1},{hp:8,mp:2,atk:0,def:1,spd:0},{hp:9,mp:1,atk:1,def:1,spd:1},{hp:9,mp:2,atk:0,def:1,spd:1},{hp:9,mp:1,atk:0,def:1,spd:0},{hp:9,mp:2,atk:1,def:1,spd:1},{hp:9,mp:1,atk:0,def:1,spd:1},{hp:9,mp:2,atk:0,def:1,spd:1},{hp:10,mp:1,atk:1,def:1,spd:1},{hp:10,mp:2,atk:1,def:2,spd:1} ],
+  res:[ {def:3,mp:3,hp:1,atk:1,spd:3},{def:3,mp:3,hp:2,atk:1,spd:3},{def:4,mp:4,hp:1,atk:2,spd:4},{def:4,mp:3,hp:2,atk:1,spd:4},{def:4,mp:4,hp:2,atk:2,spd:3},{def:4,mp:4,hp:1,atk:2,spd:4},{def:4,mp:3,hp:2,atk:1,spd:4},{def:4,mp:4,hp:2,atk:2,spd:4},{def:4,mp:4,hp:1,atk:2,spd:4},{def:4,mp:4,hp:2,atk:2,spd:4},{def:4,mp:4,hp:2,atk:2,spd:4},{def:4,mp:4,hp:2,atk:2,spd:4},{def:5,mp:4,hp:2,atk:2,spd:4},{def:5,mp:5,hp:3,atk:2,spd:5} ]
+};
+var TREE_NAMES = {
+  water:["水かさ増し","流れの勢い","淵の深さ","瀬の速さ","支流の合流","水圧の高まり","奔流の兆し","大河の心","うねる本流","渦巻く力","滝の落差","水脈の覚醒","源流の力","大河の完成"],
+  life:["芽吹き","若葉","苔の広がり","稚魚の群れ","葦の茂み","水草の森","蛍の灯り","鳥のさえずり","獣の足跡","実りの季節","御神木の花","命の循環","源流の命","生命の源"],
+  res:["石拾い","砂の選別","流木細工","竹の柵","石垣","水門修理","橋の補修","護岸工事","水車の復活","祠の修復","里の道具","川守の工房","大規模改修","川と里の結び"]
+};
+</script>
+<script>
+"use strict";
+/* ============ 技データ ============ */
+function SK(n,mp,k,v,r,rng,x){ var o={n:n,mp:mp,k:k,v:v,r:r,rng:rng||1}; if(x)for(var key in x)o[key]=x[key]; return o; }
+var PRE = [null,0,0,1,2,1,3,4,6];
+var STG = [1,2,2,3,3,3,4,4,5];
+var STG_REQ = {2:6,3:10,4:14,5:18};
+var SKILLS = {
+dobu:{
+ water:[SK("水流弾",2,"d",110,"s",3),SK("波うち",4,"d",90,"self",2),SK("うずまき",4,"d",80,"s",2,{pull:1}),
+  SK("波状うち",6,"d",130,"line",2),SK("荒波うち",7,"d",150,"s",1),SK("うずしお",7,"d",90,"area",4,{pull:1}),
+  SK("怒涛うち",9,"d",170,"line",3),SK("深淵の渦",10,"d",140,"area",4,{push:1}),SK("万波",14,"d",220,"all",0)],
+ life:[SK("癒しの雫",3,"h",35,"s",3),SK("命の芽吹き",4,"h",20,"s",3,{hot:1}),SK("癒しの雨",5,"h",20,"self",2),
+  SK("若葉の守り",5,"b",0,"s",3,{shield:20}),SK("命の若木",6,"h",20,"all",0),SK("命の雨",7,"h",35,"self",3),
+  SK("御神木の守り",8,"b",0,"all",0,{shield:20}),SK("蘇りの雨",10,"h",20,"self",2,{revive:25}),SK("生命の泉",13,"h",60,"all",0,{revive:50})],
+ res:[SK("石つぶて",2,"d",100,"s",3),SK("竹槍投げ",3,"d",110,"s",3),SK("石の連投",4,"d",70,"s",4,{hits:2}),
+  SK("爆弾投げ",5,"d",110,"area",4),SK("落石",5,"d",120,"s",4),SK("柵固め",6,"b",0,"all",0,{buff:{def:10},bt:2}),
+  SK("雷鳴玉",7,"d",150,"area",4),SK("石の雨",8,"d",100,"self",3),SK("岩雪崩",12,"d",190,"line",3)],
+ comp:[
+  SK("清流の恵み",6,"h",20,"all",0,{pair:["water","life"],cs:1,buff:{atk:10},bt:1}),
+  SK("本流の恵み",11,"h",35,"all",0,{pair:["water","life"],cs:2,buff:{atk:15,def:15},bt:2}),
+  SK("水門の裁き",7,"d",150,"line",3,{pair:["water","res"],cs:1}),
+  SK("水門の鉄槌",12,"d",200,"line",3,{pair:["water","res"],cs:2,push:1}),
+  SK("実りの加護",6,"h",20,"all",0,{pair:["life","res"],cs:1,buff:{def:15},bt:2}),
+  SK("豊穣の加護",11,"b",0,"all",0,{pair:["life","res"],cs:2,buff:{atk:15,def:15,spd:15},bt:2})]
+},
+kare:{
+ water:[SK("清流の剣",2,"d",120,"s",1),SK("真っ直ぐな斬撃",4,"d",100,"line",2),SK("一点の雫",4,"d",100,"s",3,{debuff:{def:-10},bt:2}),
+  SK("清流の太刀",6,"d",140,"s",1),SK("貫く流れ",7,"d",130,"line",3),SK("渇きの渦",7,"d",90,"area",4,{debuff:{atk:-10},bt:2}),
+  SK("正義の太刀",9,"d",180,"s",1),SK("裁きの直流",10,"d",150,"line",4),SK("一筋の奔流",14,"d",200,"line",8)],
+ life:[SK("癒しの剣",3,"dh",100,"s",1,{healLow:20}),SK("守りの雫",4,"hb",20,"s",3,{buff:{def:10},bt:2}),SK("渇きを癒す雨",5,"h",20,"self",2),
+  SK("誓いの守り",5,"b",0,"s",3,{shield:25}),SK("恵みの剣",6,"dh",90,"s",1,{healAll:20}),SK("蘇りの雫",7,"rev",10,"s",3),
+  SK("守護の誓い",8,"b",0,"all",0,{shield:15,bt:2}),SK("命の源",10,"rev",50,"s",3,{buff:{def:15},bt:2}),SK("源流の加護",13,"h",35,"all",0,{revive:25})],
+ res:[SK("川床の石",2,"d",100,"s",3),SK("地割れ",3,"d",100,"line",2),SK("石の壁",4,"b",0,"s",3,{buff:{def:20},bt:2}),
+  SK("岩の投擲",5,"d",120,"s",3),SK("乾いた地鳴り",5,"d",100,"area",4,{debuff:{spd:-10},bt:2}),SK("川床固め",6,"b",0,"all",0,{buff:{def:10},bt:2}),
+  SK("岩盤割り",7,"d",160,"s",1),SK("地鳴りの連鎖",8,"d",90,"line",3),SK("大地の割れ目",12,"d",180,"line",3,{debuff:{def:-15},bt:2})],
+ comp:[
+  SK("清き誓い",6,"h",20,"all",0,{pair:["water","life"],cs:1,buff:{def:10},bt:1}),
+  SK("誓いの本流",11,"h",35,"all",0,{pair:["water","life"],cs:2,shield:15,bt:2}),
+  SK("川床の裁き",7,"d",140,"line",3,{pair:["water","res"],cs:1,debuff:{def:-10},bt:2}),
+  SK("裁きの地割れ",12,"d",190,"line",4,{pair:["water","res"],cs:2}),
+  SK("大地の加護",6,"b",0,"all",0,{pair:["life","res"],cs:1,buff:{def:20},bt:2}),
+  SK("豊かな大地",11,"h",20,"all",0,{pair:["life","res"],cs:2,buff:{atk:15,def:15},bt:2})]
+},
+akayu:{
+ water:[SK("熱湯のしぶき",2,"d",110,"s",3),SK("湯けむり",4,"d",70,"self",2,{debuff:{atk:-10},bt:2}),SK("熱々の雫",4,"d",100,"s",4),
+  SK("沸騰うち",6,"d",120,"self",2),SK("間欠泉",7,"d",160,"area",4),SK("蒸気の渦",7,"d",80,"area",4,{debuff:{def:-10},bt:2}),
+  SK("湯滝",9,"d",160,"area",4),SK("蒸気の本流",10,"d",150,"line",3),SK("焦涙熱波",14,"d",230,"all",0,{selfDef:-50})],
+ life:[SK("湯の癒し",3,"h",35,"s",3),SK("湯けむりの癒し",4,"h",20,"s",3,{hot:1}),SK("温泉の雨",5,"h",20,"self",2),
+  SK("湯気の守り",5,"hb",20,"s",3,{shield:20}),SK("命の温泉",6,"h",20,"all",0,{hot:1}),SK("湯の雨",7,"h",35,"self",3),
+  SK("源泉の守り",8,"b",0,"all",0,{shield:20}),SK("源泉かけ流し",10,"h",35,"all",0,{hot:1}),SK("極楽の湯",13,"h",60,"all",0,{hot:1})],
+ res:[SK("熱石つぶて",2,"d",100,"s",3),SK("蒸気玉",3,"d",90,"s",3,{debuff:{atk:-10},bt:2}),SK("熱々の連投",4,"d",70,"s",4,{hits:2}),
+  SK("温泉玉",5,"hb",20,"s",3,{buff:{def:10},bt:2}),SK("熱石の雨",5,"d",110,"area",4),SK("湯煙固め",6,"b",0,"all",0,{buff:{def:10},bt:2}),
+  SK("噴石",7,"d",150,"area",4),SK("蒸気の壁",8,"d",100,"self",3,{debuff:{atk:-15},bt:2}),SK("地熱の噴出",12,"d",190,"line",3)],
+ comp:[
+  SK("湯の恵み",6,"h",20,"all",0,{pair:["water","life"],cs:1,hot:1}),
+  SK("かけ流しの恵み",11,"h",35,"all",0,{pair:["water","life"],cs:2,shield:15,bt:2}),
+  SK("間欠泉の裁き",7,"d",150,"area",4,{pair:["water","res"],cs:1}),
+  SK("噴き上がる源泉",12,"d",190,"area",4,{pair:["water","res"],cs:2}),
+  SK("湯治の加護",6,"h",20,"all",0,{pair:["life","res"],cs:1,buff:{def:15},bt:2}),
+  SK("極楽の加護",11,"h",35,"all",0,{pair:["life","res"],cs:2,buff:{atk:15,def:15},bt:2})]
+}};
+</script>
+<script>
+"use strict";
+/* ============ デフォルメキャラ絵（SVG・太い輪郭のちびキャラ） ============ */
+var OL = 'stroke="#22382f" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"';
+/* ============ 実素材アート（ひなんじょ／ふわ作の実ファイルを使用） ============ */
+var GOD_FACE={dobu:"assets/art-dobu-face.jpg",kare:"assets/art-kare-face.jpg",akayu:"assets/art-akayu-face.jpg"};
+var GOD_FULL={dobu:"assets/art-dobu-sprite.png",kare:"assets/art-kare-full.jpg",akayu:"assets/art-akayu-full.jpg"};
+function godFaceImg(gid, cls){ return '<img class="'+(cls||"face-img")+'" src="'+GOD_FACE[gid]+'" alt="'+GODS[gid].name+'の絵">'; }
+function godFullImg(gid){ return '<img class="god-full-img'+(gid==="dobu"?"":" framed")+'" src="'+GOD_FULL[gid]+'" alt="'+GODS[gid].name+'の立ち絵">'; }
+function allyImg(art, cls){ var f = art==="dojou" ? "assets/art-ayu-side.jpg" : "assets/art-ayu-front.jpg"; return '<img class="'+(cls||"ally-img")+'" src="'+f+'" alt="お供の絵">'; }
+function chibiCritter(art){
+  var s = '<svg viewBox="0 0 100 84" xmlns="http://www.w3.org/2000/svg" role="img">';
+  if(art==="ayu"){
+    s += '<path d="M14 42 L2 28 L4 42 L2 56 Z" fill="#8fa9ba" '+OL+'/>';
+    s += '<ellipse cx="52" cy="42" rx="38" ry="19" fill="#b9ccd6" '+OL+'/>';
+    s += '<path d="M30 26 Q46 16 62 25 L54 31 Q42 24 30 26Z" fill="#7e99ab" '+OL+'/>';
+    s += '<path d="M44 58 Q54 66 64 58 L56 52Z" fill="#7e99ab" '+OL+'/>';
+    s += '<circle cx="72" cy="38" r="4" fill="#22382f"/><circle cx="73.4" cy="36.6" r="1.4" fill="#fff"/>';
+    s += '<path d="M82 46 q5 3 0 6" fill="none" stroke="#22382f" stroke-width="2.6" stroke-linecap="round"/>';
+  } else if(art==="dojou"){
+    s += '<path d="M12 52 Q30 34 58 38 Q86 42 88 52 Q86 64 56 66 Q26 66 12 52Z" fill="#a9805a" '+OL+'/>';
+    s += '<circle cx="76" cy="48" r="3.4" fill="#22382f"/><circle cx="77.2" cy="46.8" r="1.2" fill="#fff"/>';
+    s += '<path d="M84 56 q8 2 12 -2 M84 60 q7 4 12 2 M20 58 q-7 3 -11 0" fill="none" stroke="#22382f" stroke-width="2.4" stroke-linecap="round"/>';
+    s += '<path d="M30 44 q6 -4 12 0 M48 42 q6 -4 12 0" fill="none" stroke="#8a6844" stroke-width="2.6" stroke-linecap="round"/>';
+  } else if(art==="bass"){
+    s += '<path d="M16 44 L2 30 L5 44 L2 58 Z" fill="#5d7350" '+OL+'/>';
+    s += '<ellipse cx="54" cy="44" rx="38" ry="21" fill="#7d926b" '+OL+'/>';
+    s += '<path d="M28 28 Q48 16 68 27 L58 34 Q42 24 28 28Z" fill="#5d7350" '+OL+'/>';
+    s += '<path d="M84 40 Q95 44 84 52 Q76 47 76 44 Q76 41 84 40Z" fill="#e8e3d2" '+OL+'/>';
+    s += '<circle cx="68" cy="39" r="4.2" fill="#22382f"/><circle cx="69.4" cy="37.6" r="1.4" fill="#fff"/>';
+    s += '<path d="M24 44 h44" stroke="#5d7350" stroke-width="3" stroke-linecap="round" opacity=".7"/>';
+  } else if(art==="bluegill"){
+    s += '<path d="M18 44 L4 32 L6 44 L4 56 Z" fill="#5b7d99" '+OL+'/>';
+    s += '<ellipse cx="55" cy="44" rx="34" ry="24" fill="#7fa6bd" '+OL+'/>';
+    s += '<ellipse cx="62" cy="44" rx="20" ry="20" fill="#a8c8d8" opacity=".8"/>';
+    s += '<circle cx="76" cy="32" r="6" fill="#33506b" '+OL+'/>';
+    s += '<circle cx="70" cy="40" r="3.6" fill="#22382f"/><circle cx="71.2" cy="38.8" r="1.2" fill="#fff"/>';
+    s += '<path d="M34 30 q4 14 0 28 M44 26 q5 18 0 36" fill="none" stroke="#5b7d99" stroke-width="3" opacity=".8"/>';
+  } else if(art==="turtle"){
+    s += '<ellipse cx="50" cy="50" rx="36" ry="22" fill="#6a9a58" '+OL+'/>';
+    s += '<ellipse cx="50" cy="47" rx="27" ry="16" fill="#87b873" '+OL+'/>';
+    s += '<path d="M36 38 l10 8 -10 8 M52 34 l10 9 -8 10 M64 40 l8 6" fill="none" stroke="#527a42" stroke-width="2.6"/>';
+    s += '<circle cx="88" cy="42" r="9" fill="#87b873" '+OL+'/>';
+    s += '<circle cx="90" cy="40" r="1.9" fill="#22382f"/>';
+    s += '<path d="M16 58 q-8 4 -10 10 M26 64 q-4 7 -2 12" fill="none" stroke="#6a9a58" stroke-width="6" stroke-linecap="round"/>';
+  } else if(art==="zarigani"){
+    s += '<path d="M50 34 Q34 40 32 54 Q34 70 50 72 Q66 70 68 54 Q66 40 50 34Z" fill="#d94f3d" '+OL+'/>';
+    s += '<path d="M34 44 Q14 38 12 24 Q24 20 30 30 Q40 26 36 40Z" fill="#e86a52" '+OL+'/>';
+    s += '<path d="M66 44 Q86 38 88 24 Q76 20 70 30 Q60 26 64 40Z" fill="#e86a52" '+OL+'/>';
+    s += '<circle cx="43" cy="30" r="5.4" fill="#22382f"/><circle cx="57" cy="30" r="5.4" fill="#22382f"/><circle cx="44.6" cy="28.4" r="1.8" fill="#fff"/><circle cx="58.6" cy="28.4" r="1.8" fill="#fff"/>';
+    s += '<path d="M36 62 l-10 6 M64 62 l10 6 M38 54 l-11 2 M62 54 l11 2" stroke="#22382f" stroke-width="3" stroke-linecap="round"/>';
+    s += '<path d="M40 52 h20 M41 60 h18" stroke="#b23a2a" stroke-width="3" stroke-linecap="round"/>';
+  } else if(art==="namazu"){
+    s += '<path d="M14 48 L2 36 L4 48 L2 60 Z" fill="#7d8894" '+OL+'/>';
+    s += '<ellipse cx="52" cy="48" rx="38" ry="17" fill="#9aa7b2" '+OL+'/>';
+    s += '<circle cx="76" cy="44" r="3.4" fill="#22382f"/>';
+    s += '<path d="M86 52 q10 6 16 2 M86 57 q9 8 15 6 M22 56 q-8 5 -13 3" fill="none" stroke="#22382f" stroke-width="2.6" stroke-linecap="round"/>';
+    s += '<path d="M60 34 q8 -5 14 0" fill="none" stroke="#7d8894" stroke-width="3" stroke-linecap="round"/>';
+  } else if(art==="dragon"){
+    s += '<path d="M22 62 Q14 40 30 30 Q26 16 40 12 L46 22 Q60 12 72 24 Q88 30 84 46 Q82 60 66 62 Q60 50 50 54 Q40 58 38 68 Q28 70 22 62Z" fill="#5da271" '+OL+'/>';
+    s += '<path d="M38 14 Q34 4 40 2 Q46 6 44 13Z" fill="#e6c878" '+OL+'/><path d="M62 14 Q64 4 70 4 Q74 10 68 16Z" fill="#e6c878" '+OL+'/>';
+    s += '<circle cx="46" cy="34" r="3.6" fill="#22382f"/><circle cx="66" cy="34" r="3.6" fill="#22382f"/>';
+    s += '<path d="M48 46 q8 5 16 0 M52 46 l2 5 3 -5 M60 46 l2 5 3 -5" fill="none" stroke="#22382f" stroke-width="2.6" stroke-linecap="round"/>';
+    s += '<path d="M30 52 q-8 2 -10 8 M82 52 q8 2 10 8" fill="none" stroke="#4c8a5e" stroke-width="5" stroke-linecap="round"/>';
+  } else { /* driftwood */
+    s += '<path d="M10 56 Q8 40 26 38 L74 34 Q90 36 88 50 Q86 62 68 62 L28 64 Q12 64 10 56Z" fill="#9a7a52" '+OL+'/>';
+    s += '<ellipse cx="24" cy="51" rx="7" ry="6" fill="#7d6240" '+OL+'/><ellipse cx="24" cy="51" rx="3" ry="2.6" fill="#5d4830"/>';
+    s += '<circle cx="58" cy="46" r="2.6" fill="#22382f"/><circle cx="72" cy="45" r="2.6" fill="#22382f"/>';
+    s += '<path d="M60 55 q6 3 12 0 M34 44 q10 -3 20 -1" fill="none" stroke="#7d6240" stroke-width="2.6" stroke-linecap="round"/>';
+    s += '<path d="M44 36 q2 -10 10 -12 M52 35 q6 -8 13 -8" fill="none" stroke="#7d6240" stroke-width="3.4" stroke-linecap="round"/>';
+  }
+  s += '</svg>';
+  return s;
+}
+function unitArt(u){
+  if(u.god){
+    if(G.god==="dobu") return '<img class="u-img-sprite" src="assets/art-dobu-sprite.png" alt="ドブ川の神">';
+    return '<img class="u-img-bust" src="'+GOD_FACE[G.god]+'" alt="'+GODS[G.god].name+'">';
+  }
+  if(u.side==="a") return allyImg(u.art, "u-img-fish");
+  return chibiCritter(u.art || "ayu");
+}
+</script>
+<script>
+"use strict";
+/* ============ 状態 ============ */
+var G = null;
+var view = "select";
+var treeTab = "common";
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+function toast(msg, ms){ var t=$("toast"); t.textContent=msg; t.classList.remove("hidden"); clearTimeout(t._h); t._h=setTimeout(function(){t.classList.add("hidden");}, ms||2600); }
+function newGame(godId){
+  var mats={}; MATS.forEach(function(m){mats[m]=0;});
+  G = { god:godId, turn:1, pts:{water:0,life:0,res:0}, mats:mats,
+    careCounts:[0,0,0,0,0,0,0,0,0], common:[], tree:{water:0,life:0,res:0},
+    skills:[], evo:0, cleared:{}, battles:0, wins:0, finished:false, lastResult:"" };
+  treeTab="common"; view="home"; render();
+}
+/* ============ セーブ／ロード（localStorage・拠点操作後に自動保存。戦闘中の状態は保存しない） ============ */
+var SAVE_KEY = "kawakami-proto-save-v1";
+var SAVE_VER = 1;
+function saveGame(){
+  if(!G) return;
+  try{ localStorage.setItem(SAVE_KEY, JSON.stringify({v:SAVE_VER, savedAt:Date.now(), state:G})); }catch(e){ /* 保存できない環境では無音で続行 */ }
+}
+function clearSave(){
+  try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
+}
+function loadSave(){
+  try{
+    var raw=localStorage.getItem(SAVE_KEY); if(!raw) return null;
+    var d=JSON.parse(raw); if(!d||!d.state||!GODS[d.state.god]) return null;
+    var s=d.state;
+    var mats={}; MATS.forEach(function(m){ mats[m]=(s.mats&&typeof s.mats[m]==="number"&&s.mats[m]>=0)?Math.floor(s.mats[m]):0; });
+    var care=[]; for(var i=0;i<9;i++){ care.push((s.careCounts&&typeof s.careCounts[i]==="number"&&s.careCounts[i]>=0)?Math.floor(s.careCounts[i]):0); }
+    var num=function(v,def,min,max){ return (typeof v==="number"&&isFinite(v))?Math.min(max,Math.max(min,Math.floor(v))):def; };
+    var g={ god:s.god,
+      turn:num(s.turn,1,1,51),
+      pts:{ water:num(s.pts&&s.pts.water,0,0,99999), life:num(s.pts&&s.pts.life,0,0,99999), res:num(s.pts&&s.pts.res,0,0,99999) },
+      mats:mats, careCounts:care,
+      common:(Array.isArray(s.common)?s.common.filter(function(x){return typeof x==="number"&&x>=0&&x<COMMON.length;}):[]),
+      tree:{ water:num(s.tree&&s.tree.water,0,0,14), life:num(s.tree&&s.tree.life,0,0,14), res:num(s.tree&&s.tree.res,0,0,14) },
+      skills:(Array.isArray(s.skills)?s.skills.filter(function(x){return typeof x==="string";}):[]),
+      evo:num(s.evo,0,0,2),
+      cleared:(s.cleared&&typeof s.cleared==="object")?s.cleared:{},
+      battles:num(s.battles,0,0,9999), wins:num(s.wins,0,0,9999),
+      finished:!!s.finished, lastResult:(typeof s.lastResult==="string")?s.lastResult:"" };
+    return g;
+  }catch(e){ return null; }
+}
+function saveInfoText(){
+  try{
+    var raw=localStorage.getItem(SAVE_KEY); if(!raw) return "保存データはありません。";
+    var d=JSON.parse(raw); if(!d||!d.state||!GODS[d.state.god]) return "保存データはありません。";
+    var when=d.savedAt?new Date(d.savedAt).toLocaleString("ja-JP"):"日時不明";
+    return GODS[d.state.god].name+"／"+d.state.turn+"ターン目まで自動保存済み（"+when+"）";
+  }catch(e){ return "保存データはありません。"; }
+}
+function totalPts(){ return G.pts.water+G.pts.life+G.pts.res; }
+function commonCount(p){ return G.common.filter(function(i){return COMMON[i].p===p;}).length; }
+function unlockCount(p){ return commonCount(p)+G.tree[p]; }
+function calcStats(){
+  var st={hp:60,mp:10,atk:12,def:10,spd:10};
+  G.common.forEach(function(i){ var fx=COMMON[i].fx; for(var k in fx) st[k]+=fx[k]; });
+  PARAMS.forEach(function(p){ for(var s=0;s<G.tree[p.id];s++){ var fx=TREE_FX[p.id][s]; for(var k in fx) st[k]+=fx[k]; } });
+  st.hp=Math.min(255,st.hp); st.mp=Math.min(99,st.mp); st.atk=Math.min(99,st.atk); st.def=Math.min(99,st.def); st.spd=Math.min(99,st.spd);
+  return st;
+}
+function monthWeek(){ var starts=[1,5,9,13,17,21,26,30,34,38,42,46]; var t=Math.max(1,Math.min(50,G.turn)); var m=1; for(var i=0;i<starts.length;i++){ if(t>=starts[i]) m=i+1; } var w=t-starts[m-1]+1; return m+"月 第"+w+"週（"+G.turn+"ターン目）"; }
+function advanceTurn(){ G.turn++; if(G.turn>50){ G.finished=true; view="ending"; } }
+function careUnlocked(i){
+  if(i<3) return true;
+  if(i<6) return G.evo>=1;
+  return G.careCounts[3]>=1 && G.careCounts[4]>=1 && G.careCounts[5]>=1;
+}
+function canAfford(cost){ for(var m in cost){ if(G.mats[m]<cost[m]) return false; } return true; }
+function costStr(cost){ return Object.keys(cost).map(function(m){ var ok=G&&G.mats[m]>=cost[m]; return '<span class="chip '+(ok?"ok":"ng")+'">'+MAT_ICON[m]+m+"×"+cost[m]+"</span>"; }).join(""); }
+function lootStr(loot){ return Object.keys(loot).map(function(m){ return '<span class="chip">'+MAT_ICON[m]+m+"×"+loot[m]+"</span>"; }).join(""); }
+function stageUnlocked(s){ if(s===0) return true; for(var d=0;d<4;d++){ if(G.cleared[(s-1)+"-"+d]) return true; } return false; }
+function depthUnlocked(s,d){ if(d===0) return true; return !!G.cleared[s+"-"+(d-1)]; }
+function allyList(){
+  return [
+    {name:"お供アユ", art:"ayu", hp:48+G.evo*10, atk:13+G.evo*3, def:8+G.evo*2, spd:14, move:4, note:"素早い川魚。通常攻撃のみ。"},
+    {name:"お供ドジョウ", art:"dojou", hp:72+G.evo*12, atk:10+G.evo*3, def:13+G.evo*2, spd:8, move:3, note:"丈夫な泥の守り手。通常攻撃のみ。"}
+  ];
+}
+</script>
+<script>
+"use strict";
+/* ============ 技の解放条件 ============ */
+function skillKey(cat,idx){ return cat+":"+idx; }
+function hasSkill(cat,idx){ return G.skills.indexOf(skillKey(cat,idx))>=0; }
+function skillReqText(cat,idx){
+  var sk=SKILLS[G.god][cat][idx];
+  if(cat==="comp"){ var need = sk.cs===1?8:14; return sk.pair.map(function(p){return paramName(p)+"解放数 "+unlockCount(p)+"/"+need;}).join(" ・ "); }
+  var stg=STG[idx];
+  if(stg===1) return "共通ツリー解放数 "+G.common.length+"/3";
+  return paramName(cat)+"解放数 "+unlockCount(cat)+"/"+STG_REQ[stg];
+}
+function skillAvailable(cat,idx){
+  if(hasSkill(cat,idx)) return false;
+  var sk=SKILLS[G.god][cat][idx];
+  if(cat==="comp"){
+    var need = sk.cs===1?8:14;
+    if(!(unlockCount(sk.pair[0])>=need && unlockCount(sk.pair[1])>=need)) return false;
+    if(sk.cs===2){ var first = SKILLS[G.god].comp.findIndex(function(c){return c.pair===sk.pair && c.cs===1;}); if(!hasSkill("comp",first)) return false; }
+    return true;
+  }
+  var stg=STG[idx];
+  if(stg===1){ if(G.common.length<3) return false; }
+  else if(unlockCount(cat)<STG_REQ[stg]) return false;
+  var pre=PRE[idx];
+  if(pre!==null && !hasSkill(cat,pre)) return false;
+  return true;
+}
+function skillVisible(cat,idx){
+  if(hasSkill(cat,idx)||skillAvailable(cat,idx)) return true;
+  var sk=SKILLS[G.god][cat][idx];
+  if(cat==="comp"){ return false; }
+  var pre=PRE[idx];
+  if(pre!==null && !hasSkill(cat,pre) && !skillAvailable(cat,pre)) return false;
+  if(pre===null || hasSkill(cat,pre) || skillAvailable(cat,pre)) return true;
+  return false;
+}
+function paramName(id){ return {water:"水量",life:"生命",res:"資源"}[id]; }
+function learnedSkills(){ var out=[]; ["water","life","res","comp"].forEach(function(cat){ SKILLS[G.god][cat].forEach(function(sk,idx){ if(hasSkill(cat,idx)) out.push({cat:cat,idx:idx,sk:sk}); }); }); return out; }
+function canEvo1(){ return G.evo===0 && G.common.length>=COMMON.length; }
+function evo2Status(){
+  var anyFull = G.tree.water>=14||G.tree.life>=14||G.tree.res>=14;
+  var totalTree = G.tree.water+G.tree.life+G.tree.res;
+  return {anyFull:anyFull, totalTree:totalTree, need:24, ok: G.evo===1 && anyFull && totalTree>=24};
+}
+function fxStr(fx){ var m={hp:"HP",mp:"神力",atk:"攻撃",def:"防御",spd:"素早さ"}; return Object.keys(fx).filter(function(k){return fx[k]>0;}).map(function(k){return m[k]+"+"+fx[k];}).join("・"); }
+function rangeLabel(sk){
+  if(sk.r==="s") return "単体（射程"+sk.rng+"）";
+  if(sk.r==="self") return "周囲"+sk.rng+"マス";
+  if(sk.r==="line") return sk.rng>=8?"前方直線全体":"前方直線"+sk.rng+"マス";
+  if(sk.r==="area") return "指定マス中心3×3";
+  return "全体";
+}
+function paramName2(k){ return {atk:"攻撃",def:"防御",spd:"素早さ",hp:"HP",mp:"神力"}[k]||k; }
+function skillDesc(sk){
+  var d="";
+  if(sk.k==="d") d="威力"+sk.v+"%の攻撃";
+  else if(sk.k==="h") d="回復（"+(sk.v>=60?"大":sk.v>=35?"中":"小")+"回復）";
+  else if(sk.k==="dh") d="威力"+sk.v+"%の攻撃＋回復";
+  else if(sk.k==="rev") d="倒れた味方をHP"+sk.v+"%で蘇生";
+  else if(sk.k==="hb") d="回復＋バフ";
+  else if(sk.k==="b") d="バフ";
+  if(sk.hits) d+="（"+sk.hits+"回）";
+  if(sk.revive && sk.k==="h") d+="＋倒れた味方をHP"+sk.revive+"%で蘇生";
+  if(sk.hot) d+="＋次の巡も回復";
+  if(sk.shield) d+="｜被ダメージ-"+sk.shield+"%";
+  if(sk.buff) d+="｜"+Object.keys(sk.buff).map(function(k){return paramName2(k)+"+"+sk.buff[k]+"%";}).join("・");
+  if(sk.debuff) d+="｜敵の"+Object.keys(sk.debuff).map(function(k){return paramName2(k)+sk.debuff[k]+"%";}).join("・");
+  if(sk.pull) d+="｜引き寄せ"; if(sk.push) d+="｜押し出し";
+  if(sk.selfDef) d+="｜使用後1巡 自分の防御"+sk.selfDef+"%";
+  return d;
+}
+function gaugeRows(st){
+  function g(lbl,val,max,cls){ return '<div class="gauge '+cls+'"><span class="gl">'+lbl+'</span><span class="gtrack"><i style="width:'+Math.min(100,Math.round(val/max*100))+'%"></i></span><span class="gv">'+val+'</span></div>'; }
+  return g("HP",st.hp,255,"g-hp")+g("神力",st.mp,99,"g-mp")+g("攻撃",st.atk,99,"g-atk")+g("防御",st.def,99,"g-def")+g("素早さ",st.spd,99,"g-spd");
+}
+/* ============ 描画 ============ */
+function render(){
+  var app=$("app"); var nav=$("bottomnav");
+  if(!G){ nav.classList.add("hidden"); app.className="wrap"; app.innerHTML='<div class="page-bg">'+viewSelect()+'</div>'; bindSelect(); return; }
+  if(view==="battle"){ nav.classList.add("hidden"); app.className="wrap wide"; renderBattle(); return; }
+  saveGame(); /* 拠点系の画面描画＝操作確定のタイミングで自動保存（戦闘中は保存しない） */
+  var sceneView = (view==="home"||view==="tree"||view==="explore");
+  app.className = sceneView ? "wrap wide" : "wrap";
+  nav.classList.toggle("hidden", sceneView);
+  document.querySelectorAll(".navbtn").forEach(function(b){ b.classList.toggle("on", b.dataset.nav===view); });
+  var html;
+  if(view==="home") html=viewHome();
+  else if(view==="tree") html=viewTree();
+  else if(view==="explore") html=viewExplore();
+  else {
+    html='<div class="page-bg">'+topbarHtml();
+    if(view==="care") html+=viewCare();
+    else if(view==="party") html+=viewParty();
+    else if(view==="setting") html+=viewSetting();
+    else if(view==="ending") html+=viewEnding();
+    html+='</div>';
+  }
+  app.innerHTML=html; bindView();
+}
+function topbarHtml(){
+  var god=GODS[G.god];
+  return '<div class="topbar"><div class="datebox"><div class="big">'+monthWeek()+'</div><div class="sub">'+esc(god.titles[G.evo])+"｜進化段階 "+G.evo+' / 2</div></div>'
+   +'<div class="turnbar"><div class="lbl"><span>1年（50ターン）の育成</span><span>残り '+(51-G.turn)+' ターン</span></div><div class="meter"><i style="width:'+Math.min(100,(G.turn-1)*2)+'%"></i></div></div></div>';
+}
+function viewSelect(){
+  var cards=Object.keys(GODS).map(function(id){ var g=GODS[id];
+    return '<button class="godcard" data-god="'+id+'"><div class="godface-art" style="background:'+g.bg+'">'+godFaceImg(id,"godcard-img")+'</div><div class="godname">'+g.name+'</div><div class="godrole" style="color:'+g.color+'">'+g.role+'</div><p class="muted">'+g.desc+'</p></button>'; }).join("");
+  return '<div class="panel dark"><img class="kv-banner" src="assets/art-keyvisual.jpg" alt="川神 キービジュアル"><h1 style="margin:4px 0 6px;font-size:30px">川神 <span style="font-size:15px;color:var(--gold2)">かわかみ ― プロトタイプ</span></h1>'
+   +'<p style="line-height:1.8;margin:0">川を育てる育成ゲームの試作です。探索で素材を集め、手入れで川を育て、ツリーを解放して神様を強くし、進化を目指します。1行動＝1週間、50ターン（1年）で一区切りです。</p></div>'
+   +'<h2 class="sec-title">育てる神様を選ぶ（御三家）</h2><div class="godcards">'+cards+'</div>'
+   +'<details class="help" style="margin-top:14px"><summary>遊び方</summary><p class="muted">① <b>探索</b>：戦闘に勝つと素材が手に入ります（負けると半分だけ持ち帰り）。ステージと深度は順に解放されます。<br>② <b>手入れ</b>：素材を消費してパラメータポイント（水量・生命・資源）が貯まります。ポイントは<b>累計方式</b>で減りません。同じ場所は回数で3段階に上がります。<br>③ <b>ツリー</b>：共通ツリー→進化→各種パラメータツリーの順に開きます。ツリー解放数に応じて<b>技</b>が解放できます（消費なし・派生式）。<br>④ <b>戦闘</b>：8×8のSRPG。移動→通常攻撃か技→待機。命中・回避はなく必ず当たります。神力は戦闘ごとに、HPは戦闘後に全回復します。</p></details>';
+}
+function bindSelect(){ document.querySelectorAll("[data-god]").forEach(function(b){ b.addEventListener("click", function(){ newGame(b.dataset.god); toast(GODS[G.god].name+"の育成をはじめます"); }); }); }
+/* ---------- ホーム（イメージ画像準拠） ---------- */
+function viewHome(){
+  var god=GODS[G.god], st=calcStats();
+  var speech;
+  if(G.lastResult) speech='<b>'+esc(G.lastResult.split("：")[0])+'</b><br>'+esc(G.lastResult);
+  else speech='<b>'+esc(god.titles[G.evo])+'、今日も川を見守っています。</b><br>探索で素材を集めて、手入れで川を育てましょう。';
+  var hint="";
+  if(G.evo===0 && G.common.length>=COMMON.length) hint='🌟 共通ツリーを全解放しました。スキルツリー画面で「進化ロック解除」を選べます。';
+  else if(G.evo===0) hint='次の目標：共通ツリー全解放で第1進化（現在 '+G.common.length+'/'+COMMON.length+'）';
+  else if(G.evo===1){ var e2=evo2Status(); hint='次の目標：第2進化＝いずれかのツリーを最後まで＋パラメータツリー解放数 合計'+e2.need+'（現在 '+e2.totalTree+'）'; }
+  else hint='🎉 第2進化に到達しました。残りターンでさらに川を育てられます。';
+  return '<div class="scene">'
+   +'<img class="scene-bg" src="assets/bg-home.jpg" alt="桜の咲く川辺の風景">'
+   +'<div class="date-chip">'+monthWeek()+'</div>'
+   +'<div class="speech">'+speech+'</div>'
+   +'<div class="home-god">'+godFullImg(G.god)+'<br><span class="god-nameplate">'+esc(god.titles[G.evo])+'</span></div>'
+   +'<div class="status-panel"><div class="sp-title">パラメータポイント</div>'
+   +'<div class="sp-pts">水量 <b>'+G.pts.water+'</b>　生命 <b>'+G.pts.life+'</b>　資源 <b>'+G.pts.res+'</b></div><hr>'
+   +'<div class="sp-sub">ステータス（最大値 HP255・他99）</div>'
+   +gaugeRows(st)
+   +'<div style="font-size:12px;color:#ffe9a8;margin-top:7px;line-height:1.6">'+hint+'</div></div>'
+   +'<div class="cmd-bar">'
+   +'<button class="cmd-btn" data-goto="explore">探索</button>'
+   +'<button class="cmd-btn" data-goto="party">編成</button>'
+   +'<button class="cmd-btn" data-goto="care">手入れ</button>'
+   +'<button class="cmd-btn" data-goto="tree">スキルツリー</button>'
+   +'<button class="cmd-btn" data-goto="setting">設定</button>'
+   +'</div></div>';
+}
+function matsPanelHtml(){
+  var matHtml=MATS.map(function(m){ return '<div class="mat'+(G.mats[m]===0?" zero":"")+'">'+MAT_ICON[m]+" "+m+"<b>"+G.mats[m]+"</b></div>"; }).join("");
+  return '<div class="panel" style="margin-top:14px"><h3 class="sec-title">所持素材</h3><div class="mats">'+matHtml+'</div><p class="muted" style="margin-top:8px">覚えた技 '+learnedSkills().length+' 個｜戦闘 '+G.battles+' 回（勝利 '+G.wins+'）</p></div>';
+}
+function viewParty(){
+  var god=GODS[G.god], st=calcStats();
+  var learned=learnedSkills();
+  var godCard='<div class="party-card"><div class="pc-art">'+godFaceImg(G.god,"party-god-img")+'</div><h3>'+esc(god.titles[G.evo])+'</h3><div class="muted">'+god.role+'</div>'
+   +'<div style="text-align:left;margin-top:8px;font-size:13.5px;line-height:1.9">HP '+st.hp+'｜神力 '+st.mp+'｜攻撃 '+st.atk+'｜防御 '+st.def+'｜素早さ '+st.spd+'<br>移動 4｜技はスキルツリーで解放</div>'
+   +'<div style="text-align:left;margin-top:6px">'+(learned.length?learned.map(function(l){return '<span class="chip">'+esc(l.sk.n)+'</span>';}).join(""):'<span class="chip ng">技はまだありません</span>')+'</div></div>';
+  var allyCards=allyList().map(function(a){
+    return '<div class="party-card"><div class="pc-art">'+allyImg(a.art,"party-ally-img")+'</div><h3>'+a.name+'</h3><div class="muted">'+a.note+'</div>'
+     +'<div style="text-align:left;margin-top:8px;font-size:13.5px;line-height:1.9">HP '+a.hp+'｜攻撃 '+a.atk+'｜防御 '+a.def+'｜素早さ '+a.spd+'<br>移動 '+a.move+'｜通常攻撃のみ（進化で強化）</div></div>';
+  }).join("");
+  return '<div class="panel"><h2 class="sec-title">編成</h2><p class="muted">戦闘に出るのは神様とお供2体です。お供の強さは神様の進化段階で上がります。</p></div><div class="party-grid">'+godCard+allyCards+'</div>'+matsPanelHtml();
+}
+/* ---------- 探索マップ（イメージ画像準拠：マップ上のスポットをタップ） ---------- */
+var exploreStage=0, exploreDepth=0;
+var EXPLORE_INFO={
+  dobu:[
+    {name:"村はずれの浅瀬", desc:"川の下流。手入れマップの範囲の外れにある浅瀬", mats:"流木・川砂"},
+    {name:"中流の岩場", desc:"川の中流。岩がごろごろする、流れの速い岩場", mats:"川石・鉄くず"},
+    {name:"上流の滝つぼ", desc:"川の上流。滝つぼのまわりは清らかな水と粘土の宝庫", mats:"粘土・清らかな水"},
+    {name:"源流の森", desc:"川の源流。御神木の根元に広がる深い森", mats:"苗木・木炭"}],
+  kare:[
+    {name:"村はずれの河原", desc:"川の下流。水量の少ない川と広い河原", mats:"流木・川砂"},
+    {name:"中流の岩場", desc:"川の中流。乾いた岩場に川石と鉄くずが眠る", mats:"川石・鉄くず"},
+    {name:"上流の滝つぼ", desc:"川の上流。今は細く落ちる滝と、その滝つぼ", mats:"粘土・清らかな水"},
+    {name:"源流の泉", desc:"川の源流。御神木の根元に湧く小さな泉", mats:"苗木・木炭"}],
+  akayu:[
+    {name:"村はずれの浅瀬", desc:"川の下流。上流で温泉の湯が流れ込み、湯気の立つ熱い浅瀬", mats:"流木・川砂"},
+    {name:"中流の岩場", desc:"川の中流。湯気の立つ岩場", mats:"川石・鉄くず"},
+    {name:"上流の滝つぼ", desc:"川の上流。湯けむりに包まれた滝つぼ", mats:"粘土・清らかな水"},
+    {name:"源流の森", desc:"川の源流。御神木の根元に広がる森", mats:"苗木・木炭"}]
+};
+var MAP_POS=[[20,88.5],[52.5,65.5],[59.5,51],[58.5,15.5]]; /* % : x,y */
+var MAP_CARD_POS=[[23.2,81.5],[55.7,58.5],[62.7,43.5],[61.7,8.5]]; /* % : left,top */
+function starsStr(n){ var s=""; for(var i=0;i<4;i++) s+= i<n?"★":"☆"; return s; }
+function viewExplore(){
+  var god=GODS[G.god], info=EXPLORE_INFO[G.god];
+  if(!depthUnlocked(exploreStage,exploreDepth)) exploreDepth=0;
+  var sel=exploreStage, st=STAGES[sel], inf=info[sel], selUn=stageUnlocked(sel);
+  /* route line through the 4 spots (16:9 viewBox = uniform scale) */
+  var pts=MAP_POS.map(function(p){ return (p[0]*16)+","+(p[1]*9); }).join(" ");
+  var route='<svg class="map-route" viewBox="0 0 1600 900" preserveAspectRatio="none"><polyline points="'+pts+'" fill="none" stroke="rgba(38,84,110,.55)" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/><polyline points="'+pts+'" fill="none" stroke="rgba(125,195,235,.92)" stroke-width="21" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  /* markers + info cards */
+  var spots="";
+  STAGES.forEach(function(s2,si){
+    var un=stageUnlocked(si), p=MAP_POS[si], cp=MAP_CARD_POS[si];
+    spots+='<button class="map-marker'+(si===sel?" sel":"")+(un?"":" locked")+'" style="left:'+p[0]+'%;top:'+p[1]+'%" data-stage="'+si+'" aria-label="ステージ'+(si+1)+' '+esc(info[si].name)+'">'+(un?(si+1):"🔒")+'</button>';
+    spots+='<div class="map-card" style="left:'+cp[0]+'%;top:'+cp[1]+'%"><div class="mc-name">'+esc(info[si].name)+'</div>'
+      +'<div class="mc-line">敵の強さ <span class="stars">'+starsStr(si+1)+'</span></div>'
+      +'<div class="mc-line">素材：'+info[si].mats+'</div>'
+      +(un?(G.cleared[si+"-0"]?'<div class="mc-note">クリア済の深度あり</div>':""):'<div class="mc-note">ステージ'+si+'を進めると開く</div>')
+      +'</div>';
+  });
+  /* detail panel for the selected stage */
+  var panel='<div class="map-panel"><div class="mp-head"><div class="mp-name">ステージ'+(sel+1)+'　'+esc(inf.name)+'</div>'+(selUn?'<span class="mp-sel">選択中</span>':'<span class="mp-sel" style="background:#5a6a72;color:#e9e2c8">🔒 ロック中</span>')+'</div>'
+   +'<div class="mp-desc">'+esc(inf.desc)+'</div>'
+   +'<div class="mp-line">敵の強さ：<span class="stars">'+starsStr(sel+1)+'</span>（'+st.diff+'）</div>'
+   +'<div class="mp-line">取れる素材：'+inf.mats+'</div>';
+  if(selUn){
+    panel+='<div class="mp-line" style="margin-top:9px"><b>深度を選ぶ</b> <span style="font-size:12px;color:#b9c4ae">深いほど素材が増え、敵も強くなる</span></div><div class="depth-row">';
+    for(var d=0;d<4;d++){
+      var du=depthUnlocked(sel,d), cl=G.cleared[sel+"-"+d];
+      panel+='<button class="depth-btn'+(exploreDepth===d?" on":"")+'" data-depth="'+d+'" '+(du?"":"disabled")+'>深度'+(d+1)+'<small>'+(du?(cl?"クリア済":"未踏"):"🔒 深度"+d+"クリアで開放")+'</small></button>';
+    }
+    panel+='</div><div class="mp-line" style="font-size:13px">この深度の素材：'+lootStr(st.loot[exploreDepth])+'</div>'
+     +'<button class="map-go" data-explore-go="'+sel+'-'+exploreDepth+'">ここを探索する</button>'
+     +'<div style="font-size:11.5px;color:#b9c4ae;margin-top:7px">出発すると戦闘が発生し、1ターン進みます。勝てば素材を全て、負ければ半分だけ持ち帰ります。</div>';
+  } else {
+    panel+='<p style="font-size:13.5px;color:#ffe9a8;margin-top:10px;line-height:1.7">🔒 まだ開いていません。ステージ'+sel+'のいずれかの深度をクリアすると開きます。</p>';
+  }
+  panel+='</div>';
+  return '<div class="map-scene"><img class="map-bg" src="assets/map-'+G.god+'.jpg" alt="'+esc(god.short)+'エリアのマップ">'
+   +route
+   +'<div class="map-title"><span class="mt-big">探索</span><span class="mt-sub">ステージを選ぶ（'+esc(god.short)+'）</span></div>'
+   +'<div class="map-godtree">源流の神（御神木）</div>'
+   +panel+spots
+   +(G.god==="akayu"?'<div class="map-onsen">温泉</div>':"")
+   +'<div class="map-care-range"><span class="map-care-tag">手入れマップの範囲</span></div>'
+   +'<div class="map-village">村</div>'
+   +'<button class="scene-back" data-goto="home">← 戻る</button>'
+   +'</div>';
+}
+function viewCare(){
+  var html='<div class="panel"><h2 class="sec-title">手入れ</h2><p class="muted">素材を消費してパラメータポイントが貯まります（累計方式・減りません）。同じ場所は実施回数で3段階に上がります。手入れすると1ターン進みます。<br>開放：1〜3は最初から／4〜6は第1進化のあと／7〜9は4・5・6を各1回以上手入れしたあと。</p></div>';
+  CARES.forEach(function(c,i){
+    var un=careUnlocked(i); var cnt=G.careCounts[i]; var tier=Math.min(2,cnt); var g=c.gains[tier];
+    var lockMsg = i<3?"":(i<6?"第1進化で開放":"4・5・6を各1回以上の手入れで開放（現在 4:"+G.careCounts[3]+"回 5:"+G.careCounts[4]+"回 6:"+G.careCounts[5]+"回）");
+    html+='<div class="itemcard'+(un?"":" locked")+'"><div class="row spread"><h3>'+c.name+'</h3><span class="chip">実施 '+cnt+' 回</span></div>'
+     +'<div>必要素材：'+costStr(c.cost)+'</div>'
+     +'<div style="margin-top:4px">得られるポイント（'+(cnt+1)+'回目）：<span class="chip w">水量+'+g[0]+'</span><span class="chip l">生命+'+g[1]+'</span><span class="chip r">資源+'+g[2]+'</span></div>'
+     +(un? '<div class="row" style="margin-top:9px"><button class="btn sm" data-care="'+i+'" '+((canAfford(c.cost)&&!G.finished)?"":"disabled")+'>手入れする（1ターン）</button>'+(canAfford(c.cost)?"":'<span class="chip ng">素材が足りません</span>')+'</div>'
+        : '<p class="muted">🔒 '+lockMsg+'</p>')
+     +'</div>';
+  });
+  return html;
+}
+</script>
+<script>
+"use strict";
+/* ============ ツリー画面（イメージ画像準拠） ============ */
+function sidePanelHtml(){
+  var god=GODS[G.god], st=calcStats();
+  var rows=PARAMS.map(function(p){
+    var dot = p.id==="water"?"#6db3e8":p.id==="life"?"#8fd07e":"#f0b45c";
+    return '<tr><td><span class="pdot" style="background:'+dot+'"></span>'+p.name+'</td><td>'+G.pts[p.id]+'</td><td>'+unlockCount(p.id)+'個</td></tr>';
+  }).join("");
+  var evoBox="";
+  if(G.evo===0){
+    evoBox='<div class="evo-box"><div class="eb-t">第一進化ロック</div>すべて解放すると選択可能<br>残り '+(COMMON.length-G.common.length)+' 項目<br>進化先は固定（1段階目）'
+      +(canEvo1()?'<button class="btn gold sm" data-evo="1" style="width:100%;margin-top:8px">進化ロック解除 → 第1進化</button>':"")+'</div>';
+  } else if(G.evo===1){
+    var e2=evo2Status();
+    evoBox='<div class="evo-box"><div class="eb-t">進化ロック解除（第2進化）</div>条件：いずれかの方向を最後まで解放 '+(e2.anyFull?"✅":"（未達）")+'<br>＋項目を一定数解放：合計 '+e2.totalTree+' / '+e2.need+' '+(e2.totalTree>=e2.need?"✅":"")
+      +(e2.ok?'<button class="btn gold sm" data-evo="2" style="width:100%;margin-top:8px">第2進化ロック解除</button>':"")+'</div>';
+  } else {
+    evoBox='<div class="evo-box"><div class="eb-t">🎉 第2進化 到達</div>'+esc(god.titles[2])+' ― 育成達成！</div>';
+  }
+  var stageLbl = G.evo===0 ? "初期段階の川" : god.titles[G.evo];
+  return '<aside class="side-panel"><div class="sp-head"><img class="sp-face" src="'+GOD_FACE[G.god]+'" alt="'+esc(god.name)+'の顔絵"><div><div class="god-nm">'+esc(god.name)+'</div><div class="god-stage">'+esc(stageLbl)+'</div></div></div>'
+   +gaugeRows(st)
+   +'<div class="pt-head">パラメータポイント</div>'
+   +'<table class="pt-table"><tr><th>パラメータ</th><th>ポイント</th><th>解放数</th></tr>'+rows+'</table>'
+   +evoBox+'</aside>';
+}
+function tnodeHtml(o){
+  /* o: x,y,cls,state(done/avail/locked),icon,label,sub,fx,badge,attrs,sq,ougi */
+  var st = o.state;
+  var dis = st!=="avail" ? " disabled" : "";
+  var badge = (st==="avail" && o.badge) ? '<span class="req-badge">'+o.badge+'</span>' : "";
+  return '<button class="tnode '+o.cls+" "+st+'" style="left:'+o.x+'%;top:'+o.y+'%" '+(o.attrs||"")+dis+'>'
+   +badge+'<span class="nc'+(o.sq?" sq":"")+'"'+(o.ncStyle?' style="'+o.ncStyle+'"':"")+'>'+o.icon+'</span>'
+   +(o.ougi?'<span class="ougi">奥義</span>':"")
+   +'<span class="nl"'+(o.nlStyle?' style="'+o.nlStyle+'"':"")+'>'+o.label+(o.fx?'<span class="fx">'+o.fx+'</span>':"")+(o.sub?'<span class="sub">'+o.sub+'</span>':"")+'</span></button>';
+}
+function linkSvg(segs){
+  var out='<svg class="tree-links" viewBox="0 0 100 100" preserveAspectRatio="none">';
+  segs.forEach(function(sg){
+    out+='<line x1="'+sg[0]+'" y1="'+sg[1]+'" x2="'+sg[2]+'" y2="'+sg[3]+'" stroke="'+(sg[4]?"rgba(230,200,120,.95)":"rgba(150,205,230,.75)")+'" stroke-width="'+(sg[4]?0.85:0.65)+'" stroke-linecap="round"/>';
+  });
+  return out+'</svg>';
+}
+var PARAM_ICON = {water:"⚔", life:"♥", res:"🛡"};
+function commonCanvas(){
+  /* イメージ画像準拠：下の「起点」から3方向（水量・生命・資源）に扇形に広がり、頂上の進化ロックへ集まる配置 */
+  var byParam={water:[],life:[],res:[]};
+  COMMON.forEach(function(n,i){ byParam[n.p].push(i); });
+  var pos={};
+  Object.keys(byParam).forEach(function(p){
+    byParam[p].forEach(function(gi,j){
+      var spread=27-j*3.2, y=87-j*16.5;
+      var x = p==="water" ? 52-spread : (p==="res" ? 52+spread : 52);
+      pos[gi]=[x,y];
+    });
+  });
+  var segs=[];
+  Object.keys(byParam).forEach(function(p){
+    var list=byParam[p];
+    segs.push([52,97,pos[list[0]][0],pos[list[0]][1], G.common.indexOf(list[0])>=0]);
+    for(var j=0;j<list.length-1;j++) segs.push([pos[list[j]][0],pos[list[j]][1],pos[list[j+1]][0],pos[list[j+1]][1], G.common.indexOf(list[j])>=0&&G.common.indexOf(list[j+1])>=0]);
+    segs.push([pos[list[4]][0],pos[list[4]][1],52,8, G.common.indexOf(list[4])>=0]);
+  });
+  var html=linkSvg(segs);
+  for(var r=0;r<5;r++){ html+='<div class="stage-label" style="left:1%;top:'+(87-r*16.5)+'%">第'+(r+1)+'段階</div>'; }
+  html+='<div class="tnode gold '+(canEvo1()?"avail":"locked")+'" style="left:52%;top:8%;position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;width:170px">'
+    +(canEvo1()?'<button class="btn gold sm" data-evo="1" style="border-radius:99px">🔓 進化ロック解除</button>':'<span class="nc" style="width:44px;height:44px;font-size:20px">🔒</span>')
+    +'<span class="nl" style="margin-top:4px">第一進化ロック解除<span class="sub">共通 '+G.common.length+' / '+COMMON.length+'</span></span></div>';
+  COMMON.forEach(function(n,i){
+    var done=G.common.indexOf(i)>=0;
+    var avail=!done && totalPts()>=n.req;
+    html+=tnodeHtml({x:pos[i][0], y:pos[i][1], cls:n.p, state:done?"done":(avail?"avail":"locked"),
+      icon:PARAM_ICON[n.p], label:fxStr(n.fx), sub:paramName(n.p)+" "+n.req, ncStyle:"width:40px;height:40px;font-size:17px", nlStyle:"font-size:10.5px;padding:2px 6px;white-space:nowrap",
+      badge:avail?("合計 "+n.req):"", attrs:'data-common="'+i+'" title="'+esc(n.label)+'"'});
+  });
+  html+='<div class="tnode gold done" style="left:52%;top:97.5%"><span class="nc" style="width:30px;height:30px;font-size:11px">起点</span></div>';
+  return '<div class="tree-canvas">'+html+'</div>';
+}
+var PARAM_POS=[[52,90],[37,80],[67,80],[37,67],[67,67],[37,54],[67,54],[37,41],[67,41],[37,28],[67,28],[37,15],[67,15],[52,5.5]];
+function dominantIcon(fx){
+  var best="atk", bv=-1; ["atk","hp","def","spd","mp"].forEach(function(k){ if((fx[k]||0)>bv){ bv=fx[k]; best=k; } });
+  return {atk:"⚔",hp:"♥",def:"🛡",spd:"≋",mp:"✦"}[best];
+}
+function paramCanvas(pid){
+  var segs=[];
+  var river='<svg class="tree-links" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M52 97 ';
+  PARAM_POS.forEach(function(p,i){ river+=(i===0?"L":"L")+p[0]+" "+p[1]+" "; });
+  river+='" fill="none" stroke="rgba(125,195,230,.4)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  for(var i=0;i<PARAM_POS.length-1;i++) segs.push([PARAM_POS[i][0],PARAM_POS[i][1],PARAM_POS[i+1][0],PARAM_POS[i+1][1], G.tree[pid]>i]);
+  var html=river+linkSvg(segs);
+  for(var s=0;s<14;s++){
+    var done=G.tree[pid]>s;
+    var isNext=(!done && G.tree[pid]===s);
+    var avail=isNext && G.pts[pid]>=THRESH[s];
+    html+=tnodeHtml({x:PARAM_POS[s][0], y:PARAM_POS[s][1], cls:pid, state:done?"done":(avail?"avail":"locked"),
+      icon:dominantIcon(TREE_FX[pid][s]), label:"第"+(s+1)+"段階 "+esc(TREE_NAMES[pid][s]), fx:fxStr(TREE_FX[pid][s]),
+      sub: done?"解放済":(isNext?paramName(pid)+"累計 "+G.pts[pid]+" / "+THRESH[s]:"順番に解放"),
+      badge: isNext?("必要 "+THRESH[s]):"", attrs:'data-ptree="'+pid+'-'+s+'"'});
+  }
+  return '<div class="tree-canvas">'+html+'</div>';
+}
+var SKILL_OFF={0:[0,92],1:[-8.5,77],2:[8.5,77],3:[-10,62],5:[-2.5,62],4:[8.5,62],6:[-10,47],7:[8.5,47],8:[-5,33.5]};
+var SKILL_ICON={water:"💧",life:"★",res:"◆"};
+function skillCanvas(){
+  var colX={water:19,life:50,res:81};
+  var segs=[];
+  ["water","life","res"].forEach(function(cat){
+    segs.push([50,98.5,colX[cat],92,false]);
+    for(var idx=0;idx<9;idx++){ var pre=PRE[idx]; if(pre!==null&&pre!==undefined){ segs.push([colX[cat]+SKILL_OFF[pre][0],SKILL_OFF[pre][1],colX[cat]+SKILL_OFF[idx][0],SKILL_OFF[idx][1], hasSkill(cat,pre)&&hasSkill(cat,idx)]); } }
+  });
+  var compPos=[[31,17],[31,4.5],[52.5,17],[52.5,4.5],[74,17],[74,4.5]];
+  segs.push([31,17,31,4.5,false]); segs.push([52.5,17,52.5,4.5,false]); segs.push([74,17,74,4.5,false]);
+  var html=linkSvg(segs);
+  html+='<div class="cat-head water" style="left:19%;top:26.5%">水量</div><div class="cat-head life" style="left:50%;top:26.5%">生命</div><div class="cat-head res" style="left:81%;top:26.5%">資源</div>';
+  ["water","life","res"].forEach(function(cat){
+    SKILLS[G.god][cat].forEach(function(sk,idx){
+      var done=hasSkill(cat,idx), av=skillAvailable(cat,idx), vis=skillVisible(cat,idx);
+      html+=tnodeHtml({x:colX[cat]+SKILL_OFF[idx][0], y:SKILL_OFF[idx][1], cls:cat, state:done?"done":(av?"avail":"locked"),
+        icon:SKILL_ICON[cat], label:vis?esc(sk.n):"？？？", sub:vis?("神力"+sk.mp+"｜第"+STG[idx]+"段階"):skillReqText(cat,idx), ncStyle:"width:40px;height:40px;font-size:16px",
+        ougi: idx===8, attrs:'data-skill="'+cat+'-'+idx+'"', badge: av?("解放可"):""});
+    });
+  });
+  var mixCls=["mix","mix","mix2","mix2","mix3","mix3"];
+  SKILLS[G.god].comp.forEach(function(sk,idx){
+    var done=hasSkill("comp",idx), av=skillAvailable("comp",idx);
+    html+=tnodeHtml({x:compPos[idx][0], y:compPos[idx][1], cls:mixCls[idx], state:done?"done":(av?"avail":"locked"),
+      icon:"★", label:(done||av)?esc(sk.n):"？？？", sub:"複合｜神力"+sk.mp, ncStyle:"width:34px;height:34px;font-size:14px", attrs:'data-skill="comp-'+idx+'"', badge: av?("解放可"):""});
+  });
+  return '<div class="tree-canvas tall">'+html+'</div>';
+}
+function viewTree(){
+  if(treeTab!=="common"&&treeTab!=="skill"&&G.evo<1) treeTab="common"; /* パラメータツリーは第1進化後のみ */
+  var bg, title, canvas, note;
+  if(treeTab==="common"){ bg="assets/bg-common.jpg"; title="共通ツリー（第一進化まで）"; canvas=commonCanvas(); note="起点から3方向に広がる共通ツリー。合計ポイント（累計）で解放でき、全解放で第一進化ロックが開きます。"; }
+  else if(treeTab==="skill"){ bg="assets/bg-tree.jpg"; title="スキルツリー"; canvas=skillCanvas(); note="技はツリーの解放数に応じて解放できます（消費なし・派生式）。次に解放できる技だけ名前が見えます。数値・名前は全部仮です。"; }
+  else { bg="assets/bg-param.jpg"; title="パラメータツリー（"+paramName(treeTab)+"）"; canvas=paramCanvas(treeTab); note="川の流れのように、本流と支流でできています。必要累計のバッジは、次に解放可能な段階だけに表示されます。"; }
+  var tabs=[["common","共通ツリー"],["water","水量ツリー"],["life","生命ツリー"],["res","資源ツリー"],["skill","スキルツリー"]].map(function(t){
+    var locked=(t[0]==="water"||t[0]==="life"||t[0]==="res")&&G.evo<1;
+    return '<button class="ttab'+(treeTab===t[0]?" on":"")+(locked?" locked":"")+'" data-treetab="'+t[0]+'"'+(locked?' title="第1進化のあとに開きます"':"")+'>'+t[1]+(locked?" 🔒":"")+'</button>';
+  }).join("");
+  return '<div class="tree-scene"><img class="tree-bg" src="'+bg+'" alt=""><div class="tree-veil"></div><div class="tree-inner">'
+   +'<div class="tree-titlebar">'+title+'</div>'
+   +'<div class="tree-tabs">'+tabs+'</div>'
+   +'<div class="tree-layout">'+sidePanelHtml()
+   +'<div class="tree-canvas-wrap"><p style="margin:0 0 4px;font-size:13px;color:#fff;text-shadow:0 1px 4px rgba(0,40,40,.8);font-weight:700">'+note+'</p>'
+   +canvas
+   +'<div class="tree-legend"><span><span class="lg d"></span>解放済み</span><span><span class="lg a"></span>解放可能</span><span><span class="lg"></span>未解放</span></div>'
+   +'</div></div></div>'
+   +'<button class="scene-back" data-goto="home">← 戻る</button></div>';
+}
+function viewSetting(){
+  return '<div class="panel"><h2 class="sec-title">設定</h2>'
+   +'<p class="muted">進行状況はこの端末に自動保存されます（手入れ・探索から帰還・ツリー解放・進化などの拠点操作ごと。戦闘中の状態は保存されません）。次に開いたときは、保存したところから再開できます。</p>'
+   +'<p class="muted">現在の保存状態：'+saveInfoText()+'</p>'
+   +'<div class="row"><button class="btn red" id="btn-reset">はじめから（保存データを消して神様を選び直す）</button></div>'
+   +'<p class="muted" id="reset-note"></p></div>'
+   +'<details class="help" open><summary>仕様メモ（試作の仮ルール）</summary><p class="muted">ダメージ＝攻撃×威力%−相手の防御×50%（最低1、必ず命中）。地形効果：浅瀬のマスにいるユニットは防御+15%で計算（敵味方とも同じ、移動コストは全マス1）。草地は補正なし、岩場は侵入不可。<br>【浅瀬の防御補正】<br>実効防御＝四捨五入したバフ込み防御×地形倍率（浅瀬1.15、その他1.0）。この積は丸めず、ダメージ計算に使用する。ダメージは攻撃×威力％－実効防御×50％を四捨五入し、最低1とする。その後、シールド軽減を適用して再度四捨五入する。<br>※浅瀬の+15%は防御値への倍率であり、被ダメージを直接15%軽減する効果ではない。<br>【敵の個性】ブルーギル＝支援型（補正なし。傷ついた仲間の敵を最大HPの25%回復、自分以外を優先。回復対象がいなければ通常攻撃）、ブラックバス＝攻撃型（神を優先して狙う。攻撃×1.25・防御×0.75）、外来ガメ＝防御型（HP×1.4・防御×1.3・素早さ−3・移動2。浅瀬を好んで移動し、浅瀬の防御×1.15と重なる）、外来ザリガニ＝高速型（HP×0.9・素早さ+6・移動4。HP割合が最も低い味方を狙う）、大ナマズ＝押し出し型（補正なし。通常攻撃が当たった相手を1マス押し出す。岩・占有マスへは押し出せない）。滝の主モドキ・源流の番人モドキ・流木のかたまりは従来どおり共通仕様（個性は第2次実装で検討）。回復量：小=最大HPの20%／中=35%／大=60%。通常攻撃は威力100%・射程1。第2進化の「解放数の条件」は合計24として実装。手入れ4番のポイントは仕様の表記順（資源主軸）を水量・生命・資源に読み替えて反映しています。技・特性の内容や効果範囲・射程はまだ仮段階です。</p></details>';
+}
+function viewEnding(){
+  var god=GODS[G.god];
+  var score = totalPts() + G.evo*60 + G.skills.length*4 + Object.keys(G.cleared).length*6 + G.wins*5;
+  var rank = G.evo>=2?"S":(score>=260?"A":score>=170?"B":score>=90?"C":"D");
+  var rankText = {S:"清らかな大河になりました",A:"豊かな川になりました",B:"きれいな川になりました",C:"少しずつ良くなっています",D:"まだ荒れていますが、芽は出ています"}[rank];
+  return '<div class="panel dark" style="text-align:center"><div style="width:170px;margin:0 auto">'+godFaceImg(G.god,"ending-img")+'</div>'
+   +'<h2 style="font-family:Shippori Mincho,serif;font-size:26px;margin:6px 0">1年が終わりました</h2>'
+   +'<p style="font-size:20px"><b style="color:var(--gold2)">到達度ランク '+rank+'</b> ― '+rankText+'</p>'
+   +'<p>'+esc(god.titles[G.evo])+'（進化段階 '+G.evo+' / 2）</p>'
+   +'<p>パラメータ累計：水量 '+G.pts.water+'／生命 '+G.pts.life+'／資源 '+G.pts.res+'（合計 '+totalPts()+'）<br>覚えた技 '+G.skills.length+' 個｜探索クリア '+Object.keys(G.cleared).length+' 件｜戦闘 '+G.battles+' 回（勝利 '+G.wins+'）</p>'
+   +'<button class="btn gold" id="btn-again">新しい1年をはじめる</button></div>';
+}
+function bindView(){
+  document.querySelectorAll("[data-goto]").forEach(function(b){ b.addEventListener("click", function(){ view=b.dataset.goto; if(view==="tree") treeTab="common"; render(); }); });
+  document.querySelectorAll("[data-treetab]").forEach(function(b){ b.addEventListener("click", function(){ var t=b.dataset.treetab; if((t==="water"||t==="life"||t==="res")&&G.evo<1){ toast("🔒 パラメータツリーは第1進化のあとに開きます（共通ツリーを全解放してください）"); return; } treeTab=t; render(); }); });
+  document.querySelectorAll("[data-stage]").forEach(function(b){ b.addEventListener("click", function(){ exploreStage=parseInt(b.dataset.stage); if(!depthUnlocked(exploreStage,exploreDepth)) exploreDepth=0; render(); }); });
+  document.querySelectorAll("[data-depth]").forEach(function(b){ b.addEventListener("click", function(){ exploreDepth=parseInt(b.dataset.depth); render(); }); });
+  document.querySelectorAll("[data-explore-go]").forEach(function(b){ b.addEventListener("click", function(){ var p=b.dataset.exploreGo.split("-"); startBattle(parseInt(p[0]), parseInt(p[1])); }); });
+  document.querySelectorAll("[data-care]").forEach(function(b){ b.addEventListener("click", function(){ doCare(parseInt(b.dataset.care)); }); });
+  document.querySelectorAll("[data-common]").forEach(function(b){ b.addEventListener("click", function(){ var i=parseInt(b.dataset.common); if(totalPts()>=COMMON[i].req && G.common.indexOf(i)<0){ G.common.push(i); toast("共通ツリー「"+COMMON[i].label+"」を解放！ "+fxStr(COMMON[i].fx)); render(); } }); });
+  document.querySelectorAll("[data-ptree]").forEach(function(b){ b.addEventListener("click", function(){ var p=b.dataset.ptree.split("-"); var cat=p[0], s=parseInt(p[1]); if(G.tree[cat]===s && G.pts[cat]>=THRESH[s]){ G.tree[cat]++; toast(paramName(cat)+"ツリー第"+(s+1)+"段階を解放！ "+fxStr(TREE_FX[cat][s])); render(); } }); });
+  document.querySelectorAll("[data-skill]").forEach(function(b){ b.addEventListener("click", function(){ var p=b.dataset.skill.split("-"); var cat=p[0], idx=parseInt(p[1]); if(skillAvailable(cat,idx)){ G.skills.push(skillKey(cat,idx)); toast("技「"+SKILLS[G.god][cat][idx].n+"」を覚えた！ 戦闘で使えます"); render(); } }); });
+  document.querySelectorAll("[data-evo]").forEach(function(b){ b.addEventListener("click", function(){ var n=parseInt(b.dataset.evo); if(n===1&&canEvo1()){ G.evo=1; toast("✨ 第1進化！ "+GODS[G.god].titles[1]+" になりました。各種パラメータツリーが開きました"); render(); } if(n===2&&evo2Status().ok){ G.evo=2; toast("🎉 第2進化！ "+GODS[G.god].titles[2]+" ― 育成達成！"); render(); } }); });
+  var rst=$("btn-reset"); if(rst) rst.addEventListener("click", function(){ if(rst.dataset.arm){ clearSave(); G=null; view="select"; render(); } else { rst.dataset.arm="1"; rst.textContent="本当に最初から？ もう一度押すと保存データも消えます"; } });
+  var ag=$("btn-again"); if(ag) ag.addEventListener("click", function(){ clearSave(); G=null; view="select"; render(); });
+}
+function doCare(i){
+  var c=CARES[i]; if(!careUnlocked(i)||!canAfford(c.cost)||G.finished) return;
+  for(var m in c.cost) G.mats[m]-=c.cost[m];
+  var g=c.gains[Math.min(2,G.careCounts[i])];
+  G.pts.water+=g[0]; G.pts.life+=g[1]; G.pts.res+=g[2];
+  G.careCounts[i]++;
+  G.lastResult="手入れ「"+c.name+"」をしました！：水量ポイント+"+g[0]+"、生命ポイント+"+g[1]+"、資源ポイント+"+g[2];
+  toast("手入れ完了：水量+"+g[0]+"・生命+"+g[1]+"・資源+"+g[2]);
+  advanceTurn(); view = G.finished?"ending":"care"; render();
+}
+document.querySelectorAll(".navbtn").forEach(function(b){ b.addEventListener("click", function(){ if(!G||view==="battle") return; view=b.dataset.nav; if(view==="tree") treeTab="common"; render(); }); });
+var _restored = loadSave();
+if(_restored){ G=_restored; view = G.finished ? "ending" : "home"; }
+render();
+if(_restored) toast("保存データから再開しました（"+monthWeek()+"）");
+</script>
+<script>
+"use strict";
+/* ============ 戦闘（SRPG） ============ */
+var B=null;
+var TERRAIN=[]; for(var ti=0;ti<64;ti++){ var r=Math.random(); TERRAIN.push(r<0.22?"water":(r<0.34?"rock":"grass")); }
+var ENEMY_TYPES=[
+  [{n:"ブルーギル",art:"bluegill"},{n:"外来ガメ",art:"turtle"},{n:"流木のかたまり",art:"driftwood"}],
+  [{n:"ブラックバス",art:"bass"},{n:"ブルーギル",art:"bluegill"},{n:"外来ザリガニ",art:"zarigani"}],
+  [{n:"大ナマズ",art:"namazu"},{n:"ブラックバス",art:"bass"},{n:"滝の主モドキ",art:"dragon"}],
+  [{n:"源流の番人モドキ",art:"dragon"},{n:"大ナマズ",art:"namazu"},{n:"外来ザリガニ",art:"zarigani"}]
+];
+/* ============ 敵の個性プロフィール（第2段階・3件目） ============
+   種類ごとの役割と能力補正はこの表1か所で管理する。数値調整はここだけを変えればよい。
+   補正は startBattle の生成時に共通式（ステージ/深度スケーリング）の結果へ適用する。
+   対象選択・固有行動の分岐は enemyAct が role を見て行う。
+   滝の主モドキ／源流の番人モドキ（art:"dragon"）と流木のかたまり（art:"driftwood"）は
+   今回は個性を付けず、従来どおりの共通仕様のまま（第2次実装で検討）。 */
+var ENEMY_PROFILES={
+  bluegill:{role:"support", label:"支援型", healPct:25},                                   /* 補正なし。傷ついた仲間の敵を最大HPの25%回復（自分以外を優先） */
+  bass:    {role:"attacker", label:"攻撃型", atkMult:1.25, defMult:0.75},                  /* 神を優先して狙う */
+  turtle:  {role:"defender", label:"防御型", hpMult:1.4, defMult:1.3, spdAdd:-3, move:2, preferWater:true}, /* 浅瀬を好む。浅瀬の防御×1.15と重なる */
+  zarigani:{role:"fast",     label:"高速型", hpMult:0.9, spdAdd:6, move:4},                /* HP割合が最も低い味方を狙う */
+  namazu:  {role:"push",     label:"押し出し型"}                                          /* 補正なし。通常攻撃で1マス押し出し */
+};
+function startBattle(si,di){
+  var st=calcStats(); var god=GODS[G.god];
+  function mkUnit(o){ o.buffs=[]; o.acted=false; o.alive=true; return o; }
+  var allies=[
+    mkUnit({side:"a",god:true,name:god.short,face:god.face,x:2,y:5,hp:st.hp,maxhp:st.hp,mp:st.mp,maxmp:st.mp,atk:st.atk,def:st.def,spd:st.spd,move:4}),
+    mkUnit({side:"a",name:"お供アユ",art:"ayu",face:"🐟",x:0,y:5,hp:48+G.evo*10,maxhp:48+G.evo*10,mp:0,maxmp:0,atk:13+G.evo*3,def:8+G.evo*2,spd:14,move:4}),
+    mkUnit({side:"a",name:"お供ドジョウ",art:"dojou",face:"🦎",x:1,y:7,hp:72+G.evo*12,maxhp:72+G.evo*12,mp:0,maxmp:0,atk:10+G.evo*3,def:13+G.evo*2,spd:8,move:3})
+  ];
+  var foes=[]; var cnt=3+di; var types=ENEMY_TYPES[si];
+  var spots=[[6,0],[7,2],[5,1],[7,4],[4,0],[6,3]];
+  for(var i=0;i<cnt;i++){ var t=types[i%types.length];
+    var prof=ENEMY_PROFILES[t.art]||null;
+    var hpB=26+si*14+di*10+Math.floor(Math.random()*8);
+    var atkB=8+si*3+di*2, defB=4+si*2+di, spdB=6+Math.floor(Math.random()*6)+si*2+di;
+    var hp=prof&&prof.hpMult?Math.max(1,Math.round(hpB*prof.hpMult)):hpB;
+    var atk=prof&&prof.atkMult?Math.max(1,Math.round(atkB*prof.atkMult)):atkB;
+    var def=prof&&prof.defMult?Math.max(1,Math.round(defB*prof.defMult)):defB;
+    var spd=Math.max(1,spdB+((prof&&prof.spdAdd)||0));
+    var mv=(prof&&prof.move)||3;
+    foes.push(mkUnit({side:"e",name:t.n,art:t.art,role:prof?prof.role:null,face:"",x:spots[i][0],y:spots[i][1],hp:hp,maxhp:hp,mp:0,maxmp:0,atk:atk,def:def,spd:spd,move:mv}));
+  }
+  allies.concat(foes).forEach(function(u){ TERRAIN[u.y*8+u.x]="grass"; });
+  B={si:si,di:di,loot:STAGES[si].loot[di],allies:allies,foes:foes,round:1,sel:null,moved:false,mode:"select",targets:[],pendingSkill:null,showSkills:false,confirm:null,focus:null,logs:["<b>"+STAGES[si].name+" 深度"+(di+1)+"</b> の戦闘開始！ 敵を全て倒すと勝利、神様が倒れると敗北です。","行動順は各巡の開始時に素早さ順（味方・敵混在）で確定します。素早さの増減は次巡の順序から反映されます。"],over:false,order:[],turnIdx:0,skipAllies:false,cur:null};
+  var roleNotes=[], roleSeen={};
+  foes.forEach(function(f){ var p=ENEMY_PROFILES[f.art]; if(p&&!roleSeen[f.art]){ roleSeen[f.art]=1; roleNotes.push(f.name+"＝"+p.label); } });
+  if(roleNotes.length) B.logs.push("敵の個性："+roleNotes.join("／")+"。種類ごとに狙い方と倒し方が変わります。");
+  buildOrder(); processTurns();
+  G.battles++; view="battle"; render();
+}
+function allUnits(){ return B.allies.concat(B.foes); }
+function unitAt(x,y){ var u=null; allUnits().forEach(function(w){ if(w.alive&&w.x===x&&w.y===y) u=w; }); return u; }
+/* 蘇生・単体回復の対象取得専用：戦闘不能者も引ける（同マスに生存者がいる場合は戦闘不能者を優先）。unitAt() の生存者フィルタは占有・移動判定用に変更しない */
+function unitAtIncludingDead(x,y){ var dead=null, any=null; allUnits().forEach(function(w){ if(w.x===x&&w.y===y){ any=w; if(!w.alive) dead=w; } }); return dead||any; }
+function dist(a,b){ return Math.abs(a.x-b.x)+Math.abs(a.y-b.y); }
+function effStat(u,stat){
+  var v=u[stat]; var pct=0;
+  u.buffs.forEach(function(b){ if(b.stat===stat) pct+=b.pct; });
+  return Math.max(1, Math.round(v*(1+pct/100)));
+}
+function shieldPct(u){ var s=0; u.buffs.forEach(function(b){ if(b.stat==="shield") s=Math.max(s,b.pct); }); return s; }
+function blog(msg){ B.logs.push(msg); if(B.logs.length>40) B.logs.shift(); }
+/* 地形効果（敵味方で同じルール）：補正はユニットではなくマスに付く。
+   浅瀬（water）のマスに立っているユニットは実効防御+15%。草地は補正なし、岩場は侵入不可。
+   移動コストは全マス1のまま（BFSには手を入れない）。押し出し・引き寄せでマスが変われば、
+   次のダメージ計算から自動で補正が付く／消える（位置から毎回判定するため）。 */
+function terrainAt(x,y){ return TERRAIN[y*8+x]; }
+function terrainDefMult(u){ return terrainAt(u.x,u.y)==="water" ? 1.15 : 1; }
+function effDefWithTerrain(u){ return effStat(u,"def")*terrainDefMult(u); }
+function previewDamage(src,tgt,power){
+  var atk=effStat(src,"atk"); var def=effDefWithTerrain(tgt);
+  var dmg=Math.max(1, Math.round(atk*power/100 - def*0.5));
+  dmg=Math.max(1, Math.round(dmg*(1-shieldPct(tgt)/100)));
+  return dmg;
+}
+function dealDamage(src,tgt,power,skill){
+  var dmg=previewDamage(src,tgt,power);
+  tgt.hp-=dmg;
+  blog(src.name+" → "+tgt.name+" に <b>"+dmg+"</b> ダメージ");
+  if(skill){
+    if(skill.debuff){ for(var k in skill.debuff){ addBuff(tgt,{stat:k,pct:skill.debuff[k],turns:skill.bt||2}); blog(tgt.name+" の"+paramName2(k)+"が "+skill.debuff[k]+"%（"+(skill.bt||2)+"巡）"); } }
+    if(skill.pull) pullUnit(src,tgt);
+    if(skill.push) pushUnit(src,tgt);
+  }
+  if(tgt.hp<=0){ tgt.hp=0; tgt.alive=false; blog("💥 "+tgt.name+" を倒した！"); if(tgt.god) return endBattle(false); }
+  return dmg;
+}
+function healUnit(src,tgt,pct,skill){
+  if(!tgt.alive){ if(skill&&skill.revive){ tgt.alive=true; tgt.hp=Math.max(1,Math.round(tgt.maxhp*skill.revive/100)); blog("✨ "+tgt.name+" が HP"+tgt.hp+" で蘇生！"); } return; }
+  var amt=Math.round(tgt.maxhp*pct/100); var before=tgt.hp; tgt.hp=Math.min(tgt.maxhp,tgt.hp+amt);
+  blog(src.name+" → "+tgt.name+" を <b>"+(tgt.hp-before)+"</b> 回復");
+  if(skill&&skill.hot){ addBuff(tgt,{stat:"hot",pct:pct,turns:1}); }
+}
+function applyBuffsTo(u,skill){
+  if(skill.buff){ for(var k in skill.buff){ addBuff(u,{stat:k,pct:skill.buff[k],turns:skill.bt||2}); } }
+  if(skill.shield){ addBuff(u,{stat:"shield",pct:skill.shield,turns:skill.bt||1}); }
+}
+function pullUnit(src,tgt){ var dx=Math.sign(src.x-tgt.x), dy=Math.sign(src.y-tgt.y); var nx=tgt.x, ny=tgt.y; if(Math.abs(src.x-tgt.x)>=Math.abs(src.y-tgt.y)) nx+=dx; else ny+=dy; if(nx>=0&&nx<8&&ny>=0&&ny<8&&!isBlockedTile(nx,ny)&&!unitAt(nx,ny)){ tgt.x=nx; tgt.y=ny; blog(tgt.name+" を引き寄せた"); } }
+function pushUnit(src,tgt){ var dx=Math.sign(tgt.x-src.x), dy=Math.sign(tgt.y-src.y); var nx=tgt.x, ny=tgt.y; if(Math.abs(tgt.x-src.x)>=Math.abs(tgt.y-src.y)) nx+=dx; else ny+=dy; if(dx===0&&dy===0) nx+=1; if(nx>=0&&nx<8&&ny>=0&&ny<8&&!isBlockedTile(nx,ny)&&!unitAt(nx,ny)){ tgt.x=nx; tgt.y=ny; blog(tgt.name+" を押し出した"); } }
+function isBlockedTile(x,y){ return TERRAIN[y*8+x]==="rock"; }
+function moveDistances(u){ var seen={}; seen[u.x+","+u.y]=0; var q=[[u.x,u.y,0]];
+  while(q.length){ var cur=q.shift(); var cx=cur[0],cy=cur[1],d=cur[2]; if(d>=u.move) continue;
+    [[1,0],[-1,0],[0,1],[0,-1]].forEach(function(o){ var nx=cx+o[0],ny=cy+o[1]; if(nx<0||nx>7||ny<0||ny>7) return; var k=nx+","+ny; if(seen[k]!==undefined) return; if(isBlockedTile(nx,ny)) return; if(unitAt(nx,ny)) return; seen[k]=d+1; q.push([nx,ny,d+1]); });
+  } return seen; }
+function moveTargets(u){ var seen=moveDistances(u); return Object.keys(seen).filter(function(k){ return seen[k]>0; }); }
+function selectUnit(u){
+  if(B.over||u.acted||!u.alive) return;
+  if(B.cur&&u!==B.cur) return; /* 個別ターン制：操作できるのは行動順が回ってきた本人のみ */
+  B.sel=u; B.moved=false; B.mode="move"; B.targets=moveTargets(u); B.showSkills=false; B.confirm=null; B.focus={x:u.x,y:u.y}; renderBattle();
+}
+function afterMove(){ B.mode="action"; B.targets=[]; B.showSkills=false; renderBattle(); }
+function chooseAttack(){
+  var u=B.sel; B.mode="target"; B.pendingSkill=null; B.showSkills=false;
+  B.targets=B.foes.filter(function(f){ return f.alive&&dist(u,f)<=1; });
+  if(!B.targets.length){ toast("隣接する敵がいません"); B.mode="action"; }
+  renderBattle();
+}
+function chooseSkill(cat,idx){
+  var u=B.sel; var sk=SKILLS[G.god][cat][idx];
+  if(u.mp<sk.mp){ toast("神力が足りません"); return; }
+  B.pendingSkill={cat:cat,idx:idx,sk:sk}; B.showSkills=false; B.confirm=null;
+  if(sk.r==="all"||sk.r==="self"){ executeSkill(null,null); return; }
+  B.mode="target";
+  if(sk.r==="s"){
+    if(sk.k==="d"||sk.k==="dh") B.targets=B.foes.filter(function(f){return f.alive&&dist(u,f)<=sk.rng;});
+    else if(sk.k==="rev") B.targets=B.allies.filter(function(a){return !a.alive;});
+    else B.targets=B.allies.filter(function(a){ return a.alive&&dist(u,a)<=sk.rng; });
+  } else if(sk.r==="line"){
+    B.targets=[]; for(var d=1;d<=sk.rng;d++){ [[d,0],[-d,0],[0,d],[0,-d]].forEach(function(o){ var x=u.x+o[0],y=u.y+o[1]; if(x>=0&&x<8&&y>=0&&y<8) B.targets.push({x:x,y:y,cell:true}); }); }
+  } else if(sk.r==="area"){
+    B.targets=[]; for(var x=0;x<8;x++)for(var y=0;y<8;y++){ if(Math.abs(x-u.x)+Math.abs(y-u.y)<=sk.rng) B.targets.push({x:x,y:y,cell:true}); }
+  }
+  if(sk.r==="s"&&!B.targets.length){ toast("範囲内に目標がいません"); B.mode="action"; B.pendingSkill=null; }
+  renderBattle();
+}
+function executeSkill(tx,ty){
+  var u=B.sel; var ps=B.pendingSkill; var sk=ps.sk;
+  B.confirm=null;
+  u.mp-=sk.mp;
+  blog("🔷 "+u.name+" の技「<b>"+sk.n+"</b>」！");
+  var foesAlive=function(){ return B.foes.filter(function(f){return f.alive;}); };
+  if(sk.k==="d"||sk.k==="dh"){
+    var targets=[];
+    if(sk.r==="s"){ var t=unitAt(tx,ty); if(t) targets=[t]; }
+    else if(sk.r==="self") targets=foesAlive().filter(function(f){return dist(u,f)<=sk.rng;});
+    else if(sk.r==="all") targets=foesAlive();
+    else if(sk.r==="line"){ var dx=Math.sign(tx-u.x), dy=Math.sign(ty-u.y); for(var d=1;d<=sk.rng;d++){ var t2=unitAt(u.x+dx*d,u.y+dy*d); if(t2&&t2.side==="e") targets.push(t2); } }
+    else if(sk.r==="area"){ targets=foesAlive().filter(function(f){return Math.abs(f.x-tx)<=1&&Math.abs(f.y-ty)<=1;}); }
+    if(!targets.length) blog("…しかし当たらなかった");
+    targets.forEach(function(t){ var hits=sk.hits||1; for(var h=0;h<hits;h++){ if(t.alive) dealDamage(u,t,sk.v,sk); } });
+    if(sk.k==="dh"){
+      if(sk.healAll) B.allies.forEach(function(a){ if(a.alive) healUnit(u,a,sk.healAll,null); });
+      else if(sk.healLow){ var low=null; B.allies.forEach(function(a){ if(a.alive&&(!low||a.hp/a.maxhp<low.hp/low.maxhp)) low=a; }); if(low) healUnit(u,low,sk.healLow,null); }
+    }
+  } else if(sk.k==="h"||sk.k==="hb"){
+    var at=[];
+    if(sk.r==="s"){ var t4=unitAtIncludingDead(tx,ty); if(t4) at=[t4]; }
+    else if(sk.r==="self") at=B.allies.filter(function(a){return dist(u,a)<=sk.rng;});
+    else if(sk.r==="all") at=B.allies.slice();
+    else if(sk.r==="area") at=B.allies.filter(function(a){return Math.abs(a.x-tx)<=1&&Math.abs(a.y-ty)<=1;});
+    at.forEach(function(a){ healUnit(u,a,sk.v,sk); applyBuffsTo(a,sk); });
+    if(sk.revive){ B.allies.forEach(function(a){ if(!a.alive){ if(sk.r==="all"||(sk.r==="self"&&dist(u,a)<=sk.rng)) healUnit(u,a,0,sk); } }); }
+  } else if(sk.k==="b"){
+    var bt2=[];
+    if(sk.r==="s"){ var t5=unitAt(tx,ty); if(t5) bt2=[t5]; }
+    else bt2=B.allies.filter(function(a){return a.alive;});
+    bt2.forEach(function(a){ applyBuffsTo(a,sk); });
+    blog("味方に加護がかかった");
+  } else if(sk.k==="rev"){
+    var t6=unitAtIncludingDead(tx,ty);
+    if(t6&&!t6.alive){ healUnit(u,t6,0,{revive:sk.v}); if(sk.buff) applyBuffsTo(t6,sk); }
+  }
+  if(sk.selfDef){ addBuff(u,{stat:"def",pct:sk.selfDef,turns:1}); blog(u.name+" の防御が "+sk.selfDef+"%（1巡）― 諸刃の反動！"); }
+  finishAction();
+  if(!B.over && !B.foes.some(function(f){return f.alive;})) return endBattle(true);
+  renderBattle();
+}
+/* ============ 行動順（全員混在・素早さ順の個別ターン制） ============
+   各巡の開始時に生存する全ユニットを実効素早さの降順で並べた行動順表を確定する。
+   同速は味方→敵、同じ陣営内は従来の並び順で決定的に処理する。
+   素早さのバフ／デバフは確定済みの当巡の順表には影響せず、次巡の順表から反映する。
+   バフ／デバフ／持続回復の残り巡の減少は、各ユニット自身のターン開始時に処理する。 */
+function buildOrder(){
+  var list=allUnits().filter(function(u){ return u.alive; });
+  var dec=list.map(function(u,i){ return {u:u, i:i, spd:effStat(u,"spd")}; });
+  dec.sort(function(a,b){
+    if(b.spd!==a.spd) return b.spd-a.spd;
+    if(a.u.side!==b.u.side) return a.u.side==="a"?-1:1;
+    return a.i-b.i;
+  });
+  B.order=dec.map(function(d){ return d.u; });
+  B.turnIdx=0;
+}
+/* 敵の対象選択（種類別）。どの分岐でも同条件（同距離・同HP割合）では
+   B.allies の並び順で先に来る者を選び、毎回同じ結果になる決定的な選択にする。 */
+function enemyPickTarget(e){
+  var aliveAllies=B.allies.filter(function(a){return a.alive;});
+  if(!aliveAllies.length) return null;
+  if(e.role==="attacker"){ /* ブラックバス：神を優先（神が戦闘不能なら最寄りへ） */
+    var god=null; aliveAllies.forEach(function(a){ if(a.god) god=a; });
+    if(god) return god;
+  }
+  if(e.role==="fast"){ /* 外来ザリガニ：HP割合が最も低い味方（同割合なら並び順で先の者） */
+    var low=null; aliveAllies.forEach(function(a){ if(!low||a.hp/a.maxhp<low.hp/low.maxhp) low=a; });
+    return low;
+  }
+  var best=null, bd=Infinity;
+  aliveAllies.forEach(function(a){ var d=dist(e,a); if(d<bd){ bd=d; best=a; } });
+  return best;
+}
+/* ブルーギル（支援型）の回復対象：傷ついた仲間の敵。自分以外を優先し、
+   同条件ならHP割合が最も低い者（同割合なら B.foes の並び順で先の者）。 */
+function enemyHealTarget(e){
+  var wounded=B.foes.filter(function(f){ return f.alive&&f.hp<f.maxhp; });
+  if(!wounded.length) return null;
+  var others=wounded.filter(function(f){ return f!==e; });
+  var pool=others.length?others:wounded;
+  var best=null;
+  pool.forEach(function(f){ if(!best||f.hp/f.maxhp<best.hp/best.maxhp) best=f; });
+  return best;
+}
+function enemyAct(e){
+  if(e.role==="support"){ /* ブルーギル：回復を優先。回復対象がいなければ通常攻撃 */
+    var ht=enemyHealTarget(e);
+    if(ht){
+      if(ht!==e) enemyMove(e,ht);
+      if(dist(e,ht)<=1){ healUnit(e,ht,ENEMY_PROFILES.bluegill.healPct,null); return; }
+      /* 回復対象に届かなかった場合は、その場で隣接する味方がいれば攻撃する（移動は二重に行わない） */
+      var adj=null; B.allies.forEach(function(a){ if(!adj&&a.alive&&dist(e,a)<=1) adj=a; });
+      if(adj) dealDamage(e,adj,100,null);
+      return;
+    }
+  }
+  var tgt=enemyPickTarget(e); if(!tgt) return;
+  if(e.role==="defender") enemyMovePreferWater(e,tgt); else enemyMove(e,tgt);
+  if(dist(e,tgt)<=1&&tgt.alive){
+    dealDamage(e,tgt,100,null);
+    if(e.role==="push"&&tgt.alive) pushUnit(e,tgt); /* 大ナマズ：既存の押し出し処理（岩・占有判定つき）を再利用 */
+  }
+}
+/* 行動順表に沿ってターンを進める。敵のターンはAIで即時実行し、次の味方のターンで止まる。
+   味方のターンが来たら、そのユニットを選択状態にしてプレイヤー操作を待つ。 */
+function processTurns(){
+  if(!B||B.over) return;
+  if(!B.foes.some(function(f){return f.alive;})) return;
+  while(B.turnIdx<B.order.length){
+    var u=B.order[B.turnIdx];
+    if(!u.alive){ u.acted=true; B.turnIdx++; continue; }
+    if(u.side==="e"){
+      B.cur=u; u.turnSeq=(u.turnSeq||0)+1; startTurnEffects(u);
+      if(u.alive&&!B.over) enemyAct(u);
+      endTurnTicks(u);
+      u.acted=true; B.turnIdx++;
+      if(B.over){ B.cur=null; B.sel=null; return; }
+      continue;
+    }
+    if(B.skipAllies){ blog(u.name+" は待機した"); u.turnSeq=(u.turnSeq||0)+1; startTurnEffects(u); endTurnTicks(u); u.acted=true; B.turnIdx++; continue; }
+    B.cur=u; u.turnSeq=(u.turnSeq||0)+1; startTurnEffects(u);
+    if(!u.alive){ u.acted=true; B.turnIdx++; continue; }
+    if(B.over) return;
+    B.sel=u; B.moved=false; B.mode="move"; B.targets=moveTargets(u); B.showSkills=false; B.confirm=null; B.pendingSkill=null; B.focus={x:u.x,y:u.y};
+    return;
+  }
+  /* 全員が行動し終えたら次の巡へ：順表を作り直す（素早さの増減はここから反映） */
+  B.round++;
+  B.skipAllies=false; B.cur=null; B.sel=null;
+  allUnits().forEach(function(w){ w.acted=false; });
+  blog("―― 第"+B.round+"巡 ――");
+  buildOrder();
+  processTurns();
+}
+function finishAction(){
+  if(B.sel){ B.sel.acted=true; endTurnTicks(B.sel); }
+  var cur=B.cur;
+  B.sel=null; B.mode="select"; B.targets=[]; B.pendingSkill=null; B.showSkills=false; B.confirm=null;
+  if(B.over) return;
+  if(!B.foes.some(function(f){return f.alive;})) return; /* 勝利判定は呼び出し側の endBattle に任せる */
+  if(cur&&B.order[B.turnIdx]===cur) B.turnIdx++;
+  B.cur=null;
+  processTurns();
+}
+function waitUnit(){ if(B.sel){ blog(B.sel.name+" は待機した"); finishAction(); renderBattle(); } }
+/* バフ／デバフ／持続効果の期間管理：
+   - 持続回復の発動は、そのユニット自身のターン開始時。
+   - 残り巡数の減算は、そのユニット自身のターン終了時。したがって「残り1巡」の効果は
+     対象ユニットの次の行動の間も残り、その行動が終わるまでは消えない。
+   - そのユニット自身の行動中に付けられた効果（自己バフ等）は、その行動の終了時には減算しない
+     （addBuff が付与時点のターン番号 born を記録し、endTurnTicks は born が現在のターンと
+      同じものを減算対象から外す）。 */
+function addBuff(u,b){ b.born=(u.turnSeq||0); u.buffs.push(b); }
+function startTurnEffects(u){
+  if(!u.alive) return;
+  u.buffs.forEach(function(b){
+    if(b.stat==="hot"){ var amt=Math.round(u.maxhp*b.pct/100); u.hp=Math.min(u.maxhp,u.hp+amt); blog("♨️ "+u.name+" は持続回復で "+amt+" 回復"); }
+  });
+}
+function endTurnTicks(u){
+  var kept=[];
+  u.buffs.forEach(function(b){
+    if(b.born!==undefined && b.born>=(u.turnSeq||0)){ kept.push(b); return; }
+    b.turns--; if(b.turns>0) kept.push(b);
+  });
+  u.buffs=kept;
+}
+/* 敵の移動：目標セルからBFSで全マスへの最短距離表を作り、プレイヤー用BFS（moveDistances）で
+   到達可能なマスの中から、その距離が最も小さくなるマスへ進む。岩や他ユニットで直進が塞がれていても、
+   一時的に遠回りになる迂回路をたどって目標に隣接できる。目標選定・移動力・岩/占有ルールは従来どおり */
+function enemyMove(e,tgt){
+  if(dist(e,tgt)<=1) return;
+  var dg={}; dg[tgt.x+","+tgt.y]=0; var q=[[tgt.x,tgt.y,0]];
+  while(q.length){ var cur=q.shift(); var cx=cur[0], cy=cur[1], d=cur[2];
+    [[1,0],[-1,0],[0,1],[0,-1]].forEach(function(o){ var nx=cx+o[0], ny=cy+o[1]; if(nx<0||nx>7||ny<0||ny>7) return; var k=nx+","+ny; if(dg[k]!==undefined) return; if(isBlockedTile(nx,ny)) return; var occ=unitAt(nx,ny); if(occ&&occ!==e&&occ!==tgt) return; dg[k]=d+1; q.push([nx,ny,d+1]); });
+  }
+  var curKey=e.x+","+e.y; if(dg[curKey]===undefined) return;
+  var reach=moveDistances(e); var bestKey=null, bestD=dg[curKey], bestSteps=-1;
+  Object.keys(reach).forEach(function(k){ var dk=dg[k]; if(dk===undefined) return; if(dk<bestD||(dk===bestD&&bestKey&&reach[k]>bestSteps)){ bestD=dk; bestSteps=reach[k]; bestKey=k; } });
+  if(bestKey){ var p=bestKey.split(","); e.x=parseInt(p[0]); e.y=parseInt(p[1]); }
+}
+/* 外来ガメ（防御型）専用の行き先選択：enemyMove と同じ距離表（BFS）と到達可能マスを使い、
+   行き先を選ぶ段階のスコアだけを変える（目標への距離が同じなら浅瀬のマスを優先する）。
+   経路探索・迂回処理そのものには手を入れていない。浅瀬に乗れば地形の防御×1.15が
+   ダメージ計算時に自動で重なる（補正はマス側に付く既存仕様）。 */
+function enemyMovePreferWater(e,tgt){
+  if(dist(e,tgt)<=1) return;
+  var dg={}; dg[tgt.x+","+tgt.y]=0; var q=[[tgt.x,tgt.y,0]];
+  while(q.length){ var cur=q.shift(); var cx=cur[0], cy=cur[1], d=cur[2];
+    [[1,0],[-1,0],[0,1],[0,-1]].forEach(function(o){ var nx=cx+o[0], ny=cy+o[1]; if(nx<0||nx>7||ny<0||ny>7) return; var k=nx+","+ny; if(dg[k]!==undefined) return; if(isBlockedTile(nx,ny)) return; var occ=unitAt(nx,ny); if(occ&&occ!==e&&occ!==tgt) return; dg[k]=d+1; q.push([nx,ny,d+1]); });
+  }
+  var curKey=e.x+","+e.y; if(dg[curKey]===undefined) return;
+  var reach=moveDistances(e); var bestKey=null, bestD=dg[curKey], bestSteps=-1;
+  var bestWater=terrainAt(e.x,e.y)==="water"?1:0;
+  Object.keys(reach).forEach(function(k){ var dk=dg[k]; if(dk===undefined) return; var pp=k.split(","); var w=terrainAt(parseInt(pp[0]),parseInt(pp[1]))==="water"?1:0;
+    if(dk<bestD||(dk===bestD&&(w>bestWater||(w===bestWater&&bestKey&&reach[k]>bestSteps)))){ bestD=dk; bestSteps=reach[k]; bestKey=k; bestWater=w; } });
+  if(bestKey){ var p=bestKey.split(","); e.x=parseInt(p[0]); e.y=parseInt(p[1]); }
+}
+/* 「残りの味方全員を待機させて順送り」：この巡にまだ行動していない味方は待機扱いにし、
+   行動順表に沿って残りのターン（敵を含む）を進める。次巡からは通常どおり全員が行動できる。 */
+function enemyPhase(){
+  if(!B||B.over) return;
+  B.skipAllies=true;
+  blog("―― 残りの味方は待機し、行動順を進める ――");
+  if(B.sel){ blog(B.sel.name+" は待機した"); finishAction(); } else { processTurns(); }
+}
+function endBattle(win){
+  B.over=true;
+  var loot=B.loot; var got={};
+  Object.keys(loot).forEach(function(m){ got[m]= win?loot[m]:Math.floor(loot[m]/2); if(got[m]>0) G.mats[m]+=got[m]; });
+  var gotStr=Object.keys(got).filter(function(m){return got[m]>0;}).map(function(m){return m+"×"+got[m];}).join("・")||"なし";
+  if(win){ G.wins++; G.cleared[B.si+"-"+B.di]=true; }
+  G.lastResult=(win?"探索に勝利":"探索は敗北")+"（"+STAGES[B.si].name+" 深度"+(B.di+1)+"）素材："+gotStr;
+  blog(win?"🎉 <b>勝利！</b> 素材を手に入れた："+gotStr:"敗北…半分だけ持ち帰った："+gotStr);
+  advanceTurn();
+  renderBattle();
+}
+function leaveBattle(){ B=null; view= G.finished?"ending":"explore"; render(); }
+function terrainInfo(x,y){
+  var t=TERRAIN[y*8+x];
+  if(t==="rock") return {name:"岩場", cost:"侵入不可", note:"オレンジ枠＋×のマスには入れません。補正なし"};
+  if(t==="water") return {name:"浅瀬", cost:"移動コスト 1", note:"防御補正あり：このマスのユニットは防御+15%（被ダメージが軽減されます）。味方・敵とも同じ"};
+  return {name:"草地", cost:"移動コスト 1", note:"補正なし（基本地形）"};
+}
+/* ---- 戦闘描画（渓流の一手イメージ準拠） ---- */
+function renderBattle(){
+  var app=$("app");
+  var cells="";
+  var order=[]; for(var yy=0;yy<8;yy++) for(var xx=0;xx<8;xx++) order.push([xx,yy]);
+  order.sort(function(a,b){ return (a[0]+a[1])-(b[0]+b[1]); });
+  order.forEach(function(pos){
+    var x=pos[0], y=pos[1];
+    var u=unitAt(x,y);
+    var isTgt=B.targets.some(function(tt){return tt.x===x&&tt.y===y;});
+    var isMoveCell = B.mode==="move" && B.targets.indexOf(x+","+y)>=0;
+    var blocked = isBlockedTile(x,y) && !u;
+    var inConfirm = B.confirm && Math.abs(x-B.confirm.x)<=1 && Math.abs(y-B.confirm.y)<=1;
+    var cls="iso-cell t-"+TERRAIN[y*8+x];
+    if(isMoveCell) cls+=" is-move"; else if((isTgt&&B.mode==="target")||inConfirm) cls+=" is-target";
+    if(blocked) cls+=" is-blocked";
+    if(B.sel&&u===B.sel) cls+=" is-sel";
+    var left=((x-y+7)*6.25).toFixed(2); var top=((x+y)*5.9).toFixed(2);
+    var z=(x+y)*10+5;
+    var inner='<span class="side"></span><span class="diamond"></span>';
+    if(blocked) inner+='<span class="blocked-x">×</span>';
+    if(u){
+      var isCur = B.sel===u && !B.over;
+      inner+='<span class="unit '+(u.side==="e"?"enemy":"")+(u.god?" god":"")+(u.alive?"":" dead")+(u.acted&&u.side==="a"?" acted":"")+'">'
+        +(isCur?'<span class="u-active">👉</span>':"")
+        +'<span class="u-art">'+unitArt(u)+'</span>'
+        +'<span class="u-ring"></span>'
+        +'<span class="u-hpbar"><i class="'+(u.hp/u.maxhp<0.3?"low":"")+'" style="width:'+Math.max(0,Math.round(u.hp/u.maxhp*100))+'%"></i></span>'
+        +'<span class="u-nameplate">'+esc(u.name)+'</span></span>';
+    }
+    cells+='<button class="'+cls+'" style="left:'+left+'%;top:'+top+'%;z-index:'+z+'" data-cell="'+x+','+y+'" aria-label="'+x+','+y+'">'+inner+'</button>';
+  });
+  /* top enemy HP bar (single pill, like reference) */
+  var segs=B.foes.map(function(f){
+    return '<span class="seg'+(f.alive?"":" dead")+'"><span class="nm">'+esc(f.name)+'</span><span class="bar"><i style="width:'+Math.max(0,Math.round(f.hp/f.maxhp*100))+'%"></i></span><span class="hp">'+f.hp+'/'+f.maxhp+'</span></span>';
+  }).join("");
+  var topbar='<div class="b-topbar">'+segs+'</div>';
+  /* skill targeting bar (range-confirm reference) */
+  var skillbar="";
+  if(!B.over && B.mode==="target" && B.pendingSkill){
+    var sk=B.pendingSkill.sk;
+    skillbar='<div class="b-skillbar"><span class="sk-nm">'+esc(sk.n)+'</span><span>消費神力 '+sk.mp+'</span><span>／</span><span>'+(sk.r==="area"?"範囲の中心マスをタップで確認":sk.r==="line"?"方向のマスをタップで決定":"対象をタップで決定")+'</span><button class="cancel" id="btn-cancel2">キャンセル</button></div>';
+  }
+  /* minimap */
+  var mini="";
+  for(var my=0;my<8;my++) for(var mx=0;mx<8;mx++){ var mu=unitAt(mx,my); var mc=TERRAIN[my*8+mx]==="water"?"w":TERRAIN[my*8+mx]==="rock"?"r":""; if(mu) mc=mu.side==="a"?"a":"e"; mini+='<i class="'+mc+'"></i>'; }
+  var foesLeft=B.foes.filter(function(f){return f.alive;}).length;
+  var sideHtml='<div class="bs-title">あなたの一手</div>'
+   +'<div class="bs-round"><b>'+B.round+'</b> 巡</div>'
+   +'<div class="bs-left">敵全滅まで あと'+foesLeft+'体</div>'
+   +'<div class="bs-left">行動順は各巡の開始時に素早さで確定（素早さの増減は次巡から反映）</div>'
+   +'<div class="bs-sec">全体MAP</div><div class="minimap">'+mini+'</div><div class="mini-legend"><span style="color:#7ec8ff">●</span> 味方　<span style="color:#ff8a7a">●</span> 敵<br><span style="color:#2ea8e0">■</span> 浅瀬（防御+15%）　<span style="color:#5da85e">■</span> 草地　<span style="color:#8a8474">■</span> 岩場</div>'
+   +'<div class="bs-sec">ステージ'+(B.si+1)+'</div><div class="bs-stage">'+esc(STAGES[B.si].name.replace(/^ステージ\d+ /,""))+' 深度'+(B.di+1)+'</div><div class="bs-obj">目標：敵の全滅</div>'
+   +'<div class="bs-sec">獲得予定の素材</div><div>'+lootStr(B.loot)+'</div>'
+   +'<div class="bs-sec">戦闘ログ</div><div class="b-log">'+B.logs.slice().reverse().join("<br>")+'</div>'
+   +(!B.over?'<button class="btn ghost sm" id="btn-endphase" style="margin-top:12px;background:transparent;color:#eef3e6;border-color:rgba(120,200,210,.6)">残りの味方全員 待機（この巡を順送り）</button>':"");
+  /* turn order rail */
+  /* 行動順レールは、その巡の開始時に確定した順表（B.order）をそのまま表示する。
+     巡の途中で蘇生した等で順表に無いユニットは末尾に置き、この巡は行動しない（次巡から参加）。 */
+  var railUnits=(B.order&&B.order.length)?B.order.slice():allUnits().slice();
+  allUnits().forEach(function(u){ if(railUnits.indexOf(u)<0) railUnits.push(u); });
+  var rail='<div class="tr-title">行動順</div>'+railUnits.map(function(u){
+    var pos=B.order?B.order.indexOf(u):-1;
+    var isDone=u.acted||(pos>=0&&pos<B.turnIdx);
+    var isCur=!B.over&&B.cur===u&&pos===B.turnIdx;
+    return '<div class="turn-item '+(u.side==="e"?"enemy":"")+(isDone?" done":"")+(isCur?" cur":"")+(u.alive?"":" dead")+'"><span class="tnum">'+(pos>=0?(pos+1):"―")+'</span><div class="tart">'+unitArt(u)+'</div><div class="tname">'+esc(u.name)+'</div><div class="tspd">素早さ '+effStat(u,"spd")+'</div></div>';
+  }).join("");
+  /* floating command menu */
+  var menu="";
+  if(!B.over && B.sel){
+    var u2=B.sel;
+    menu='<div class="b-menu"><div class="bm-name">'+esc(u2.name)+'</div><div class="bm-sub">HP '+u2.hp+'/'+u2.maxhp+(u2.maxmp?'　神力 '+u2.mp+'/'+u2.maxmp:"")+'　攻'+effStat(u2,"atk")+' 防'+effStat(u2,"def")+(terrainAt(u2.x,u2.y)==="water"?' <span style="color:#7ec8ff;font-weight:800">浅瀬：防御+15%</span>':"")+'</div>';
+    if(B.mode==="move"){
+      menu+='<p class="bm-guide">水色のマスが移動範囲です。岩マス（オレンジ枠＋×）には入れません。青い菱形が浅瀬（防御+15%）、緑が草地（補正なし）です。</p>'
+       +'<button class="bm-btn sel" id="btn-stay">移動しない</button>';
+    } else if(B.mode==="action"){
+      if(!B.showSkills){
+        menu+='<button class="bm-btn" id="btn-atk">攻撃</button>';
+        if(u2.god) menu+='<button class="bm-btn" id="btn-skills">技 ＞</button>';
+        menu+='<button class="bm-btn" id="btn-wait">待機</button>';
+      } else {
+        var ls=learnedSkills();
+        if(!ls.length) menu+='<p class="bm-guide">まだ技を覚えていません。スキルツリーで解放できます。</p>';
+        ls.forEach(function(l){ var sk2=l.sk; menu+='<button class="bm-btn" data-bskill="'+l.cat+'-'+l.idx+'" '+(u2.mp>=sk2.mp?"":"disabled")+'><span>'+esc(sk2.n)+'</span> <span class="cost">神力'+sk2.mp+'</span><br><span class="rng">'+rangeLabel(sk2)+'｜'+esc(skillDesc(sk2))+'</span></button>'; });
+        menu+='<button class="bm-btn" id="btn-backskills">＜ もどる</button>';
+      }
+    } else if(B.mode==="target"){
+      menu+='<p class="bm-guide">'+(B.pendingSkill?"赤〜ピンクのマス／対象を選んでください。":"隣接する敵を選んでください。")+'</p>'
+       +'<button class="bm-btn" id="btn-cancel">もどる</button>';
+    }
+    menu+='</div>';
+  }
+  var hint="";
+  if(!B.over && B.mode==="select") hint='<div class="b-hint">行動順に進んでいます（命中・回避なし／必ず当たります）</div>';
+  /* terrain info */
+  var fc = B.focus || (B.sel?{x:B.sel.x,y:B.sel.y}:{x:2,y:5});
+  var ti = terrainInfo(fc.x,fc.y);
+  var terrain='<div class="b-terrain"><div class="tt"><b id="t-name">'+ti.name+'</b><span>地形情報</span></div><div class="td" id="t-body">X'+String(fc.x).padStart(2,"0")+' Y'+String(fc.y).padStart(2,"0")+'<br>'+ti.cost+'<br>'+ti.note+'</div></div>';
+  /* prediction panel for area skills */
+  var predict="";
+  if(B.confirm && B.pendingSkill && B.sel){
+    var sk3=B.pendingSkill.sk; var src=B.sel;
+    var rowsHtml="";
+    B.foes.forEach(function(f){
+      if(!f.alive) return;
+      if(Math.abs(f.x-B.confirm.x)<=1 && Math.abs(f.y-B.confirm.y)<=1){
+        var dmg=previewDamage(src,f,sk3.v)*(sk3.hits||1);
+        var after=Math.max(0,f.hp-dmg);
+        rowsHtml+='<div class="bp-row"><div class="r1"><span>'+esc(f.name)+(terrainAt(f.x,f.y)==="water"?' <span style="color:#7ec8ff;font-size:11px;font-weight:800">浅瀬 防御+15%</span>':"")+'</span><span>HP '+f.hp+' → '+after+'</span></div><div class="bp-bar"><i style="width:'+Math.round(after/f.maxhp*100)+'%"></i><s style="width:'+Math.round((f.hp-after)/f.maxhp*100)+'%"></s></div><div>ダメージ '+dmg+'（命中 確定）</div></div>';
+      }
+    });
+    if(!rowsHtml) rowsHtml='<div class="bp-row">範囲内に敵はいません</div>';
+    predict='<div class="b-predict"><div class="bp-t">攻撃予測</div><div class="bp-name">'+esc(sk3.n)+'<span class="bp-cost">消費神力 '+sk3.mp+'</span><span style="font-size:12px;color:#b9cdc2">範囲：3×3</span></div>'
+     +rowsHtml+'<div class="bp-btns"><button class="btn gold" id="btn-confirm-ok">決定する</button><button class="btn ghost" id="btn-confirm-no" style="background:transparent;color:#eef3e6;border-color:rgba(120,200,210,.6)">やめる</button></div></div>';
+  }
+  var result="";
+  if(B.over){
+    result='<div class="b-result"><h3>'+(B.foes.some(function(f){return f.alive;})?"敗北…":"🎉 勝利！")+'</h3><p style="font-size:13.5px;line-height:1.7">'+esc(G.lastResult)+'</p><button class="btn gold" id="btn-leave" style="width:100%">拠点へ戻る</button></div>';
+  }
+  var uchips=allUnits().map(function(u){
+    var buffTxt=u.buffs.map(function(b){return (b.stat==="shield"?"被ダメ減":b.stat==="hot"?"持続回復":paramName2(b.stat)+(b.pct>0?"+":"")+b.pct+"%");}).join(" ");
+    if(u.alive&&terrainAt(u.x,u.y)==="water") buffTxt=(buffTxt?buffTxt+" ":"")+"浅瀬 防御+15%";
+    var roleTxt=(u.side==="e"&&u.art&&ENEMY_PROFILES[u.art])?' <span style="font-size:11px;color:#ffb59d;font-weight:800">'+ENEMY_PROFILES[u.art].label+'</span>':"";
+    return '<span class="b-uchip'+(B.sel===u?" cur":"")+(u.acted?" acted":"")+(u.alive?"":" dead")+'"><span class="mini-art">'+unitArt(u)+'</span><span><b>'+esc(u.name)+'</b>'+roleTxt+(u.alive?"":"（倒れた）")+'<br><span class="ubar" style="display:block"><i style="width:'+Math.max(0,Math.round(u.hp/u.maxhp*100))+'%"></i></span>HP '+u.hp+'/'+u.maxhp+(buffTxt?'｜'+esc(buffTxt):"")+'</span></span>';
+  }).join("");
+  app.innerHTML='<div class="battle-scene">'
+   +'<aside class="b-side">'+sideHtml+'</aside>'
+   +'<div class="b-main">'+topbar+skillbar
+   +'<div class="b-stage"><img src="assets/bg-battle-real.jpg" alt="ひなんじょ作の戦闘シーン（台風と渓流）"><div class="iso-board">'+cells+'</div>'+menu+hint+terrain+predict+result+'</div>'
+   +'<div class="b-units">'+uchips+'</div></div>'
+   +'<aside class="b-rail">'+rail+'</aside></div>';
+  bindBattle();
+}
+function bindBattle(){
+  document.querySelectorAll("[data-cell]").forEach(function(c){
+    c.addEventListener("mouseenter", function(){
+      if(!B) return;
+      var p=c.dataset.cell.split(","); var x=parseInt(p[0]), y=parseInt(p[1]);
+      B.focus={x:x,y:y};
+      var ti=terrainInfo(x,y); var tn=$("t-name"), tb=$("t-body");
+      if(tn) tn.textContent=ti.name;
+      if(tb) tb.innerHTML="X"+String(x).padStart(2,"0")+" Y"+String(y).padStart(2,"0")+"<br>"+ti.cost+"<br>"+ti.note;
+    });
+    c.addEventListener("click", function(){
+    if(!B||B.over) return;
+    var p=c.dataset.cell.split(","); var x=parseInt(p[0]), y=parseInt(p[1]); var u=unitAt(x,y);
+    B.focus={x:x,y:y};
+    if(B.mode==="select"){ if(u&&u.side==="a") selectUnit(u); return; }
+    if(!B.sel) return;
+    if(B.mode==="move"){
+      if(u===B.sel){ afterMove(); return; }
+      if(B.targets.indexOf(x+","+y)>=0){ B.sel.x=x; B.sel.y=y; B.moved=true; B.focus={x:x,y:y}; afterMove(); }
+      return;
+    }
+    if(B.mode==="target"){
+      if(B.pendingSkill){
+        var ok=B.targets.some(function(t){return t.x===x&&t.y===y;});
+        if(ok){
+          if(B.pendingSkill.sk.r==="area" && !B.confirm){ B.confirm={x:x,y:y}; renderBattle(); return; }
+          executeSkill(x,y);
+        }
+        return;
+      }
+      if(u&&u.side==="e"&&dist(B.sel,u)<=1){ var s=B.sel; dealDamage(s,u,100,null); finishAction(); if(!B.foes.some(function(f){return f.alive;})) endBattle(true); renderBattle(); }
+      return;
+    }
+  }); });
+  var stay=$("btn-stay"); if(stay) stay.addEventListener("click", afterMove);
+  var desel=$("btn-deselect"); if(desel) desel.addEventListener("click", function(){ if(B.cur){ B.sel=B.cur; B.mode="move"; B.targets=moveTargets(B.cur); } renderBattle(); });
+  var atk=$("btn-atk"); if(atk) atk.addEventListener("click", chooseAttack);
+  var skb=$("btn-skills"); if(skb) skb.addEventListener("click", function(){ B.showSkills=true; renderBattle(); });
+  var bsk=$("btn-backskills"); if(bsk) bsk.addEventListener("click", function(){ B.showSkills=false; renderBattle(); });
+  var wait=$("btn-wait"); if(wait) wait.addEventListener("click", waitUnit);
+  var cancelFn=function(){ B.mode="action"; B.pendingSkill=null; B.targets=[]; B.confirm=null; renderBattle(); };
+  var cancel=$("btn-cancel"); if(cancel) cancel.addEventListener("click", cancelFn);
+  var cancel2=$("btn-cancel2"); if(cancel2) cancel2.addEventListener("click", cancelFn);
+  var cok=$("btn-confirm-ok"); if(cok) cok.addEventListener("click", function(){ var cx=B.confirm.x, cy=B.confirm.y; executeSkill(cx,cy); });
+  var cno=$("btn-confirm-no"); if(cno) cno.addEventListener("click", function(){ B.confirm=null; renderBattle(); });
+  var endp=$("btn-endphase"); if(endp) endp.addEventListener("click", function(){ enemyPhase(); renderBattle(); });
+  var leave=$("btn-leave"); if(leave) leave.addEventListener("click", leaveBattle);
+  document.querySelectorAll("[data-bskill]").forEach(function(b){ b.addEventListener("click", function(){ var p=b.dataset.bskill.split("-"); chooseSkill(p[0], parseInt(p[1])); }); });
+}
+</script>
+<script>
+"use strict";
+/* PWA: Service Worker 登録（オフライン起動・ホーム画面追加用）。
+   対応していない環境や埋め込み表示で登録できない場合は、そのまま通常表示で遊べます。 */
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("assets/sw.js").then(function (reg) {
+      if (reg && reg.update) { reg.update(); }
+    }).catch(function () { /* 登録できなくてもゲームはそのまま動作します */ });
+  });
+}
+</script>
+</body>
+</html>
