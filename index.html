@@ -295,7 +295,38 @@ select{font-family:inherit;font-size:calc(var(--k)*15);padding:calc(var(--k)*8);
   .map-marker.sel{width:calc(var(--k)*52);height:calc(var(--k)*52);font-size:calc(var(--k)*21)}
 }
 /* ---------- BATTLE ---------- */
-.battle-scene{display:grid;grid-template-columns:calc(var(--k)*172) minmax(0,1fr) calc(var(--k)*58);gap:0;height:100%;overflow:hidden;background:#0a222b}
+.battle-scene{display:grid;grid-template-columns:calc(var(--k)*198) calc(var(--k)*172) minmax(0,1fr) calc(var(--k)*58);gap:0;height:100%;overflow:hidden;background:#0a222b}
+/* 左端の常設ステータス枠：最後にタップ／選択したキャラの情報をここに出す。
+   行動メニュー側にはステータスを一切置かないための受け皿。 */
+.b-status{background:linear-gradient(180deg,#123a47,#0a222b);color:#eef3e6;padding:calc(var(--k)*14) calc(var(--k)*12);border-right:1.5px solid rgba(230,200,120,.55);display:flex;flex-direction:column;gap:0;overflow-y:auto;min-height:0}
+.b-status .bsp-sec{font-size:calc(var(--k)*12);font-weight:900;color:#9fc3bb;letter-spacing:.1em;margin-bottom:calc(var(--k)*9)}
+.b-status .bsp-head{display:flex;gap:calc(var(--k)*10);align-items:center}
+.b-status .bsp-face{width:calc(var(--k)*56);height:calc(var(--k)*56);flex:none;border-radius:calc(var(--k)*10);border:2px solid rgba(230,200,120,.8);background:rgba(235,245,235,.14);object-fit:contain}
+.b-status .bsp-face.god{object-fit:cover;object-position:top center}
+.b-status .bsp-name{font-family:"Shippori Mincho",serif;font-size:calc(var(--k)*17.5);font-weight:800;line-height:1.3}
+.b-status .bsp-tag{display:inline-block;font-size:calc(var(--k)*10.5);font-weight:900;border-radius:calc(var(--k)*99);padding:1px calc(var(--k)*8);margin-top:2px}
+.b-status .bsp-tag.a{background:rgba(74,144,217,.3);color:#aed6ff;border:1px solid rgba(126,200,255,.7)}
+.b-status .bsp-tag.e{background:rgba(239,83,80,.25);color:#ffb59d;border:1px solid rgba(255,138,122,.7)}
+.b-status .bsp-role{margin-top:calc(var(--k)*8);font-size:calc(var(--k)*12.5);font-weight:800;color:#ffb59d}
+.b-status .bsp-bar-row{display:grid;grid-template-columns:calc(var(--k)*30) 1fr calc(var(--k)*62);align-items:center;gap:calc(var(--k)*7);margin-top:calc(var(--k)*9);font-size:calc(var(--k)*12);font-weight:800}
+.b-status .bsp-bar-row b{font-family:"Shippori Mincho",serif;font-size:calc(var(--k)*13.5);text-align:right}
+.b-status .bsp-bar{height:calc(var(--k)*9);background:rgba(255,255,255,.15);border-radius:calc(var(--k)*99);overflow:hidden}
+.b-status .bsp-bar>i{display:block;height:100%}
+.b-status .bsp-bar.hp>i{background:#7ed67e}
+.b-status .bsp-bar.hp>i.low{background:#ef5350}
+.b-status .bsp-bar.mp>i{background:#6db3e8}
+.b-status .bsp-stats{margin-top:calc(var(--k)*11);border-top:1px solid rgba(42,160,175,.5);padding-top:calc(var(--k)*8);display:flex;flex-direction:column;gap:calc(var(--k)*4)}
+.b-status .bsp-stat{display:flex;align-items:baseline;font-size:calc(var(--k)*13)}
+.b-status .bsp-stat span:first-child{color:#c8d4bd;font-weight:700}
+.b-status .bsp-stat b{margin-left:auto;font-family:"Shippori Mincho",serif;font-size:calc(var(--k)*16)}
+.b-status .bsp-delta{font-size:calc(var(--k)*11);font-weight:800;margin-left:calc(var(--k)*4)}
+.b-status .bsp-delta.up{color:#8fd07e}.b-status .bsp-delta.dn{color:#ff9a8a}
+.b-status .bsp-terr{margin-top:calc(var(--k)*11);border-top:1px solid rgba(42,160,175,.5);padding-top:calc(var(--k)*8);font-size:calc(var(--k)*12.5);line-height:1.8;color:#c8d4bd}
+.b-status .bsp-terr b{color:#eef3e6}
+.b-status .bsp-buffs{margin-top:calc(var(--k)*10);display:flex;flex-wrap:wrap;gap:calc(var(--k)*5)}
+.b-status .bsp-buff{font-size:calc(var(--k)*11);font-weight:800;border:1px solid rgba(143,208,126,.65);color:#cdeabd;background:rgba(95,154,78,.18);border-radius:calc(var(--k)*99);padding:2px calc(var(--k)*8)}
+.b-status .bsp-buff.de{border-color:rgba(255,138,122,.65);color:#ffc9b8;background:rgba(182,80,63,.18)}
+.b-status .bsp-dead{margin-top:calc(var(--k)*10);font-weight:900;color:#ff9a8a;font-size:calc(var(--k)*13)}
 .b-side{background:linear-gradient(180deg,#10333f,#0a222b);color:#eef3e6;padding:calc(var(--k)*14) calc(var(--k)*12);border-right:1.5px solid rgba(42,122,134,.7);display:flex;flex-direction:column;gap:0;overflow-y:auto;min-height:0}
 .b-side .bs-title{font-family:"Shippori Mincho",serif;font-size:calc(var(--k)*20);font-weight:800;letter-spacing:.06em}
 .b-side .bs-round{font-family:"Shippori Mincho",serif;font-size:calc(var(--k)*19);margin-top:calc(var(--k)*12)}
@@ -418,7 +449,6 @@ select{font-family:inherit;font-size:calc(var(--k)*15);padding:calc(var(--k)*8);
 .face-pad .fp-btn.sel{border-color:var(--gold);background:rgba(217,180,92,.22);color:#ffe9a8}
 .face-pad .fp-btn.sel .fl{color:var(--gold2)}
 .face-pad .fp-c{display:flex;align-items:center;justify-content:center;font-size:calc(var(--k)*15);color:rgba(230,200,120,.75)}
-.b-hint{position:absolute;left:calc(var(--k)*12);bottom:calc(var(--k)*12);z-index:15;background:rgba(10,32,40,.92);border:1px solid rgba(230,200,120,.6);color:#ffe9a8;border-radius:calc(var(--k)*99);padding:calc(var(--k)*7) calc(var(--k)*16);font-size:calc(var(--k)*13);font-weight:800;box-shadow:0 calc(var(--k)*4) calc(var(--k)*12) rgba(0,0,0,.35)}
 .b-terrain{position:absolute;right:calc(var(--k)*12);bottom:calc(var(--k)*12);z-index:15;width:calc(var(--k)*238);background:linear-gradient(170deg,rgba(18,58,71,.96),rgba(10,34,43,.97));border:1.5px solid rgba(42,160,175,.8);border-radius:calc(var(--k)*12);padding:calc(var(--k)*11) calc(var(--k)*14);color:#eef3e6;box-shadow:0 calc(var(--k)*8) calc(var(--k)*20) rgba(0,0,0,.4)}
 .b-terrain .tt{display:flex;justify-content:space-between;align-items:baseline}
 .b-terrain .tt b{font-family:"Shippori Mincho",serif;font-size:calc(var(--k)*18)}
@@ -500,7 +530,7 @@ select{font-family:inherit;font-size:calc(var(--k)*15);padding:calc(var(--k)*8);
 .turn-item.done{opacity:.42}.turn-item.cur{border-color:#e6c878;box-shadow:0 0 0 2.5px rgba(230,200,120,.65),0 0 calc(var(--k)*12) rgba(230,200,120,.5);transform:scale(1.16);z-index:2}
 .turn-item.dead{opacity:.3;filter:grayscale(1)}
 @media(max-width:900px){
-  .battle-scene{grid-template-columns:calc(var(--k)*150) minmax(0,1fr) calc(var(--k)*54)}
+  .battle-scene{grid-template-columns:calc(var(--k)*178) calc(var(--k)*150) minmax(0,1fr) calc(var(--k)*54)}
   .b-side{padding:calc(var(--k)*12) calc(var(--k)*10)}
   .b-side .bs-title{font-size:calc(var(--k)*16)}
   .b-log{max-height:calc(var(--k)*96)}
@@ -1002,7 +1032,7 @@ function viewSelect(){
    +'<p style="line-height:1.8;margin:0">川を育てる育成ゲームの試作です。探索で素材を集め、手入れで川を育て、ツリーを解放して神様を強くし、進化を目指します。1行動＝1週間、50ターン（1年）で一区切りです。</p></div>'
    +pwaHintHtml()
    +'<h2 class="sec-title">育てる神様を選ぶ（御三家）</h2><div class="godcards">'+cards+'</div>'
-   +'<details class="help" style="margin-top:calc(var(--k)*14)"><summary>遊び方</summary><p class="muted">① <b>探索</b>：戦闘に勝つと素材が手に入ります（負けると半分だけ持ち帰り）。ステージと深度は順に解放されます。<br>② <b>手入れ</b>：素材を消費してパラメータポイント（水量・生命・資源）が貯まります。ポイントは<b>累計方式</b>で減りません。同じ場所は回数で3段階に上がります。<br>③ <b>ツリー</b>：共通ツリー→進化→各種パラメータツリーの順に開きます。ツリー解放数に応じて<b>技</b>が解放できます（消費なし・派生式）。<br>④ <b>戦闘</b>：7×10のSRPG。移動→通常攻撃か技→待機。行動が実行される前なら「移動キャンセル」「全キャンセル」で元の位置に完全に戻れます（攻撃や技を選んで対象を選んでいる途中でも可。実行したあとは戻れません）。サイドバーの「撤退する」ボタンで、報酬なしで戦闘を終えて拠点へ戻ることもできます。地形には高さがあり（川底-10〜高台+17）、高い所から攻撃すると命中・ダメージが上がります（高さ差1ごとに命中+1・ダメージ+1%）。隣との高さ差が8以上のマスへは直接移動できません（崖）。サイドバーの⟳ボタンでマップを90°ずつ回転できます（表示だけが変わります）。カメラは行動キャラを中心に映し、盤面のドラッグでスクロール、サイドバーの＋/−ボタンやピンチでズームできます。行動コマンドは行動キャラの真下に出ます。「移動しない」を選んでも、行動を実行する前なら「移動に戻る」で移動し直せます。神力は戦闘ごとに、HPは戦闘後に全回復します。</p></details>';
+   +'<details class="help" style="margin-top:calc(var(--k)*14)"><summary>遊び方</summary><p class="muted">① <b>探索</b>：戦闘に勝つと素材が手に入ります（負けると半分だけ持ち帰り）。ステージと深度は順に解放されます。<br>② <b>手入れ</b>：素材を消費してパラメータポイント（水量・生命・資源）が貯まります。ポイントは<b>累計方式</b>で減りません。同じ場所は回数で3段階に上がります。<br>③ <b>ツリー</b>：共通ツリー→進化→各種パラメータツリーの順に開きます。ツリー解放数に応じて<b>技</b>が解放できます（消費なし・派生式）。<br>④ <b>戦闘</b>：7×10のSRPG。移動→通常攻撃か技→待機。行動が実行される前なら「移動キャンセル」「全キャンセル」で元の位置に完全に戻れます（攻撃や技を選んで対象を選んでいる途中でも可。実行したあとは戻れません）。サイドバーの「撤退する」ボタンで、報酬なしで戦闘を終えて拠点へ戻ることもできます。地形には高さがあり（川底-10〜高台+17）、高い所から攻撃すると命中・ダメージが上がります（高さ差1ごとに命中+1・ダメージ+1%）。隣との高さ差が8以上のマスへは直接移動できません（崖）。サイドバーの⟳ボタンでマップを90°ずつ回転できます（表示だけが変わります）。カメラは行動キャラを中心に映し、盤面のドラッグでスクロール、サイドバーの＋/−ボタンやピンチでズームできます。行動キャラを選ぶと移動範囲と行動コマンド（攻撃・技・待機）が同時に出ます。移動したい場合は範囲内のマスをタップ、移動しない場合はそのままコマンドを選んでください。盤面のキャラをタップすると、左端のステータス枠にそのキャラの情報（HP・神力・攻撃・防御・素早さ・地形・バフ）が出ます。神力は戦闘ごとに、HPは戦闘後に全回復します。</p></details>';
 }
 function bindSelect(){ document.querySelectorAll("[data-god]").forEach(function(b){ b.addEventListener("click", function(){ newGame(b.dataset.god); toast(GODS[G.god].name+"の育成をはじめます"); }); }); bindPwaHint(); }
 /* ---------- ホーム（イメージ画像準拠） ---------- */
@@ -2061,7 +2091,7 @@ function startBattle(si,di){
   foes.forEach(function(u){ faceNearestOpponent(u,allies); });
   allies.concat(foes).forEach(function(u){ TERRAIN[tIdx(u.x,u.y)]="grass"; });
   CAM={z:1, tx:0, ty:0, zMin:0.5, suppressTapUntil:0, centerReq:false}; lastCenteredCur=null;
-  B={si:si,di:di,rot:0,loot:STAGES[si].loot[di],allies:allies,foes:foes,round:1,sel:null,moved:false,preMove:null,mode:"select",targets:[],pendingSkill:null,showSkills:false,confirm:null,focus:null,logs:["<b>"+STAGES[si].name+" 深度"+(di+1)+"</b> の戦闘開始！ 敵を全て倒すと勝利、神様が倒れると敗北です。","行動順は各巡の開始時に素早さ順（味方・敵混在）で確定します。素早さの増減は次巡の順序から反映されます。","地形には高さがあります（川底-10〜高台+17）。高い所から攻撃すると命中・ダメージが上がり（高さ差1ごとに命中+1・ダメージ+1%）、隣との高さ差が8以上のマスへは直接移動できません（崖）。⟳ボタンでマップを90°ずつ回転できます。","向き：側面からの攻撃は与ダメージ+15%、背面からは+30%（正面は変動なし）。待機・攻撃・技のあとに、ターンを終える向きを選べます。足元の矢印が今の向きです。","カメラ：行動するキャラクターが画面の中心に来ます。盤面をドラッグすると上下左右にスクロール、サイドバーの＋/−ボタンやピンチ操作でズームできます。"],over:false,order:[],turnIdx:0,skipAllies:false,cur:null,faceSel:null,predict:null};
+  B={si:si,di:di,rot:0,loot:STAGES[si].loot[di],allies:allies,foes:foes,round:1,sel:null,moved:false,preMove:null,mode:"select",targets:[],pendingSkill:null,showSkills:false,confirm:null,focus:null,logs:["<b>"+STAGES[si].name+" 深度"+(di+1)+"</b> の戦闘開始！ 敵を全て倒すと勝利、神様が倒れると敗北です。","行動順は各巡の開始時に素早さ順（味方・敵混在）で確定します。素早さの増減は次巡の順序から反映されます。","地形には高さがあります（川底-10〜高台+17）。高い所から攻撃すると命中・ダメージが上がり（高さ差1ごとに命中+1・ダメージ+1%）、隣との高さ差が8以上のマスへは直接移動できません（崖）。⟳ボタンでマップを90°ずつ回転できます。","向き：側面からの攻撃は与ダメージ+15%、背面からは+30%（正面は変動なし）。待機・攻撃・技のあとに、ターンを終える向きを選べます。足元の矢印が今の向きです。","カメラ：行動するキャラクターが画面の中心に来ます。盤面をドラッグすると上下左右にスクロール、サイドバーの＋/−ボタンやピンチ操作でズームできます。"],over:false,order:[],turnIdx:0,skipAllies:false,cur:null,faceSel:null,predict:null,focusUnit:null,actFrom:null};
   var roleNotes=[], roleSeen={};
   foes.forEach(function(f){ var p=ENEMY_PROFILES[f.art]; if(p&&!roleSeen[f.art]){ roleSeen[f.art]=1; roleNotes.push(f.name+"＝"+p.label); } });
   if(roleNotes.length) B.logs.push("敵の個性："+roleNotes.join("／")+"。種類ごとに狙い方と倒し方が変わります。");
@@ -2228,7 +2258,7 @@ function moveTargets(u){ var seen=moveDistances(u); return Object.keys(seen).fil
 function selectUnit(u){
   if(B.over||u.acted||!u.alive) return;
   if(B.cur&&u!==B.cur) return; /* 個別ターン制：操作できるのは行動順が回ってきた本人のみ */
-  B.sel=u; B.moved=false; B.preMove=null; B.mode="move"; B.targets=moveTargets(u); B.showSkills=false; B.confirm=null; B.focus={x:u.x,y:u.y}; renderBattle();
+  B.sel=u; B.focusUnit=u; B.moved=false; B.preMove=null; B.mode="move"; B.targets=moveTargets(u); B.showSkills=false; B.confirm=null; B.focus={x:u.x,y:u.y}; renderBattle();
 }
 function afterMove(){ B.mode="action"; B.targets=[]; B.showSkills=false; renderBattle(); }
 /* 全キャンセル（移動の巻き戻し）：行動が「実行される前」ならいつでも使える。
@@ -2249,14 +2279,15 @@ function undoMove(){
   renderBattle();
 }
 function chooseAttack(){
-  var u=B.sel; B.mode="target"; B.pendingSkill=null; B.predict=null; B.showSkills=false; /* B.preMove は残す：対象を選んでいる途中でも全キャンセルで元の位置に戻れる */
+  var u=B.sel; B.actFrom=B.mode; B.mode="target"; B.pendingSkill=null; B.predict=null; B.showSkills=false; /* B.preMove は残す：対象を選んでいる途中でも全キャンセルで元の位置に戻れる */
   B.targets=B.foes.filter(function(f){ return f.alive&&dist(u,f)<=1; });
-  if(!B.targets.length){ toast("隣接する敵がいません"); B.mode="action"; }
+  if(!B.targets.length){ toast("隣接する敵がいません"); B.mode=B.actFrom||"action"; if(B.mode==="move") B.targets=moveTargets(u); }
   renderBattle();
 }
 function chooseSkill(cat,idx){
   var u=B.sel; var sk=SKILLS[G.god][cat][idx];
   if(u.mp<sk.mp){ toast("神力が足りません"); return; }
+  B.actFrom=B.mode;
   B.pendingSkill={cat:cat,idx:idx,sk:sk}; B.showSkills=false; B.confirm=null; B.predict=null; /* B.preMove は残す：対象を選んでいる途中でも全キャンセルで元の位置に戻れる */
   if(sk.r==="all"||sk.r==="self"){ executeSkill(null,null); return; }
   B.mode="target";
@@ -2269,7 +2300,7 @@ function chooseSkill(cat,idx){
   } else if(sk.r==="area"){
     B.targets=[]; for(var x=0;x<COLS;x++)for(var y=0;y<ROWS;y++){ if(Math.abs(x-u.x)+Math.abs(y-u.y)<=sk.rng) B.targets.push({x:x,y:y,cell:true}); }
   }
-  if(sk.r==="s"&&!B.targets.length){ toast("範囲内に目標がいません"); B.mode="action"; B.pendingSkill=null; }
+  if(sk.r==="s"&&!B.targets.length){ toast("範囲内に目標がいません"); B.pendingSkill=null; B.mode=B.actFrom||"action"; if(B.mode==="move") B.targets=moveTargets(u); else B.targets=[]; }
   renderBattle();
 }
 function executeSkill(tx,ty){
@@ -2390,7 +2421,7 @@ function processTurns(){
     var u=B.order[B.turnIdx];
     if(!u.alive){ u.acted=true; B.turnIdx++; continue; }
     if(u.side==="e"){
-      B.cur=u; u.turnSeq=(u.turnSeq||0)+1; startTurnEffects(u);
+      B.cur=u; B.focusUnit=u; u.turnSeq=(u.turnSeq||0)+1; startTurnEffects(u);
       if(u.alive&&!B.over) enemyAct(u);
       endTurnTicks(u);
       u.acted=true; B.turnIdx++;
@@ -2398,7 +2429,7 @@ function processTurns(){
       continue;
     }
     if(B.skipAllies){ blog(u.name+" は待機した"); u.turnSeq=(u.turnSeq||0)+1; startTurnEffects(u); endTurnTicks(u); u.acted=true; B.turnIdx++; continue; }
-    B.cur=u; u.turnSeq=(u.turnSeq||0)+1; startTurnEffects(u);
+    B.cur=u; B.focusUnit=u; u.turnSeq=(u.turnSeq||0)+1; startTurnEffects(u);
     if(!u.alive){ u.acted=true; B.turnIdx++; continue; }
     if(B.over) return;
     B.sel=u; B.moved=false; B.preMove=null; B.mode="move"; B.targets=moveTargets(u); B.showSkills=false; B.confirm=null; B.pendingSkill=null; B.focus={x:u.x,y:u.y};
@@ -2529,6 +2560,61 @@ function terrainInfo(x,y){
   if(t==="high") return {name:"高台", h:h, cost:"移動コスト 1", note:"マップで最も高い場所（高さ+16前後）。高い所から攻撃すると命中・ダメージが上がります（高さ差1ごとに命中+1・ダメージ+1%）。急な側は崖（高さ差8以上）で直接は登れません"};
   return {name:"草地", h:h, cost:"移動コスト 1", note:"高さは場所で変わります（川岸-3／斜面+4／台地+9前後）。隣との高さ差が8以上のマスへは直接移動できません（崖）"};
 }
+/* ---- 左端の常設ステータス枠 ----
+   表示対象は「最後にタップ／選択したキャラ」（B.focusUnit）。行動中キャラが
+   切り替わったら processTurns／selectUnit がそちらを初期表示にする。
+   行動フロー上のタップは従来どおり対象選択等を優先し、ここは表示専用：
+   onCellTap が focusUnit を更新し、再描画を伴わないタップでも
+   updateStatusPanel() で枠だけを書き換える。 */
+function statusUnit(){
+  if(!B) return null;
+  var u=B.focusUnit;
+  if(u && allUnits().indexOf(u)>=0) return u;
+  if(B.cur) return B.cur;
+  if(B.sel) return B.sel;
+  return B.allies[0]||null;
+}
+function statusPanelHtml(){
+  var u=statusUnit();
+  var head='<div class="bsp-sec">ステータス</div>';
+  if(!u) return head;
+  var isEnemy=u.side==="e";
+  var face=u.god
+    ? '<img class="bsp-face god" src="'+GOD_FACE[G.god]+'" alt="">'
+    : '<img class="bsp-face" src="assets/spr-'+spriteKey(u)+'-f.png" alt="">';
+  var h=head+'<div class="bsp-head">'+face+'<div><div class="bsp-name">'+esc(u.name)+'</div>'
+    +'<span class="bsp-tag '+(isEnemy?"e":"a")+'">'+(isEnemy?"敵":"味方")+(u.god?"・神":"")+'</span></div></div>';
+  if(isEnemy && u.art && ENEMY_PROFILES[u.art]) h+='<div class="bsp-role">役割：'+ENEMY_PROFILES[u.art].label+'</div>';
+  var hpPct=Math.max(0,Math.round(u.hp/u.maxhp*100));
+  h+='<div class="bsp-bar-row"><span>HP</span><div class="bsp-bar hp"><i class="'+(u.hp/u.maxhp<0.3?"low":"")+'" style="width:'+hpPct+'%"></i></div><b>'+u.hp+' / '+u.maxhp+'</b></div>';
+  if(!isEnemy && u.maxmp>0){
+    h+='<div class="bsp-bar-row"><span>神力</span><div class="bsp-bar mp"><i style="width:'+Math.round(u.mp/u.maxmp*100)+'%"></i></div><b>'+u.mp+' / '+u.maxmp+'</b></div>';
+  }
+  function statRow(label,key){
+    var eff=effStat(u,key), pct=buffPctSum(u,key);
+    var note=pct?'<span class="bsp-delta '+(pct>0?"up":"dn")+'">('+(pct>0?"+":"")+pct+'%)</span>':"";
+    return '<div class="bsp-stat"><span>'+label+'</span><b>'+eff+'</b>'+note+'</div>';
+  }
+  h+='<div class="bsp-stats">'+statRow("攻撃","atk")+statRow("防御","def")+statRow("素早さ","spd")+'</div>';
+  var ti=terrainInfo(u.x,u.y);
+  h+='<div class="bsp-terr">地形 <b>'+ti.name+'</b>（高さ <b>'+(ti.h>0?"+":"")+ti.h+'</b>）'
+    +(terrainAt(u.x,u.y)==="water"?'<br>浅瀬の補正：防御+15%':"")+'</div>';
+  if(u.buffs && u.buffs.length){
+    var bl=u.buffs.map(function(b){
+      var nm=b.stat==="hot"?"持続回復":(b.stat==="shield"?"シールド":paramName2(b.stat));
+      var val=b.stat==="hot"?("毎巡 +"+b.pct+"%"):(b.stat==="shield"?(b.pct+"% 軽減"):((b.pct>0?"+":"")+b.pct+"%"));
+      var de=(b.stat!=="shield"&&b.pct<0);
+      return '<span class="bsp-buff'+(de?" de":"")+'">'+nm+" "+val+"・あと"+b.turns+"巡</span>";
+    }).join("");
+    h+='<div class="bsp-buffs">'+bl+'</div>';
+  }
+  if(!u.alive) h+='<div class="bsp-dead">戦闘不能</div>';
+  return h;
+}
+function updateStatusPanel(){
+  var el=document.getElementById("b-status");
+  if(el&&B) el.innerHTML=statusPanelHtml();
+}
 /* ---- 戦闘描画（渓流の一手イメージ準拠） ---- */
 function renderBattle(){
   var app=$("app");
@@ -2628,15 +2714,17 @@ function renderBattle(){
        +fp([-1,0])+'<span class="fp-c">✦</span>'+fp([1,0])
        +'<span></span>'+fp([0,1])+'<span></span></div>'
        +'<button class="bm-btn sel" id="btn-face-ok">'+faceDirName(fs)+' を向いて終了</button>';
-    } else if(B.mode==="move"){
-      menu+='<button class="bm-btn sel" id="btn-stay">移動しない</button>';
-    } else if(B.mode==="action"){
+    } else if(B.mode==="move"||B.mode==="action"){
+      /* 移動範囲の表示と同時に行動メニューを出す（「移動しない」ボタンは廃止）。
+         移動したい場合は範囲内のマスをタップ、移動しない場合はそのまま
+         メニューから攻撃／技／待機を選ぶ。移動後は mode="action" で再表示される。
+         メニュー内はコマンドのラベルのみ（ステータス・説明文は左のステータス枠へ集約）。 */
       if(!B.showSkills){
         menu+='<button class="bm-btn" id="btn-atk">攻撃</button>';
         if(u2.god) menu+='<button class="bm-btn" id="btn-skills">技</button>';
         menu+='<button class="bm-btn" id="btn-wait">待機</button>';
         var subActs="";
-        if(!B.preMove && !B.moved) subActs+='<button class="bm-subbtn" id="btn-backmove">移動に戻る</button>'; /* 「移動しない」を選んだ直し：まだ動いていないので移動フェーズへ戻れる（補助操作は下端の小リンクに格下げ） */
+        if(B.mode==="action" && !B.preMove && !B.moved) subActs+='<button class="bm-subbtn" id="btn-backmove">移動に戻る</button>'; /* 自マスタップで行動に進んだ場合の戻し（補助操作は下端の小リンク） */
         if(B.preMove) subActs+='<button class="bm-subbtn" id="btn-undomove">移動キャンセル</button>';
         if(subActs) menu+='<div class="bm-subrow">'+subActs+'</div>';
       } else {
@@ -2652,8 +2740,6 @@ function renderBattle(){
     }
     menu+='</div>';
   }
-  var hint="";
-  if(!B.over && B.mode==="select") hint='<div class="b-hint">行動順に進んでいます（高さで命中・ダメージが変動／⟳で回転）</div>';
   /* terrain info */
   var fc = B.focus || (B.sel?{x:B.sel.x,y:B.sel.y}:{x:2,y:8});
   var ti = terrainInfo(fc.x,fc.y);
@@ -2687,9 +2773,10 @@ function renderBattle(){
     retreat='<div class="b-result"><h3>撤退しますか？</h3><p style="font-size:calc(var(--k)*13.5);line-height:1.7">戦闘を終了して拠点へ戻ります。<br>素材などの報酬は得られません。探索のターンは通常どおり1つ進みます。</p><div style="display:flex;gap:calc(var(--k)*10)"><button class="btn gold" id="btn-retreat-ok" style="flex:1">撤退する</button><button class="btn ghost" id="btn-retreat-no" style="flex:1;background:transparent;color:#eef3e6;border-color:rgba(120,200,210,.6)">やめる</button></div></div>';
   }
   app.innerHTML='<div class="battle-scene">'
+   +'<aside class="b-status" id="b-status">'+statusPanelHtml()+'</aside>'
    +'<aside class="b-side">'+sideHtml+'</aside>'
    +'<div class="b-main">'+skillbar
-   +'<div class="b-stage"><img src="assets/bg-battle-real.jpg" alt="水彩の川辺の戦闘背景"><div class="cam-world"><div class="iso-board"><img class="iso-map" src="assets/map-battle-wide.jpg" alt="戦闘マップ（盤面の周囲に森と川が続く）" style="left:'+MAPV.x+'%;top:'+MAPV.y+'%;width:'+MAPV.w+'%;height:'+MAPV.h+'%'+(mapImgTransform()?';transform:'+mapImgTransform():'')+'">'+cells+'</div></div>'+menu+hint+terrain+predict+result+retreat+'</div>'
+   +'<div class="b-stage"><img src="assets/bg-battle-real.jpg" alt="水彩の川辺の戦闘背景"><div class="cam-world"><div class="iso-board"><img class="iso-map" src="assets/map-battle-wide.jpg" alt="戦闘マップ（盤面の周囲に森と川が続く）" style="left:'+MAPV.x+'%;top:'+MAPV.y+'%;width:'+MAPV.w+'%;height:'+MAPV.h+'%'+(mapImgTransform()?';transform:'+mapImgTransform():'')+'">'+cells+'</div></div>'+menu+terrain+predict+result+retreat+'</div>'
    +'</div>'
    +'<aside class="b-rail">'+rail+'</aside></div>';
   bindBattle();
@@ -2761,6 +2848,10 @@ function onCellTap(x,y){
     if(!B||B.over) return;
     var u=unitAt(x,y);
     B.focus={x:x,y:y};
+    /* 左のステータス枠は「最後にタップしたキャラ」を表示する（戦闘不能者も対象）。
+       行動フロー上のタップ処理（対象選択など）はこの後の従来処理が優先される。 */
+    var fu=u||unitAtIncludingDead(x,y);
+    if(fu){ B.focusUnit=fu; updateStatusPanel(); }
     if(B.mode==="select"){ if(u&&u.side==="a") selectUnit(u); return; }
     if(!B.sel) return;
     if(B.mode==="move"){
@@ -2813,7 +2904,6 @@ function bindBattle(){
     }
     if(best&&bd<=1.9) onCellTap(best[0],best[1]);
   });
-  var stay=$("btn-stay"); if(stay) stay.addEventListener("click", afterMove);
   var desel=$("btn-deselect"); if(desel) desel.addEventListener("click", function(){ if(B.cur){ B.sel=B.cur; B.mode="move"; B.targets=moveTargets(B.cur); } renderBattle(); });
   var atk=$("btn-atk"); if(atk) atk.addEventListener("click", chooseAttack);
   var skb=$("btn-skills"); if(skb) skb.addEventListener("click", function(){ B.showSkills=true; renderBattle(); });
@@ -2826,7 +2916,10 @@ function bindBattle(){
   var ret=$("btn-retreat"); if(ret) ret.addEventListener("click", function(){ B.retreatAsk=true; renderBattle(); });
   var retok=$("btn-retreat-ok"); if(retok) retok.addEventListener("click", retreatBattle);
   var retno=$("btn-retreat-no"); if(retno) retno.addEventListener("click", function(){ B.retreatAsk=false; renderBattle(); });
-  var cancelFn=function(){ B.mode="action"; B.pendingSkill=null; B.targets=[]; B.confirm=null; B.predict=null; renderBattle(); };
+  var cancelFn=function(){ /* 対象選択のキャンセルは、入ってきたモード（移動前なら移動範囲表示）へ戻す */
+    B.mode=B.actFrom||"action"; B.pendingSkill=null; B.confirm=null; B.predict=null;
+    B.targets = B.mode==="move" ? moveTargets(B.sel) : [];
+    renderBattle(); };
   var pok=$("btn-predict-ok"); if(pok) pok.addEventListener("click", executePredicted);
   var pno=$("btn-predict-no"); if(pno) pno.addEventListener("click", function(){ B.predict=null; renderBattle(); }); /* キャンセル＝対象選択に戻る（移動の巻き戻しはしない） */
   var cancel=$("btn-cancel"); if(cancel) cancel.addEventListener("click", cancelFn);
