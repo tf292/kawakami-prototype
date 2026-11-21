@@ -432,9 +432,15 @@ select{font-family:inherit;font-size:calc(var(--k)*15);padding:calc(var(--k)*8);
 /* floating command menu：ボタンラベルのみで構成する（見出し・説明文なし）。
    メニューは .cam-world の外（.b-stage 直下）に置き、寸法はステージ基準の
    --k だけで決める。カメラのズーム（CAM.z）では拡大縮小しない。 */
-.b-menu{position:absolute;left:0;top:0;z-index:20;width:calc(var(--k)*120);background:linear-gradient(170deg,rgba(18,58,71,.97),rgba(10,34,43,.98));border:1.5px solid rgba(42,160,175,.85);border-radius:calc(var(--k)*8);padding:calc(var(--k)*4) calc(var(--k)*5);color:#eef3e6;box-shadow:0 calc(var(--k)*8) calc(var(--k)*20) rgba(0,0,0,.45)}
+.b-menu{position:absolute;left:0;top:0;z-index:20;width:max-content;max-width:min(calc(var(--k)*620),calc(100% - 12px));background:linear-gradient(170deg,rgba(18,58,71,.97),rgba(10,34,43,.98));border:1.5px solid rgba(42,160,175,.85);border-radius:calc(var(--k)*8);padding:calc(var(--k)*4) calc(var(--k)*5);color:#eef3e6;box-shadow:0 calc(var(--k)*8) calc(var(--k)*20) rgba(0,0,0,.45)}
 .b-menu .bm-btn{display:block;width:100%;text-align:left;background:rgba(46,110,120,.35);border:1.5px solid rgba(120,200,210,.55);color:#fff;border-radius:calc(var(--k)*6);padding:calc(var(--k)*2) calc(var(--k)*7);font-size:calc(var(--k)*13);font-weight:800;line-height:1.35;min-height:calc(var(--k)*26);margin-bottom:calc(var(--k)*2)}
 .b-menu .bm-btn:last-child{margin-bottom:0}
+/* 本体ボタンは左→右の横一列（キャラ絵の下）。高さ26・フォント13は小型化時のまま維持 */
+.b-menu .bm-row{display:flex;flex-direction:row;flex-wrap:nowrap;gap:calc(var(--k)*3);align-items:stretch}
+.b-menu .bm-row.wrap{flex-wrap:wrap}
+.b-menu .bm-row .bm-btn{flex:0 0 auto;width:auto;display:inline-flex;align-items:center;justify-content:center;text-align:center;white-space:nowrap;margin-bottom:0;padding:calc(var(--k)*2) calc(var(--k)*11)}
+.b-menu .bm-row.wrap .bm-btn{flex:0 1 auto}
+.b-menu .bm-row .bm-btn .cost{float:none;margin-left:calc(var(--k)*6)}
 .b-menu .bm-subrow{display:flex;flex-wrap:wrap;gap:0 calc(var(--k)*5);border-top:1px solid rgba(42,160,175,.45);margin-top:calc(var(--k)*3);padding-top:calc(var(--k)*1)}
 .b-menu .bm-subbtn{background:none;border:none;color:#a9c6bb;font-size:calc(var(--k)*11);font-weight:700;text-decoration:underline;text-underline-offset:3px;padding:calc(var(--k)*1) calc(var(--k)*3);min-height:calc(var(--k)*18);line-height:1.3;text-align:left}
 .b-menu .bm-subbtn:hover{color:var(--gold2)}
@@ -442,7 +448,7 @@ select{font-family:inherit;font-size:calc(var(--k)*15);padding:calc(var(--k)*8);
 .b-menu .bm-btn.sel{border-color:var(--gold);background:rgba(217,180,92,.18);color:#ffe9a8}
 .b-menu .bm-btn:disabled{opacity:.45}
 .b-menu .bm-btn .cost{color:var(--gold2);font-size:calc(var(--k)*11);font-weight:900;float:right}
-.face-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:calc(var(--k)*3);margin:calc(var(--k)*3) 0 calc(var(--k)*5)}
+.face-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:calc(var(--k)*3);margin:calc(var(--k)*3) 0 calc(var(--k)*5);width:calc(var(--k)*110)}
 .face-pad .fp-btn{background:rgba(46,110,120,.35);border:1.5px solid rgba(120,200,210,.55);color:#fff;border-radius:calc(var(--k)*6);padding:calc(var(--k)*3) 0 calc(var(--k)*2);font-weight:900;line-height:1.15;min-height:calc(var(--k)*30)}
 .face-pad .fp-btn .fa{display:block;font-size:calc(var(--k)*15)}
 .face-pad .fp-btn .fl{display:block;font-size:calc(var(--k)*10.5);color:#b9cdc2;font-weight:800}
@@ -534,7 +540,7 @@ select{font-family:inherit;font-size:calc(var(--k)*15);padding:calc(var(--k)*8);
   .b-side{padding:calc(var(--k)*12) calc(var(--k)*10)}
   .b-side .bs-title{font-size:calc(var(--k)*16)}
   .b-log{max-height:calc(var(--k)*96)}
-  .b-menu{width:calc(var(--k)*116)}
+  .b-menu{max-width:calc(100% - 12px)}
   .b-terrain{display:none}
   .iso-board{width:min(99%,calc(var(--k)*1230))}
 }
@@ -2720,22 +2726,25 @@ function renderBattle(){
          メニューから攻撃／技／待機を選ぶ。移動後は mode="action" で再表示される。
          メニュー内はコマンドのラベルのみ（ステータス・説明文は左のステータス枠へ集約）。 */
       if(!B.showSkills){
-        menu+='<button class="bm-btn" id="btn-atk">攻撃</button>';
+        menu+='<div class="bm-row">'
+        +'<button class="bm-btn" id="btn-atk">攻撃</button>';
         if(u2.god) menu+='<button class="bm-btn" id="btn-skills">技</button>';
-        menu+='<button class="bm-btn" id="btn-wait">待機</button>';
+        menu+='<button class="bm-btn" id="btn-wait">待機</button></div>';
         var subActs="";
         if(B.mode==="action" && !B.preMove && !B.moved) subActs+='<button class="bm-subbtn" id="btn-backmove">移動に戻る</button>'; /* 自マスタップで行動に進んだ場合の戻し（補助操作は下端の小リンク） */
         if(B.preMove) subActs+='<button class="bm-subbtn" id="btn-undomove">移動キャンセル</button>';
         if(subActs) menu+='<div class="bm-subrow">'+subActs+'</div>';
       } else {
         var ls=learnedSkills();
-        ls.forEach(function(l){ var sk2=l.sk; menu+='<button class="bm-btn" data-bskill="'+l.cat+'-'+l.idx+'" '+(u2.mp>=sk2.mp?"":"disabled")+'><span>'+esc(sk2.n)+'</span> <span class="cost">神力'+sk2.mp+'</span></button>'; });
+        menu+='<div class="bm-row wrap">';
+        ls.forEach(function(l){ var sk2=l.sk; menu+='<button class="bm-btn" data-bskill="'+l.cat+'-'+l.idx+'" '+(u2.mp>=sk2.mp?"":"disabled")+'><span>'+esc(sk2.n)+'</span><span class="cost">神力'+sk2.mp+'</span></button>'; });
+        menu+='</div>';
         var subSk='<button class="bm-subbtn" id="btn-backskills">もどる</button>';
         if(B.preMove) subSk='<button class="bm-subbtn" id="btn-undomove">移動キャンセル</button>'+subSk;
         menu+='<div class="bm-subrow">'+subSk+'</div>';
       }
     } else if(B.mode==="target"){
-      menu+='<button class="bm-btn" id="btn-cancel">もどる</button>';
+      menu+='<div class="bm-row"><button class="bm-btn" id="btn-cancel">もどる</button></div>';
       if(B.preMove) menu+='<div class="bm-subrow"><button class="bm-subbtn" id="btn-fullcancel">全キャンセル</button></div>';
     }
     menu+='</div>';
