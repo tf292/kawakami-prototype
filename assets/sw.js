@@ -3,7 +3,7 @@
    更新時は CACHE_VERSION を上げることで古いキャッシュが破棄され、新版が反映されます。 */
 "use strict";
 
-var CACHE_VERSION = "kawakami-v2";
+var CACHE_VERSION = "kawakami-v3";
 var CORE_CACHE = CACHE_VERSION + "-core";
 var RUNTIME_CACHE = CACHE_VERSION + "-runtime";
 

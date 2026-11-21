@@ -272,7 +272,7 @@ select{font-family:inherit;font-size:calc(var(--k)*15);padding:calc(var(--k)*8);
 .b-side .bs-sec{font-size:calc(var(--k)*12);font-weight:900;color:#9fc3bb;letter-spacing:.1em;margin:calc(var(--k)*14) 0 calc(var(--k)*7)}
 .minimap{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;background:rgba(0,0,0,.3);padding:calc(var(--k)*6);border-radius:calc(var(--k)*8);border:1px solid rgba(42,122,134,.7)}
 .minimap i{aspect-ratio:1;border-radius:2px;background:#5da85e;display:block}
-.minimap i.w{background:#2ea8e0}.minimap i.r{background:#8a8474}
+.minimap i.w{background:#2ea8e0}.minimap i.r{background:#8a8474}.minimap i.h{background:#b5cf7d}
 .minimap i.a{background:#7ec8ff;box-shadow:inset 0 0 0 2px #fff}
 .minimap i.e{background:#ff8a7a;box-shadow:inset 0 0 0 2px #7e1f14}
 .mini-legend{font-size:calc(var(--k)*11);color:#b9cdc2;margin-top:calc(var(--k)*5)}
@@ -286,8 +286,15 @@ select{font-family:inherit;font-size:calc(var(--k)*15);padding:calc(var(--k)*8);
 .b-skillbar .cancel{margin-left:auto;background:rgba(255,255,255,.08);border:1px solid rgba(230,200,120,.7);color:#ffe9a8;border-radius:calc(var(--k)*99);padding:calc(var(--k)*4) calc(var(--k)*14);font-weight:800;font-size:calc(var(--k)*12.5);min-height:30px}
 .b-stage{position:relative;margin:0;border-radius:0;overflow:hidden;border:none;flex:1;min-height:0}
 .b-stage>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.iso-board{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(99%,calc(var(--k)*1230));aspect-ratio:47/20;box-shadow:0 calc(var(--k)*18) calc(var(--k)*44) rgba(4,20,16,.55)}
-.iso-board>img.iso-map{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0}
+.iso-board{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(99%,calc(var(--k)*1230));aspect-ratio:47/20;box-shadow:0 calc(var(--k)*18) calc(var(--k)*44) rgba(4,20,16,.55);background:#39543c}
+.iso-board>img.iso-map{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0;transform-origin:50% 50%}
+/* ---- 高さ（段差）の崖面：タイルを持ち上げたとき側面として見える部分 ---- */
+.iso-cell .cliff{position:absolute;left:0;right:0;top:50%;z-index:0}
+.iso-cell.t-grass .cliff{background:linear-gradient(90deg,#5d4a2e 50%,#715a38 50%)}
+.iso-cell.t-high .cliff{background:linear-gradient(90deg,#6b5636 50%,#7d653f 50%)}
+.iso-cell.t-rock .cliff{background:linear-gradient(90deg,#4c463c 50%,#5d574c 50%)}
+.iso-cell.t-water .cliff{background:linear-gradient(90deg,#14425e 50%,#1a5070 50%)}
+.iso-cell.t-high .diamond{background:rgba(196,178,110,.45);box-shadow:inset 0 0 0 1.5px rgba(250,240,200,.6)}
 .iso-cell{position:absolute;width:11.7647%;height:11.0588%;background:none;border:none;padding:0;margin:0;min-height:0;cursor:default;pointer-events:none}
 .iso-cell .hit{position:absolute;inset:-26% -14%;z-index:4;pointer-events:auto;background:transparent}
 .iso-cell .diamond{position:absolute;inset:0;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);background:rgba(255,255,255,.05);box-shadow:inset 0 0 0 1px rgba(255,255,255,.28)}
@@ -315,6 +322,8 @@ select{font-family:inherit;font-size:calc(var(--k)*15);padding:calc(var(--k)*8);
 .unit.god img.u-img-sprite{height:calc(var(--k)*98)}
 .unit img.u-img-bust{width:calc(var(--k)*68);height:calc(var(--k)*68);object-fit:cover;object-position:top center;border-radius:calc(var(--k)*14);border:2.5px solid #e6c878;display:block;background:#dfe9e2}
 .unit img.u-img-fish{width:calc(var(--k)*72);height:calc(var(--k)*58);object-fit:cover;object-position:center;border-radius:calc(var(--k)*10);border:2px solid rgba(255,255,255,.85);display:block}
+.unit img.u-img-pix{height:calc(var(--k)*94);width:auto;display:block;image-rendering:pixelated}
+.unit.god img.u-img-pix{height:calc(var(--k)*102)}
 .unit .u-ring{width:64%;height:calc(var(--k)*13);border-radius:50%;margin-top:-calc(var(--k)*9);border:3.5px solid #4a90d9;background:rgba(74,144,217,.25);box-shadow:0 3px calc(var(--k)*6) rgba(0,0,0,.35)}
 .unit.enemy .u-ring{border-color:#ef5350;background:rgba(239,83,80,.22)}
 .unit .u-hpbar{width:76%;height:calc(var(--k)*6);background:rgba(10,25,20,.65);border-radius:calc(var(--k)*99);overflow:hidden;margin-top:calc(var(--k)*4);border:1px solid rgba(255,255,255,.55)}
@@ -340,6 +349,7 @@ select{font-family:inherit;font-size:calc(var(--k)*15);padding:calc(var(--k)*8);
 .fx-float.dmg{color:#ffd94d;text-shadow:0 2px 0 #8a4b08,0 0 calc(var(--k)*10) rgba(255,150,40,.75),0 2px calc(var(--k)*6) rgba(0,0,0,.55)}
 .fx-float.heal{color:#8dff9a;text-shadow:0 2px 0 #14541c,0 0 calc(var(--k)*10) rgba(90,255,130,.8),0 2px calc(var(--k)*6) rgba(0,0,0,.55)}
 .fx-float.revive{color:#ffe9a8;text-shadow:0 2px 0 #7a5c10,0 0 calc(var(--k)*12) rgba(255,220,120,.9),0 2px calc(var(--k)*6) rgba(0,0,0,.55)}
+.fx-float.miss{color:#e8f2f5;text-shadow:0 2px 0 #33505c,0 2px calc(var(--k)*6) rgba(0,0,0,.55);letter-spacing:.14em}
 @keyframes fxFloat{0%{opacity:0;transform:translate(-50%,-30%) scale(.7)}18%{opacity:1;transform:translate(-50%,-70%) scale(1.12)}38%{transform:translate(-50%,-95%) scale(1)}100%{opacity:0;transform:translate(-50%,-215%) scale(1)}}
 @media(prefers-reduced-motion:reduce){.unit.fx-hit,.unit.fx-lunge,.unit.fx-heal,.unit.fx-die{animation:none}.fx-float{animation-duration:.45s}}
 /* floating command menu (渓流の一手 v3 style) */
@@ -387,7 +397,7 @@ select{font-family:inherit;font-size:calc(var(--k)*15);padding:calc(var(--k)*8);
 .turn-item .tnum{position:absolute;top:-calc(var(--k)*7);left:-calc(var(--k)*7);width:calc(var(--k)*18);height:calc(var(--k)*18);border-radius:50%;background:linear-gradient(180deg,#e3c169,#c39a3e);color:#2c2410;font-size:calc(var(--k)*10.5);font-weight:900;display:flex;align-items:center;justify-content:center;border:1px solid #8a6d24;z-index:2}
 .turn-item .tart{width:100%;height:100%;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:rgba(235,245,235,.16)}
 .turn-item .tart svg{width:88%;height:88%}
-.turn-item .tart img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
+.turn-item .tart img{width:100%;height:100%;object-fit:contain;object-position:center;display:block}
 .turn-item.done{opacity:.42}.turn-item.cur{border-color:#e6c878;box-shadow:0 0 0 2.5px rgba(230,200,120,.65),0 0 calc(var(--k)*12) rgba(230,200,120,.5);transform:scale(1.16);z-index:2}
 .turn-item.dead{opacity:.3;filter:grayscale(1)}
 @media(max-width:900px){
@@ -638,13 +648,23 @@ function chibiCritter(art){
   s += '</svg>';
   return s;
 }
-function unitArt(u){
-  if(u.god){
-    if(G.god==="dobu") return '<img class="u-img-sprite" src="assets/art-dobu-sprite.png" alt="ドブ川の神">';
-    return '<img class="u-img-bust" src="'+GOD_FACE[G.god]+'" alt="'+GODS[G.god].name+'">';
-  }
-  if(u.side==="a") return allyImg(u.art, "u-img-fish");
-  return chibiCritter(u.art || "ayu");
+/* ============ 4方向ドット絵スプライト（戦いの構え） ============
+   全ユニット分を assets/spr-<key>-<dir>.png に用意（dir: f=正面 b=背面 l=左 r=右）。
+   表示する向きは「ユニットの世界の向き（u.faceDir）」をカメラ回転で変換して決める。
+   u.faceDir は移動・攻撃・回復のたびに setFacing で更新される（既存の face=絵文字とは別物）。 */
+function spriteKey(u){ if(u.god) return G.god; return u.art || "ayu"; }
+function facingDir(u){
+  var f = u.faceDir || (u.side==="e" ? [0,1] : [0,-1]);
+  var r = (typeof B!=="undefined" && B) ? (B.rot||0) : 0;
+  var fx=f[0], fy=f[1], rx, ry;
+  if(r===1){ rx=-fy; ry=fx; } else if(r===2){ rx=-fx; ry=-fy; } else if(r===3){ rx=fy; ry=-fx; } else { rx=fx; ry=fy; }
+  if(rx===1) return "r"; if(rx===-1) return "l"; if(ry===1) return "f"; return "b";
+}
+function setFacing(u, tx, ty){ var dx=tx-u.x, dy=ty-u.y; if(!dx&&!dy) return; if(Math.abs(dx)>=Math.abs(dy)) u.faceDir=[dx>0?1:-1,0]; else u.faceDir=[0,dy>0?1:-1]; }
+function setFacingDelta(u, dx, dy){ if(!dx&&!dy) return; if(Math.abs(dx)>=Math.abs(dy)) u.faceDir=[dx>0?1:-1,0]; else u.faceDir=[0,dy>0?1:-1]; }
+function unitArt(u, dirOverride){
+  var d = dirOverride || facingDir(u);
+  return '<img class="u-img-pix" src="assets/spr-'+spriteKey(u)+'-'+d+'.png" alt="'+esc(u.name)+'">';
 }
 </script>
 <script>
@@ -871,7 +891,7 @@ function viewSelect(){
    +'<p style="line-height:1.8;margin:0">川を育てる育成ゲームの試作です。探索で素材を集め、手入れで川を育て、ツリーを解放して神様を強くし、進化を目指します。1行動＝1週間、50ターン（1年）で一区切りです。</p></div>'
    +pwaHintHtml()
    +'<h2 class="sec-title">育てる神様を選ぶ（御三家）</h2><div class="godcards">'+cards+'</div>'
-   +'<details class="help" style="margin-top:calc(var(--k)*14)"><summary>遊び方</summary><p class="muted">① <b>探索</b>：戦闘に勝つと素材が手に入ります（負けると半分だけ持ち帰り）。ステージと深度は順に解放されます。<br>② <b>手入れ</b>：素材を消費してパラメータポイント（水量・生命・資源）が貯まります。ポイントは<b>累計方式</b>で減りません。同じ場所は回数で3段階に上がります。<br>③ <b>ツリー</b>：共通ツリー→進化→各種パラメータツリーの順に開きます。ツリー解放数に応じて<b>技</b>が解放できます（消費なし・派生式）。<br>④ <b>戦闘</b>：7×10のSRPG。移動→通常攻撃か技→待機。移動直後なら「移動キャンセル」で元の位置に戻れます（攻撃や技を選ぶと取り消せなくなります）。命中・回避はなく必ず当たります。神力は戦闘ごとに、HPは戦闘後に全回復します。</p></details>';
+   +'<details class="help" style="margin-top:calc(var(--k)*14)"><summary>遊び方</summary><p class="muted">① <b>探索</b>：戦闘に勝つと素材が手に入ります（負けると半分だけ持ち帰り）。ステージと深度は順に解放されます。<br>② <b>手入れ</b>：素材を消費してパラメータポイント（水量・生命・資源）が貯まります。ポイントは<b>累計方式</b>で減りません。同じ場所は回数で3段階に上がります。<br>③ <b>ツリー</b>：共通ツリー→進化→各種パラメータツリーの順に開きます。ツリー解放数に応じて<b>技</b>が解放できます（消費なし・派生式）。<br>④ <b>戦闘</b>：7×10のSRPG。移動→通常攻撃か技→待機。移動直後なら「移動キャンセル」で元の位置に戻れます（攻撃や技を選ぶと取り消せなくなります）。地形には高さがあり（浅瀬0・草地1・高台2）、高い所から攻撃すると命中・ダメージが上がります。段差2以上のマスへは直接移動できません。サイドバーの⟳ボタンでマップを90°ずつ回転できます（表示だけが変わります）。神力は戦闘ごとに、HPは戦闘後に全回復します。</p></details>';
 }
 function bindSelect(){ document.querySelectorAll("[data-god]").forEach(function(b){ b.addEventListener("click", function(){ newGame(b.dataset.god); toast(GODS[G.god].name+"の育成をはじめます"); }); }); bindPwaHint(); }
 /* ---------- ホーム（イメージ画像準拠） ---------- */
@@ -1178,7 +1198,7 @@ function viewSetting(){
    +'<p class="muted">現在の保存状態：'+saveInfoText()+'</p>'
    +'<div class="row"><button class="btn red" id="btn-reset">はじめから（保存データを消して神様を選び直す）</button></div>'
    +'<p class="muted" id="reset-note"></p></div>'
-   +'<details class="help" open><summary>仕様メモ（試作の仮ルール）</summary><p class="muted">ダメージ＝攻撃×威力%−相手の防御×50%（最低1、必ず命中）。地形効果：浅瀬のマスにいるユニットは防御+15%で計算（敵味方とも同じ、移動コストは全マス1）。草地は補正なし、岩場は侵入不可。<br>【浅瀬の防御補正】<br>実効防御＝四捨五入したバフ込み防御×地形倍率（浅瀬1.15、その他1.0）。この積は丸めず、ダメージ計算に使用する。ダメージは攻撃×威力％－実効防御×50％を四捨五入し、最低1とする。その後、シールド軽減を適用して再度四捨五入する。<br>※浅瀬の+15%は防御値への倍率であり、被ダメージを直接15%軽減する効果ではない。<br>【敵の個性】ブルーギル＝支援型（補正なし。傷ついた仲間の敵を最大HPの25%回復、自分以外を優先。回復対象がいなければ通常攻撃）、ブラックバス＝攻撃型（神を優先して狙う。攻撃×1.25・防御×0.75）、外来ガメ＝防御型（HP×1.4・防御×1.3・素早さ−3・移動2。浅瀬を好んで移動し、浅瀬の防御×1.15と重なる）、外来ザリガニ＝高速型（HP×0.9・素早さ+6・移動4。HP割合が最も低い味方を狙う）、大ナマズ＝押し出し型（補正なし。通常攻撃が当たった相手を1マス押し出す。岩・占有マスへは押し出せない）。滝の主モドキ・源流の番人モドキ・流木のかたまりは従来どおり共通仕様（個性は第2次実装で検討）。回復量：小=最大HPの20%／中=35%／大=60%。通常攻撃は威力100%・射程1。第2進化の「解放数の条件」は合計24として実装。手入れ4番のポイントは仕様の表記順（資源主軸）を水量・生命・資源に読み替えて反映しています。技・特性の内容や効果範囲・射程はまだ仮段階です。</p></details>';
+   +'<details class="help" open><summary>仕様メモ（試作の仮ルール）</summary><p class="muted">ダメージ＝攻撃×威力%−相手の防御×50%（最低1）に高さの倍率を適用。地形効果：浅瀬のマスにいるユニットは防御+15%で計算（敵味方とも同じ、移動コストは全マス1）。草地は補正なし、岩場は侵入不可。<br>【高さ】各マスに高さ0〜2（浅瀬0・草地1・高台2。岩場は侵入不可）。隣接マス間の高さ差が2以上のマスへは直接移動できない（プレイヤーの移動範囲・敵AIの経路探索とも同じルール）。Δ＝攻撃側の高さ−対象の高さとして、命中率＝90+Δ×10（60〜100%に制限）、ダメージ倍率＝1+Δ×0.1（0.8〜1.2に制限、ダメージ計算の入口で適用し予測表示と一致）。回復・蘇生は必中。数値は HEIGHT_CFG の1か所で管理。<br>【マップ回転】サイドバーの⟳ボタンで盤面表示を90°ずつ回転（論理盤面・行動順・敵AIには影響なし）。マップ画像はアイソメ投影と等価な線形変換で追随し、タップ吸着・キャラの向き（4方向ドット絵）も回転に連動する。<br>【浅瀬の防御補正】<br>実効防御＝四捨五入したバフ込み防御×地形倍率（浅瀬1.15、その他1.0）。この積は丸めず、ダメージ計算に使用する。ダメージは攻撃×威力％－実効防御×50％を四捨五入し、最低1とする。その後、シールド軽減を適用して再度四捨五入する。<br>※浅瀬の+15%は防御値への倍率であり、被ダメージを直接15%軽減する効果ではない。<br>【敵の個性】ブルーギル＝支援型（補正なし。傷ついた仲間の敵を最大HPの25%回復、自分以外を優先。回復対象がいなければ通常攻撃）、ブラックバス＝攻撃型（神を優先して狙う。攻撃×1.25・防御×0.75）、外来ガメ＝防御型（HP×1.4・防御×1.3・素早さ−3・移動2。浅瀬を好んで移動し、浅瀬の防御×1.15と重なる）、外来ザリガニ＝高速型（HP×0.9・素早さ+6・移動4。HP割合が最も低い味方を狙う）、大ナマズ＝押し出し型（補正なし。通常攻撃が当たった相手を1マス押し出す。岩・占有マスへは押し出せない）。滝の主モドキ・源流の番人モドキ・流木のかたまりは従来どおり共通仕様（個性は第2次実装で検討）。回復量：小=最大HPの20%／中=35%／大=60%。通常攻撃は威力100%・射程1。第2進化の「解放数の条件」は合計24として実装。手入れ4番のポイントは仕様の表記順（資源主軸）を水量・生命・資源に読み替えて反映しています。技・特性の内容や効果範囲・射程はまだ仮段階です。</p></details>';
 }
 function viewEnding(){
   var god=GODS[G.god];
@@ -1240,25 +1260,68 @@ var ISO_SX=100/(COLS+ROWS);           /* 5.8824 */
 var ISO_SY=5.5294, ISO_TOP=3;
 function tIdx(x,y){ return y*COLS+x; }
 function inBoard(x,y){ return x>=0&&x<COLS&&y>=0&&y<ROWS; }
+/* ============ 高さ＆マップ回転の設定（数値はすべてここ1か所で調整） ============
+   高さ：浅瀬（water）=0、草地（grass）=1、高台（high）=2、岩場は侵入不可。
+   段差ルール：隣接マス間の高さ差が maxStep（1）を超えるマスへは直接移動できない
+   （プレイヤーの移動範囲計算と敵AIの経路探索の両方に同じく適用）。
+   戦闘への影響：Δ＝攻撃側の高さ−対象の高さ として
+     命中率 ＝ hitBase + Δ×hitPer（hitMin〜hitMax に制限。回復・蘇生は必中）
+     ダメージ倍率 ＝ 1 + Δ×dmgPer（dmgMin〜dmgMax に制限。previewDamage の入口で適用）
+   stepPct はタイルを持ち上げる量（盤面の高さに対する%／1段あたり）。
+   回転：B.rot が 0〜3（90°刻み）。論理盤面は変えず表示投影だけを回す。 */
+var HEIGHT_CFG={ hitBase:90, hitPer:10, hitMin:60, hitMax:100, dmgPer:0.10, dmgMin:0.8, dmgMax:1.2, maxStep:1, stepPct:3.2 };
+function heightAt(x,y){ var t=TERRAIN[tIdx(x,y)]; return t==="water"?0:(t==="high"?2:1); }
+function heightDelta(a,b){ return heightAt(a.x,a.y)-heightAt(b.x,b.y); }
+function hitChance(src,tgt){ var d=heightDelta(src,tgt); return Math.max(HEIGHT_CFG.hitMin, Math.min(HEIGHT_CFG.hitMax, HEIGHT_CFG.hitBase + d*HEIGHT_CFG.hitPer)); }
+function heightDmgMult(src,tgt){ var d=heightDelta(src,tgt); return Math.max(HEIGHT_CFG.dmgMin, Math.min(HEIGHT_CFG.dmgMax, 1 + d*HEIGHT_CFG.dmgPer)); }
+function canStep(fx,fy,tx,ty){ return Math.abs(heightAt(fx,fy)-heightAt(tx,ty))<=HEIGHT_CFG.maxStep; }
+/* ---- 回転つき投影：論理(x,y) → 表示グリッド(rx,ry) と盤面%座標 ---- */
+function boardRot(){ return B ? (B.rot||0) : 0; }
+function rotXY(x,y){ var r=boardRot();
+  if(r===1) return [ROWS-1-y, x, ROWS, COLS];
+  if(r===2) return [COLS-1-x, ROWS-1-y, COLS, ROWS];
+  if(r===3) return [y, COLS-1-x, ROWS, COLS];
+  return [x, y, COLS, ROWS]; }
+function unrotXY(rx,ry){ var r=boardRot();
+  if(r===1) return [ry, ROWS-1-rx];
+  if(r===2) return [COLS-1-rx, ROWS-1-ry];
+  if(r===3) return [COLS-1-ry, rx];
+  return [rx, ry]; }
+function cellLeftTop(x,y){ var p=rotXY(x,y); var rx=p[0], ry=p[1], RD=p[3]; var h=heightAt(x,y);
+  return { left:(rx-ry+RD-1)*ISO_SX, top:(rx+ry)*ISO_SY+ISO_TOP - h*HEIGHT_CFG.stepPct, z:(rx+ry)*10 + h*2 + 5, h:h }; }
+function cellCenter(x,y){ var lt=cellLeftTop(x,y); return { cx:lt.left+ISO_SX, cy:lt.top+ISO_SY }; }
+/* マップ画像の回転：アイソメ投影（縦圧縮0.40）のもとでグリッド回転と等価になる
+   線形変換を画像に適用する。格子の中心＝盤面の中心なので transform-origin は 50% 50%。
+   90°/270°は matrix(0,±0.4,∓2.5,0)、180°は通常の回転と一致する。 */
+function mapImgTransform(){ var r=boardRot();
+  if(r===1) return "matrix(0,0.4,-2.5,0,0,0)";
+  if(r===2) return "rotate(180deg)";
+  if(r===3) return "matrix(0,-0.4,2.5,0,0,0)";
+  return ""; }
+/* 段差の崖面クリップ形状（セルの高さに対する%で計算） */
+function cliffStyle(h){ if(h<=0) return "";
+  var E=h*HEIGHT_CFG.stepPct/(2*ISO_SY)*100; var den=50+E;
+  var V=(50/den*100).toFixed(1), C=(E/den*100).toFixed(1);
+  return ' style="height:'+den.toFixed(1)+'%;clip-path:polygon(0 0,50% '+V+'%,100% 0,100% '+C+'%,50% 100%,0 '+C+'%)"'; }
 /* ============ 地形（固定レイアウト：川が奥行き方向に流れる） ============
    戦闘マップ画像（assets/map-battle.jpg）と同じ流路をデータ化したもの。
    川の帯（W=浅瀬）が盤面の奥（y=0）から手前（y=9）へ中央を蛇行して流れ、
    両岸は草地（G）、岩場（R）は点在。画像とマスは常に一致する。
    行は y=0（奥）→ y=9（手前）、各行の文字は x=0→6。 */
 var TERRAIN_LAYOUT=[
-  "GGGWWGG",
+  "HGGWWGH",
   "RGGWWGG",
   "GGWWGGG",
-  "GRWWGGG",
+  "GRWWGGH",
   "GGGWWGG",
-  "GGGWWGR",
+  "HGGWWGR",
   "GGWWGGG",
-  "RGWWGGG",
+  "RGWWGGH",
   "GGGWWGG",
-  "GGGWWGR"
+  "HGGWWGR"
 ];
 var TERRAIN=[];
-for(var tiy=0;tiy<ROWS;tiy++) for(var tix=0;tix<COLS;tix++){ var tc=TERRAIN_LAYOUT[tiy].charAt(tix); TERRAIN.push(tc==="W"?"water":(tc==="R"?"rock":"grass")); }
+for(var tiy=0;tiy<ROWS;tiy++) for(var tix=0;tix<COLS;tix++){ var tc=TERRAIN_LAYOUT[tiy].charAt(tix); TERRAIN.push(tc==="W"?"water":(tc==="R"?"rock":(tc==="H"?"high":"grass"))); }
 var ENEMY_TYPES=[
   [{n:"ブルーギル",art:"bluegill"},{n:"外来ガメ",art:"turtle"},{n:"流木のかたまり",art:"driftwood"}],
   [{n:"ブラックバス",art:"bass"},{n:"ブルーギル",art:"bluegill"},{n:"外来ザリガニ",art:"zarigani"}],
@@ -1280,7 +1343,7 @@ var ENEMY_PROFILES={
 };
 function startBattle(si,di){
   var st=calcStats(); var god=GODS[G.god];
-  function mkUnit(o){ o.buffs=[]; o.acted=false; o.alive=true; return o; }
+  function mkUnit(o){ o.buffs=[]; o.acted=false; o.alive=true; o.faceDir = o.side==="e" ? [0,1] : [0,-1]; return o; }
   var allies=[
     mkUnit({side:"a",god:true,name:god.short,face:god.face,x:2,y:8,hp:st.hp,maxhp:st.hp,mp:st.mp,maxmp:st.mp,atk:st.atk,def:st.def,spd:st.spd,move:4}),
     mkUnit({side:"a",name:"お供アユ",art:"ayu",face:"🐟",x:0,y:8,hp:48+G.evo*10,maxhp:48+G.evo*10,mp:0,maxmp:0,atk:13+G.evo*3,def:8+G.evo*2,spd:14,move:4}),
@@ -1300,7 +1363,7 @@ function startBattle(si,di){
     foes.push(mkUnit({side:"e",name:t.n,art:t.art,role:prof?prof.role:null,face:"",x:spots[i][0],y:spots[i][1],hp:hp,maxhp:hp,mp:0,maxmp:0,atk:atk,def:def,spd:spd,move:mv}));
   }
   allies.concat(foes).forEach(function(u){ TERRAIN[tIdx(u.x,u.y)]="grass"; });
-  B={si:si,di:di,loot:STAGES[si].loot[di],allies:allies,foes:foes,round:1,sel:null,moved:false,preMove:null,mode:"select",targets:[],pendingSkill:null,showSkills:false,confirm:null,focus:null,logs:["<b>"+STAGES[si].name+" 深度"+(di+1)+"</b> の戦闘開始！ 敵を全て倒すと勝利、神様が倒れると敗北です。","行動順は各巡の開始時に素早さ順（味方・敵混在）で確定します。素早さの増減は次巡の順序から反映されます。"],over:false,order:[],turnIdx:0,skipAllies:false,cur:null};
+  B={si:si,di:di,rot:0,loot:STAGES[si].loot[di],allies:allies,foes:foes,round:1,sel:null,moved:false,preMove:null,mode:"select",targets:[],pendingSkill:null,showSkills:false,confirm:null,focus:null,logs:["<b>"+STAGES[si].name+" 深度"+(di+1)+"</b> の戦闘開始！ 敵を全て倒すと勝利、神様が倒れると敗北です。","行動順は各巡の開始時に素早さ順（味方・敵混在）で確定します。素早さの増減は次巡の順序から反映されます。","地形には高さがあります（浅瀬0・草地1・高台2）。高い所から攻撃すると命中・ダメージが上がり、段差2以上のマスへは直接移動できません。⟳ボタンでマップを90°ずつ回転できます。"],over:false,order:[],turnIdx:0,skipAllies:false,cur:null};
   var roleNotes=[], roleSeen={};
   foes.forEach(function(f){ var p=ENEMY_PROFILES[f.art]; if(p&&!roleSeen[f.art]){ roleSeen[f.art]=1; roleNotes.push(f.name+"＝"+p.label); } });
   if(roleNotes.length) B.logs.push("敵の個性："+roleNotes.join("／")+"。種類ごとに狙い方と倒し方が変わります。");
@@ -1335,10 +1398,18 @@ function effDefWithTerrain(u){ return effStat(u,"def")*terrainDefMult(u); }
 function previewDamage(src,tgt,power){
   var atk=effStat(src,"atk"); var def=effDefWithTerrain(tgt);
   var dmg=Math.max(1, Math.round(atk*power/100 - def*0.5));
+  dmg=Math.max(1, Math.round(dmg*heightDmgMult(src,tgt))); /* 高さのダメージ倍率は計算の入口ここで適用（予測表示と実計算で共有） */
   dmg=Math.max(1, Math.round(dmg*(1-shieldPct(tgt)/100)));
   return dmg;
 }
 function dealDamage(src,tgt,power,skill){
+  setFacing(src,tgt.x,tgt.y); /* 攻撃時は対象の方向を向く */
+  var hc=hitChance(src,tgt);
+  if(Math.random()*100>=hc){ /* 命中判定：外れたらダメージ・デバフ・押し引きなしで 0 を返す */
+    fxPush({t:"miss",x:tgt.x,y:tgt.y});
+    blog(src.name+" → "+tgt.name+" への攻撃は <b>外れた</b>！（命中"+hc+"%：高さ"+heightAt(src.x,src.y)+"→"+heightAt(tgt.x,tgt.y)+"）");
+    return 0;
+  }
   var dmg=previewDamage(src,tgt,power);
   tgt.hp-=dmg;
   fxPush({t:"dmg",sx:src.x,sy:src.y,x:tgt.x,y:tgt.y,amt:dmg,died:tgt.hp<=0});
@@ -1352,6 +1423,7 @@ function dealDamage(src,tgt,power,skill){
   return dmg;
 }
 function healUnit(src,tgt,pct,skill){
+  setFacing(src,tgt.x,tgt.y); /* 回復・蘇生は必中。向きだけ対象へ */
   if(!tgt.alive){ if(skill&&skill.revive){ tgt.alive=true; tgt.hp=Math.max(1,Math.round(tgt.maxhp*skill.revive/100)); fxPush({t:"heal",x:tgt.x,y:tgt.y,amt:"蘇生！",revive:true}); blog("✨ "+tgt.name+" が HP"+tgt.hp+" で蘇生！"); } return; }
   var amt=Math.round(tgt.maxhp*pct/100); var before=tgt.hp; tgt.hp=Math.min(tgt.maxhp,tgt.hp+amt);
   if(tgt.hp-before>0) fxPush({t:"heal",x:tgt.x,y:tgt.y,amt:tgt.hp-before});
@@ -1362,12 +1434,12 @@ function applyBuffsTo(u,skill){
   if(skill.buff){ for(var k in skill.buff){ addBuff(u,{stat:k,pct:skill.buff[k],turns:skill.bt||2}); } }
   if(skill.shield){ addBuff(u,{stat:"shield",pct:skill.shield,turns:skill.bt||1}); }
 }
-function pullUnit(src,tgt){ var dx=Math.sign(src.x-tgt.x), dy=Math.sign(src.y-tgt.y); var nx=tgt.x, ny=tgt.y; if(Math.abs(src.x-tgt.x)>=Math.abs(src.y-tgt.y)) nx+=dx; else ny+=dy; if(inBoard(nx,ny)&&!isBlockedTile(nx,ny)&&!unitAt(nx,ny)){ fxPush({t:"slide",fx:tgt.x,fy:tgt.y,x:nx,y:ny}); tgt.x=nx; tgt.y=ny; blog(tgt.name+" を引き寄せた"); } }
-function pushUnit(src,tgt){ var dx=Math.sign(tgt.x-src.x), dy=Math.sign(tgt.y-src.y); var nx=tgt.x, ny=tgt.y; if(Math.abs(tgt.x-src.x)>=Math.abs(tgt.y-src.y)) nx+=dx; else ny+=dy; if(dx===0&&dy===0) nx+=1; if(inBoard(nx,ny)&&!isBlockedTile(nx,ny)&&!unitAt(nx,ny)){ fxPush({t:"slide",fx:tgt.x,fy:tgt.y,x:nx,y:ny}); tgt.x=nx; tgt.y=ny; blog(tgt.name+" を押し出した"); } }
+function pullUnit(src,tgt){ var dx=Math.sign(src.x-tgt.x), dy=Math.sign(src.y-tgt.y); var nx=tgt.x, ny=tgt.y; if(Math.abs(src.x-tgt.x)>=Math.abs(src.y-tgt.y)) nx+=dx; else ny+=dy; if(inBoard(nx,ny)&&!isBlockedTile(nx,ny)&&!unitAt(nx,ny)){ fxPush({t:"slide",fx:tgt.x,fy:tgt.y,x:nx,y:ny}); setFacingDelta(tgt,nx-tgt.x,ny-tgt.y); tgt.x=nx; tgt.y=ny; blog(tgt.name+" を引き寄せた"); } }
+function pushUnit(src,tgt){ var dx=Math.sign(tgt.x-src.x), dy=Math.sign(tgt.y-src.y); var nx=tgt.x, ny=tgt.y; if(Math.abs(tgt.x-src.x)>=Math.abs(tgt.y-src.y)) nx+=dx; else ny+=dy; if(dx===0&&dy===0) nx+=1; if(inBoard(nx,ny)&&!isBlockedTile(nx,ny)&&!unitAt(nx,ny)){ fxPush({t:"slide",fx:tgt.x,fy:tgt.y,x:nx,y:ny}); setFacingDelta(tgt,nx-tgt.x,ny-tgt.y); tgt.x=nx; tgt.y=ny; blog(tgt.name+" を押し出した"); } }
 function isBlockedTile(x,y){ return TERRAIN[tIdx(x,y)]==="rock"; }
 function moveDistances(u){ var seen={}; seen[u.x+","+u.y]=0; var q=[[u.x,u.y,0]];
   while(q.length){ var cur=q.shift(); var cx=cur[0],cy=cur[1],d=cur[2]; if(d>=u.move) continue;
-    [[1,0],[-1,0],[0,1],[0,-1]].forEach(function(o){ var nx=cx+o[0],ny=cy+o[1]; if(!inBoard(nx,ny)) return; var k=nx+","+ny; if(seen[k]!==undefined) return; if(isBlockedTile(nx,ny)) return; if(unitAt(nx,ny)) return; seen[k]=d+1; q.push([nx,ny,d+1]); });
+    [[1,0],[-1,0],[0,1],[0,-1]].forEach(function(o){ var nx=cx+o[0],ny=cy+o[1]; if(!inBoard(nx,ny)) return; var k=nx+","+ny; if(seen[k]!==undefined) return; if(isBlockedTile(nx,ny)) return; if(!canStep(cx,cy,nx,ny)) return; /* 段差2以上のマスへは直接移動できない */ if(unitAt(nx,ny)) return; seen[k]=d+1; q.push([nx,ny,d+1]); });
   } return seen; }
 function moveTargets(u){ var seen=moveDistances(u); return Object.keys(seen).filter(function(k){ return seen[k]>0; }); }
 function selectUnit(u){
@@ -1513,8 +1585,8 @@ function enemyAct(e){
   var tgt=enemyPickTarget(e); if(!tgt) return;
   if(e.role==="defender") enemyMovePreferWater(e,tgt); else enemyMove(e,tgt);
   if(dist(e,tgt)<=1&&tgt.alive){
-    dealDamage(e,tgt,100,null);
-    if(e.role==="push"&&tgt.alive) pushUnit(e,tgt); /* 大ナマズ：既存の押し出し処理（岩・占有判定つき）を再利用 */
+    var dd=dealDamage(e,tgt,100,null);
+    if(e.role==="push"&&dd>0&&tgt.alive) pushUnit(e,tgt); /* 大ナマズ：攻撃が当たったときだけ、既存の押し出し処理（岩・占有判定つき）を再利用 */
   }
 }
 /* 行動順表に沿ってターンを進める。敵のターンはAIで即時実行し、次の味方のターンで止まる。
@@ -1588,12 +1660,12 @@ function enemyMove(e,tgt){
   if(dist(e,tgt)<=1) return;
   var dg={}; dg[tgt.x+","+tgt.y]=0; var q=[[tgt.x,tgt.y,0]];
   while(q.length){ var cur=q.shift(); var cx=cur[0], cy=cur[1], d=cur[2];
-    [[1,0],[-1,0],[0,1],[0,-1]].forEach(function(o){ var nx=cx+o[0], ny=cy+o[1]; if(!inBoard(nx,ny)) return; var k=nx+","+ny; if(dg[k]!==undefined) return; if(isBlockedTile(nx,ny)) return; var occ=unitAt(nx,ny); if(occ&&occ!==e&&occ!==tgt) return; dg[k]=d+1; q.push([nx,ny,d+1]); });
+    [[1,0],[-1,0],[0,1],[0,-1]].forEach(function(o){ var nx=cx+o[0], ny=cy+o[1]; if(!inBoard(nx,ny)) return; var k=nx+","+ny; if(dg[k]!==undefined) return; if(isBlockedTile(nx,ny)) return; if(!canStep(cx,cy,nx,ny)) return; /* 段差制限はプレイヤーと同じ */ var occ=unitAt(nx,ny); if(occ&&occ!==e&&occ!==tgt) return; dg[k]=d+1; q.push([nx,ny,d+1]); });
   }
   var curKey=e.x+","+e.y; if(dg[curKey]===undefined) return;
   var reach=moveDistances(e); var bestKey=null, bestD=dg[curKey], bestSteps=-1;
   Object.keys(reach).forEach(function(k){ var dk=dg[k]; if(dk===undefined) return; if(dk<bestD||(dk===bestD&&bestKey&&reach[k]>bestSteps)){ bestD=dk; bestSteps=reach[k]; bestKey=k; } });
-  if(bestKey){ var p=bestKey.split(","); var nx2=parseInt(p[0]), ny2=parseInt(p[1]); if(nx2!==e.x||ny2!==e.y) fxPush({t:"slide",fx:e.x,fy:e.y,x:nx2,y:ny2}); e.x=nx2; e.y=ny2; }
+  if(bestKey){ var p=bestKey.split(","); var nx2=parseInt(p[0]), ny2=parseInt(p[1]); if(nx2!==e.x||ny2!==e.y){ fxPush({t:"slide",fx:e.x,fy:e.y,x:nx2,y:ny2}); setFacingDelta(e,nx2-e.x,ny2-e.y); } e.x=nx2; e.y=ny2; }
 }
 /* 外来ガメ（防御型）専用の行き先選択：enemyMove と同じ距離表（BFS）と到達可能マスを使い、
    行き先を選ぶ段階のスコアだけを変える（目標への距離が同じなら浅瀬のマスを優先する）。
@@ -1603,14 +1675,14 @@ function enemyMovePreferWater(e,tgt){
   if(dist(e,tgt)<=1) return;
   var dg={}; dg[tgt.x+","+tgt.y]=0; var q=[[tgt.x,tgt.y,0]];
   while(q.length){ var cur=q.shift(); var cx=cur[0], cy=cur[1], d=cur[2];
-    [[1,0],[-1,0],[0,1],[0,-1]].forEach(function(o){ var nx=cx+o[0], ny=cy+o[1]; if(!inBoard(nx,ny)) return; var k=nx+","+ny; if(dg[k]!==undefined) return; if(isBlockedTile(nx,ny)) return; var occ=unitAt(nx,ny); if(occ&&occ!==e&&occ!==tgt) return; dg[k]=d+1; q.push([nx,ny,d+1]); });
+    [[1,0],[-1,0],[0,1],[0,-1]].forEach(function(o){ var nx=cx+o[0], ny=cy+o[1]; if(!inBoard(nx,ny)) return; var k=nx+","+ny; if(dg[k]!==undefined) return; if(isBlockedTile(nx,ny)) return; if(!canStep(cx,cy,nx,ny)) return; /* 段差制限はプレイヤーと同じ */ var occ=unitAt(nx,ny); if(occ&&occ!==e&&occ!==tgt) return; dg[k]=d+1; q.push([nx,ny,d+1]); });
   }
   var curKey=e.x+","+e.y; if(dg[curKey]===undefined) return;
   var reach=moveDistances(e); var bestKey=null, bestD=dg[curKey], bestSteps=-1;
   var bestWater=terrainAt(e.x,e.y)==="water"?1:0;
   Object.keys(reach).forEach(function(k){ var dk=dg[k]; if(dk===undefined) return; var pp=k.split(","); var w=terrainAt(parseInt(pp[0]),parseInt(pp[1]))==="water"?1:0;
     if(dk<bestD||(dk===bestD&&(w>bestWater||(w===bestWater&&bestKey&&reach[k]>bestSteps)))){ bestD=dk; bestSteps=reach[k]; bestKey=k; bestWater=w; } });
-  if(bestKey){ var p=bestKey.split(","); var nx3=parseInt(p[0]), ny3=parseInt(p[1]); if(nx3!==e.x||ny3!==e.y) fxPush({t:"slide",fx:e.x,fy:e.y,x:nx3,y:ny3}); e.x=nx3; e.y=ny3; }
+  if(bestKey){ var p=bestKey.split(","); var nx3=parseInt(p[0]), ny3=parseInt(p[1]); if(nx3!==e.x||ny3!==e.y){ fxPush({t:"slide",fx:e.x,fy:e.y,x:nx3,y:ny3}); setFacingDelta(e,nx3-e.x,ny3-e.y); } e.x=nx3; e.y=ny3; }
 }
 /* 「残りの味方全員を待機させて順送り」：この巡にまだ行動していない味方は待機扱いにし、
    行動順表に沿って残りのターン（敵を含む）を進める。次巡からは通常どおり全員が行動できる。 */
@@ -1633,10 +1705,11 @@ function endBattle(win){
 }
 function leaveBattle(){ B=null; view= G.finished?"ending":"explore"; render(); }
 function terrainInfo(x,y){
-  var t=TERRAIN[tIdx(x,y)];
-  if(t==="rock") return {name:"岩場", cost:"侵入不可", note:"オレンジ枠＋×のマスには入れません。補正なし"};
-  if(t==="water") return {name:"浅瀬", cost:"移動コスト 1", note:"防御補正あり：このマスのユニットは防御+15%（被ダメージが軽減されます）。味方・敵とも同じ"};
-  return {name:"草地", cost:"移動コスト 1", note:"補正なし（基本地形）"};
+  var t=TERRAIN[tIdx(x,y)]; var h=heightAt(x,y);
+  if(t==="rock") return {name:"岩場", h:h, cost:"侵入不可", note:"オレンジ枠＋×のマスには入れません。補正なし"};
+  if(t==="water") return {name:"浅瀬", h:h, cost:"移動コスト 1", note:"高さ0。防御補正あり：このマスのユニットは防御+15%（被ダメージが軽減されます）。味方・敵とも同じ。低い所からは命中・ダメージで不利になります"};
+  if(t==="high") return {name:"高台", h:h, cost:"移動コスト 1", note:"高さ2。高い所から攻撃すると命中+10・ダメージ+10%（1段差ごと）。高さ0の浅瀬へは直接降りられません（段差2）"};
+  return {name:"草地", h:h, cost:"移動コスト 1", note:"高さ1。補正なし（基本地形）"};
 }
 /* ---- 戦闘描画（渓流の一手イメージ準拠） ---- */
 function renderBattle(){
@@ -1655,9 +1728,9 @@ function renderBattle(){
     if(isMoveCell) cls+=" is-move"; else if((isTgt&&B.mode==="target")||inConfirm) cls+=" is-target";
     if(blocked) cls+=" is-blocked";
     if(B.sel&&u===B.sel) cls+=" is-sel";
-    var left=((x-y+ROWS-1)*ISO_SX).toFixed(2); var top=((x+y)*ISO_SY+ISO_TOP).toFixed(2);
-    var z=(x+y)*10+5;
-    var inner='<span class="side"></span><span class="diamond"></span><span class="hit"></span>';
+    var left, top, z;
+    var lt=cellLeftTop(x,y); left=lt.left.toFixed(2); top=lt.top.toFixed(2); z=lt.z;
+    var inner=(lt.h>0?'<span class="cliff"'+cliffStyle(lt.h)+'></span>':"")+'<span class="side"></span><span class="diamond"></span><span class="hit"></span>';
     if(blocked) inner+='<span class="blocked-x">×</span>';
     if(u){
       var isCur = B.sel===u && !B.over;
@@ -1677,14 +1750,16 @@ function renderBattle(){
     var sk=B.pendingSkill.sk;
     skillbar='<div class="b-skillbar"><span class="sk-nm">'+esc(sk.n)+'</span><span>消費神力 '+sk.mp+'</span><span>／</span><span>'+(sk.r==="area"?"範囲の中心マスをタップで確認":sk.r==="line"?"方向のマスをタップで決定":"対象をタップで決定")+'</span><button class="cancel" id="btn-cancel2">キャンセル</button></div>';
   }
-  /* minimap */
+  /* minimap（表示の回転に合わせて並べる。高台は h クラス） */
+  var _dims=rotXY(0,0), RW=_dims[2], RD=_dims[3];
   var mini="";
-  for(var my=0;my<ROWS;my++) for(var mx=0;mx<COLS;mx++){ var mu=unitAt(mx,my); var mc=TERRAIN[tIdx(mx,my)]==="water"?"w":TERRAIN[tIdx(mx,my)]==="rock"?"r":""; if(mu) mc=mu.side==="a"?"a":"e"; mini+='<i class="'+mc+'"></i>'; }
+  for(var rry=0;rry<RD;rry++) for(var rxx=0;rxx<RW;rxx++){ var lp=unrotXY(rxx,rry); var mx=lp[0], my=lp[1]; var mu=unitAt(mx,my); var mc=TERRAIN[tIdx(mx,my)]==="water"?"w":TERRAIN[tIdx(mx,my)]==="rock"?"r":TERRAIN[tIdx(mx,my)]==="high"?"h":""; if(mu) mc=mu.side==="a"?"a":"e"; mini+='<i class="'+mc+'"></i>'; }
   var foesLeft=B.foes.filter(function(f){return f.alive;}).length;
   var sideHtml='<div class="bs-title">あなたの一手</div>'
    +'<div class="bs-round"><b>'+B.round+'</b> 巡</div>'
    +'<div class="bs-left">敵全滅まで あと'+foesLeft+'体</div>'
-   +'<div class="bs-sec">全体MAP</div><div class="minimap">'+mini+'</div><div class="mini-legend"><span style="color:#7ec8ff">●</span> 味方　<span style="color:#ff8a7a">●</span> 敵</div>'
+   +'<div class="bs-sec">全体MAP</div><div class="minimap" style="grid-template-columns:repeat('+RW+',1fr)">'+mini+'</div><div class="mini-legend"><span style="color:#7ec8ff">●</span> 味方　<span style="color:#ff8a7a">●</span> 敵　<span style="color:#b5cf7d">●</span> 高台</div>'
+   +'<button class="btn ghost sm" id="btn-rot" style="margin-top:calc(var(--k)*10);background:transparent;color:#eef3e6;border-color:rgba(120,200,210,.6)">⟳ マップ回転（'+(boardRot()*90)+'°）</button><div style="font-size:calc(var(--k)*10.5);color:#9fc3bb;margin-top:calc(var(--k)*4)">回転は表示だけを変えます</div>'
    +'<div class="bs-sec">ステージ'+(B.si+1)+'</div><div class="bs-stage">'+esc(STAGES[B.si].name.replace(/^ステージ\d+ /,""))+' 深度'+(B.di+1)+'</div><div class="bs-obj">目標：敵の全滅</div>'
    +'<div class="bs-sec">戦闘ログ</div><div class="b-log">'+B.logs.slice().reverse().join("<br>")+'</div>'
    +(!B.over?'<button class="btn ghost sm" id="btn-endphase" style="margin-top:calc(var(--k)*12);background:transparent;color:#eef3e6;border-color:rgba(120,200,210,.6)">残りの味方全員 待機（この巡を順送り）</button>':"");
@@ -1697,15 +1772,15 @@ function renderBattle(){
     var pos=B.order?B.order.indexOf(u):-1;
     var isDone=u.acted||(pos>=0&&pos<B.turnIdx);
     var isCur=!B.over&&B.cur===u&&pos===B.turnIdx;
-    return '<div class="turn-item '+(u.side==="e"?"enemy":"")+(isDone?" done":"")+(isCur?" cur":"")+(u.alive?"":" dead")+'" title="'+esc(u.name)+'（素早さ '+effStat(u,"spd")+'）"><span class="tnum">'+(pos>=0?(pos+1):"―")+'</span><div class="tart">'+unitArt(u)+'</div></div>';
+    return '<div class="turn-item '+(u.side==="e"?"enemy":"")+(isDone?" done":"")+(isCur?" cur":"")+(u.alive?"":" dead")+'" title="'+esc(u.name)+'（素早さ '+effStat(u,"spd")+'）"><span class="tnum">'+(pos>=0?(pos+1):"―")+'</span><div class="tart">'+unitArt(u,"f")+'</div></div>';
   }).join("");
   /* floating command menu */
   var menu="";
   if(!B.over && B.sel){
     var u2=B.sel;
-    menu='<div class="b-menu"><div class="bm-name">'+esc(u2.name)+'</div><div class="bm-sub">HP '+u2.hp+'/'+u2.maxhp+(u2.maxmp?'　神力 '+u2.mp+'/'+u2.maxmp:"")+'　攻'+effStat(u2,"atk")+' 防'+effStat(u2,"def")+(terrainAt(u2.x,u2.y)==="water"?' <span style="color:#7ec8ff;font-weight:800">浅瀬：防御+15%</span>':"")+'</div>';
+    menu='<div class="b-menu"><div class="bm-name">'+esc(u2.name)+'</div><div class="bm-sub">HP '+u2.hp+'/'+u2.maxhp+(u2.maxmp?'　神力 '+u2.mp+'/'+u2.maxmp:"")+'　攻'+effStat(u2,"atk")+' 防'+effStat(u2,"def")+'　高さ'+heightAt(u2.x,u2.y)+(terrainAt(u2.x,u2.y)==="water"?' <span style="color:#7ec8ff;font-weight:800">浅瀬：防御+15%</span>':"")+'</div>';
     if(B.mode==="move"){
-      menu+='<p class="bm-guide">水色のマスが移動範囲です。岩マス（オレンジ枠＋×）には入れません。青い菱形が浅瀬（防御+15%）、緑が草地（補正なし）です。</p>'
+      menu+='<p class="bm-guide">水色のマスが移動範囲です。岩マス（オレンジ枠＋×）には入れません。段差2以上のマスへは直接移動できません。高い所から攻撃すると命中・ダメージが上がります。</p>'
        +'<button class="bm-btn sel" id="btn-stay">移動しない</button>';
     } else if(B.mode==="action"){
       if(!B.showSkills){
@@ -1727,11 +1802,11 @@ function renderBattle(){
     menu+='</div>';
   }
   var hint="";
-  if(!B.over && B.mode==="select") hint='<div class="b-hint">行動順に進んでいます（命中・回避なし／必ず当たります）</div>';
+  if(!B.over && B.mode==="select") hint='<div class="b-hint">行動順に進んでいます（高さで命中・ダメージが変動／⟳で回転）</div>';
   /* terrain info */
   var fc = B.focus || (B.sel?{x:B.sel.x,y:B.sel.y}:{x:2,y:8});
   var ti = terrainInfo(fc.x,fc.y);
-  var terrain='<div class="b-terrain"><div class="tt"><b id="t-name">'+ti.name+'</b><span>地形情報</span></div><div class="td" id="t-body">X'+String(fc.x).padStart(2,"0")+' Y'+String(fc.y).padStart(2,"0")+'<br>'+ti.cost+'<br>'+ti.note+'</div></div>';
+  var terrain='<div class="b-terrain"><div class="tt"><b id="t-name">'+ti.name+'</b><span>地形情報</span></div><div class="td" id="t-body">X'+String(fc.x).padStart(2,"0")+' Y'+String(fc.y).padStart(2,"0")+'<br>高さ '+ti.h+'<br>'+ti.cost+'<br>'+ti.note+'</div></div>';
   /* prediction panel for area skills */
   var predict="";
   if(B.confirm && B.pendingSkill && B.sel){
@@ -1742,7 +1817,7 @@ function renderBattle(){
       if(Math.abs(f.x-B.confirm.x)<=1 && Math.abs(f.y-B.confirm.y)<=1){
         var dmg=previewDamage(src,f,sk3.v)*(sk3.hits||1);
         var after=Math.max(0,f.hp-dmg);
-        rowsHtml+='<div class="bp-row"><div class="r1"><span>'+esc(f.name)+(terrainAt(f.x,f.y)==="water"?' <span style="color:#7ec8ff;font-size:calc(var(--k)*11);font-weight:800">浅瀬 防御+15%</span>':"")+'</span><span>HP '+f.hp+' → '+after+'</span></div><div class="bp-bar"><i style="width:'+Math.round(after/f.maxhp*100)+'%"></i><s style="width:'+Math.round((f.hp-after)/f.maxhp*100)+'%"></s></div><div>ダメージ '+dmg+'（命中 確定）</div></div>';
+        rowsHtml+='<div class="bp-row"><div class="r1"><span>'+esc(f.name)+(terrainAt(f.x,f.y)==="water"?' <span style="color:#7ec8ff;font-size:calc(var(--k)*11);font-weight:800">浅瀬 防御+15%</span>':"")+'</span><span>HP '+f.hp+' → '+after+'</span></div><div class="bp-bar"><i style="width:'+Math.round(after/f.maxhp*100)+'%"></i><s style="width:'+Math.round((f.hp-after)/f.maxhp*100)+'%"></s></div><div>ダメージ '+dmg+'（命中 '+hitChance(src,f)+'%・高さ'+heightAt(src.x,src.y)+'→'+heightAt(f.x,f.y)+'）</div></div>';
       }
     });
     if(!rowsHtml) rowsHtml='<div class="bp-row">範囲内に敵はいません</div>';
@@ -1756,7 +1831,7 @@ function renderBattle(){
   app.innerHTML='<div class="battle-scene">'
    +'<aside class="b-side">'+sideHtml+'</aside>'
    +'<div class="b-main">'+skillbar
-   +'<div class="b-stage"><img src="assets/bg-battle-real.jpg" alt="水彩の川辺の戦闘背景"><div class="iso-board"><img class="iso-map" src="assets/map-battle.jpg" alt="戦闘マップ">'+cells+'</div>'+menu+hint+terrain+predict+result+'</div>'
+   +'<div class="b-stage"><img src="assets/bg-battle-real.jpg" alt="水彩の川辺の戦闘背景"><div class="iso-board"><img class="iso-map" src="assets/map-battle.jpg" alt="戦闘マップ"'+(mapImgTransform()?' style="transform:'+mapImgTransform()+'"':"")+'>'+cells+'</div>'+menu+hint+terrain+predict+result+'</div>'
    +'</div>'
    +'<aside class="b-rail">'+rail+'</aside></div>';
   bindBattle();
@@ -1776,8 +1851,9 @@ function playFX(){
   function floater(x,y,text,cls){
     var d=document.createElement("div");
     d.className="fx-float "+cls; d.textContent=text;
-    d.style.left=(((x-y+ROWS-1)*ISO_SX)+ISO_SX)+"%";
-    d.style.top=(((x+y)*ISO_SY)+ISO_TOP+1.5)+"%";
+    var c=cellCenter(x,y);
+    d.style.left=c.cx+"%";
+    d.style.top=(c.cy+1.5)+"%";
     board.appendChild(d);
     setTimeout(function(){ if(d.parentNode) d.parentNode.removeChild(d); },1050);
   }
@@ -1789,8 +1865,9 @@ function playFX(){
   q.forEach(function(ev){
     if(ev.t==="slide"){
       var u=unitEl(ev.x,ev.y); if(!u||!rect.width) return;
-      var dx=((ev.fx-ev.fy)-(ev.x-ev.y))*(ISO_SX/100)*rect.width;
-      var dy=((ev.fx+ev.fy)-(ev.x+ev.y))*(ISO_SY/100)*rect.height;
+      var ca=cellCenter(ev.fx,ev.fy), cb=cellCenter(ev.x,ev.y);
+      var dx=(ca.cx-cb.cx)/100*rect.width;
+      var dy=(ca.cy-cb.cy)/100*rect.height;
       if(!dx&&!dy) return;
       u.style.transition="none";
       u.style.transform="translate(calc(-50% + "+Math.round(dx)+"px), "+Math.round(dy)+"px)";
@@ -1806,6 +1883,8 @@ function playFX(){
     } else if(ev.t==="heal"){
       flash(unitEl(ev.x,ev.y),"fx-heal",680);
       floater(ev.x,ev.y,(typeof ev.amt==="number"?"+"+ev.amt:ev.amt),ev.revive?"revive":"heal");
+    } else if(ev.t==="miss"){
+      floater(ev.x,ev.y,"MISS","miss");
     }
   });
 }
@@ -1818,7 +1897,7 @@ function onCellTap(x,y){
     if(!B.sel) return;
     if(B.mode==="move"){
       if(u===B.sel){ afterMove(); return; }
-      if(B.targets.indexOf(x+","+y)>=0){ B.preMove={x:B.sel.x,y:B.sel.y}; fxPush({t:"slide",fx:B.sel.x,fy:B.sel.y,x:x,y:y}); B.sel.x=x; B.sel.y=y; B.moved=true; B.focus={x:x,y:y}; afterMove(); }
+      if(B.targets.indexOf(x+","+y)>=0){ B.preMove={x:B.sel.x,y:B.sel.y}; fxPush({t:"slide",fx:B.sel.x,fy:B.sel.y,x:x,y:y}); setFacingDelta(B.sel,x-B.sel.x,y-B.sel.y); B.sel.x=x; B.sel.y=y; B.moved=true; B.focus={x:x,y:y}; afterMove(); }
       return;
     }
     if(B.mode==="target"){
@@ -1842,7 +1921,7 @@ function bindBattle(){
       B.focus={x:x,y:y};
       var ti=terrainInfo(x,y); var tn=$("t-name"), tb=$("t-body");
       if(tn) tn.textContent=ti.name;
-      if(tb) tb.innerHTML="X"+String(x).padStart(2,"0")+" Y"+String(y).padStart(2,"0")+"<br>"+ti.cost+"<br>"+ti.note;
+      if(tb) tb.innerHTML="X"+String(x).padStart(2,"0")+" Y"+String(y).padStart(2,"0")+"<br>高さ "+ti.h+"<br>"+ti.cost+"<br>"+ti.note;
     });
   });
   /* タップ判定は盤面全体で受ける：アイソメ盤面はセル同士が重なり合うため、
@@ -1858,8 +1937,8 @@ function bindBattle(){
     var px=(ev.clientX-r.left)/r.width*100, py=(ev.clientY-r.top)/r.height*100;
     var best=null, bd=1e9;
     for(var yy=0;yy<ROWS;yy++) for(var xx=0;xx<COLS;xx++){
-      var cx=(xx-yy+ROWS-1)*ISO_SX+ISO_SX, cy=(xx+yy)*ISO_SY+ISO_TOP+ISO_SY;
-      var dx=(px-cx)/6.5, dy=(py-cy)/5.3, d=dx*dx+dy*dy;
+      var cc=cellCenter(xx,yy);
+      var dx=(px-cc.cx)/6.5, dy=(py-cc.cy)/5.3, d=dx*dx+dy*dy;
       if(d<bd){ bd=d; best=[xx,yy]; }
     }
     if(best&&bd<=1.9) onCellTap(best[0],best[1]);
@@ -1877,6 +1956,7 @@ function bindBattle(){
   var cok=$("btn-confirm-ok"); if(cok) cok.addEventListener("click", function(){ var cx=B.confirm.x, cy=B.confirm.y; executeSkill(cx,cy); });
   var cno=$("btn-confirm-no"); if(cno) cno.addEventListener("click", function(){ B.confirm=null; renderBattle(); });
   var endp=$("btn-endphase"); if(endp) endp.addEventListener("click", function(){ enemyPhase(); renderBattle(); });
+  var rotb=$("btn-rot"); if(rotb) rotb.addEventListener("click", function(){ B.rot=((B.rot||0)+1)%4; renderBattle(); });
   var leave=$("btn-leave"); if(leave) leave.addEventListener("click", leaveBattle);
   document.querySelectorAll("[data-bskill]").forEach(function(b){ b.addEventListener("click", function(){ var p=b.dataset.bskill.split("-"); chooseSkill(p[0], parseInt(p[1])); }); });
 }
