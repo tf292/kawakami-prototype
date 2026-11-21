@@ -666,9 +666,15 @@ function chibiCritter(art){
   s += '</svg>';
   return s;
 }
-/* ============ 4方向ドット絵スプライト（戦いの構え） ============
-   全ユニット分を assets/spr-<key>-<dir>.png に用意（dir: f=正面 b=背面 l=左 r=右）。
-   表示する向きは「ユニットの世界の向き（u.faceDir）」をカメラ回転で変換して決める。
+/* ============ 斜め4方向ドット絵スプライト（戦いの構え） ============
+   戦闘画面はアイソメ（斜め）視点なので、絵も画面の斜め方向を向いた4パターンを
+   全ユニット分 assets/spr-<key>-<dir>.png に用意する。
+   dir は facingDir() が「世界の向き＋カメラ回転」から求めた画面上の向きで、
+   アイソメ投影では盤面の4方向は画面の斜め4方向に一致する：
+     f = 手前左（画面左下向き・正面寄りの3/4ビュー）
+     r = 手前右（画面右下向き・正面寄りの3/4ビュー）
+     l = 奥左　（画面左上向き・背面寄りの3/4ビュー）
+     b = 奥右　（画面右上向き・背面寄りの3/4ビュー）
    u.faceDir は移動・攻撃・回復のたびに setFacing で更新される（既存の face=絵文字とは別物）。 */
 function spriteKey(u){ if(u.god) return G.god; return u.art || "ayu"; }
 function facingDir(u){
@@ -909,7 +915,7 @@ function viewSelect(){
    +'<p style="line-height:1.8;margin:0">川を育てる育成ゲームの試作です。探索で素材を集め、手入れで川を育て、ツリーを解放して神様を強くし、進化を目指します。1行動＝1週間、50ターン（1年）で一区切りです。</p></div>'
    +pwaHintHtml()
    +'<h2 class="sec-title">育てる神様を選ぶ（御三家）</h2><div class="godcards">'+cards+'</div>'
-   +'<details class="help" style="margin-top:calc(var(--k)*14)"><summary>遊び方</summary><p class="muted">① <b>探索</b>：戦闘に勝つと素材が手に入ります（負けると半分だけ持ち帰り）。ステージと深度は順に解放されます。<br>② <b>手入れ</b>：素材を消費してパラメータポイント（水量・生命・資源）が貯まります。ポイントは<b>累計方式</b>で減りません。同じ場所は回数で3段階に上がります。<br>③ <b>ツリー</b>：共通ツリー→進化→各種パラメータツリーの順に開きます。ツリー解放数に応じて<b>技</b>が解放できます（消費なし・派生式）。<br>④ <b>戦闘</b>：7×10のSRPG。移動→通常攻撃か技→待機。移動直後なら「移動キャンセル」で元の位置に戻れます（攻撃や技を選ぶと取り消せなくなります）。地形には高さがあり（川底-10〜高台+17）、高い所から攻撃すると命中・ダメージが上がります（高さ差1ごとに命中+1・ダメージ+1%）。隣との高さ差が8以上のマスへは直接移動できません（崖）。サイドバーの⟳ボタンでマップを90°ずつ回転できます（表示だけが変わります）。神力は戦闘ごとに、HPは戦闘後に全回復します。</p></details>';
+   +'<details class="help" style="margin-top:calc(var(--k)*14)"><summary>遊び方</summary><p class="muted">① <b>探索</b>：戦闘に勝つと素材が手に入ります（負けると半分だけ持ち帰り）。ステージと深度は順に解放されます。<br>② <b>手入れ</b>：素材を消費してパラメータポイント（水量・生命・資源）が貯まります。ポイントは<b>累計方式</b>で減りません。同じ場所は回数で3段階に上がります。<br>③ <b>ツリー</b>：共通ツリー→進化→各種パラメータツリーの順に開きます。ツリー解放数に応じて<b>技</b>が解放できます（消費なし・派生式）。<br>④ <b>戦闘</b>：7×10のSRPG。移動→通常攻撃か技→待機。行動が実行される前なら「移動キャンセル」「全キャンセル」で元の位置に完全に戻れます（攻撃や技を選んで対象を選んでいる途中でも可。実行したあとは戻れません）。サイドバーの「撤退する」ボタンで、報酬なしで戦闘を終えて拠点へ戻ることもできます。地形には高さがあり（川底-10〜高台+17）、高い所から攻撃すると命中・ダメージが上がります（高さ差1ごとに命中+1・ダメージ+1%）。隣との高さ差が8以上のマスへは直接移動できません（崖）。サイドバーの⟳ボタンでマップを90°ずつ回転できます（表示だけが変わります）。神力は戦闘ごとに、HPは戦闘後に全回復します。</p></details>';
 }
 function bindSelect(){ document.querySelectorAll("[data-god]").forEach(function(b){ b.addEventListener("click", function(){ newGame(b.dataset.god); toast(GODS[G.god].name+"の育成をはじめます"); }); }); bindPwaHint(); }
 /* ---------- ホーム（イメージ画像準拠） ---------- */
@@ -1526,20 +1532,25 @@ function selectUnit(u){
   B.sel=u; B.moved=false; B.preMove=null; B.mode="move"; B.targets=moveTargets(u); B.showSkills=false; B.confirm=null; B.focus={x:u.x,y:u.y}; renderBattle();
 }
 function afterMove(){ B.mode="action"; B.targets=[]; B.showSkills=false; renderBattle(); }
-/* 移動キャンセル：移動直後（行動を確定する前）だけ、元の位置へ戻す。
-   位置だけを巻き戻し、ターン消費・バフの残り巡など他の状態には一切触れない。
-   攻撃／技を選んだ時点で B.preMove は消えるため、その後はキャンセルできない。 */
+/* 全キャンセル（移動の巻き戻し）：行動が「実行される前」ならいつでも使える。
+   移動直後はもちろん、攻撃や技を選んで対象を選んでいる途中（mode="target" や
+   範囲確認中）でも、位置・向き・移動済みフラグ・選択中の行動をすべて移動前の
+   状態に戻す。神力は実行時にしか消費されないため、戻しても消費は発生しない。
+   攻撃／技が実行された時点（executeSkill・通常攻撃の実行・向き選択への移行）で
+   B.preMove は消えるため、その後はキャンセルできない。
+   ターン消費・バフの残り巡など、移動と無関係な状態には一切触れない。 */
 function undoMove(){
   var u=B.sel; if(!u||!B.preMove) return;
   var px=B.preMove.x, py=B.preMove.y;
   fxPush({t:"slide",fx:u.x,fy:u.y,x:px,y:py});
   u.x=px; u.y=py;
+  if(B.preMove.face) u.faceDir=B.preMove.face.slice(); /* 移動で変わった向きも移動前に戻す */
   B.preMove=null; B.moved=false;
   B.mode="move"; B.targets=moveTargets(u); B.showSkills=false; B.confirm=null; B.pendingSkill=null; B.focus={x:px,y:py};
   renderBattle();
 }
 function chooseAttack(){
-  var u=B.sel; B.mode="target"; B.pendingSkill=null; B.showSkills=false; B.preMove=null;
+  var u=B.sel; B.mode="target"; B.pendingSkill=null; B.showSkills=false; /* B.preMove は残す：対象を選んでいる途中でも全キャンセルで元の位置に戻れる */
   B.targets=B.foes.filter(function(f){ return f.alive&&dist(u,f)<=1; });
   if(!B.targets.length){ toast("隣接する敵がいません"); B.mode="action"; }
   renderBattle();
@@ -1547,7 +1558,7 @@ function chooseAttack(){
 function chooseSkill(cat,idx){
   var u=B.sel; var sk=SKILLS[G.god][cat][idx];
   if(u.mp<sk.mp){ toast("神力が足りません"); return; }
-  B.pendingSkill={cat:cat,idx:idx,sk:sk}; B.showSkills=false; B.confirm=null; B.preMove=null;
+  B.pendingSkill={cat:cat,idx:idx,sk:sk}; B.showSkills=false; B.confirm=null; /* B.preMove は残す：対象を選んでいる途中でも全キャンセルで元の位置に戻れる */
   if(sk.r==="all"||sk.r==="self"){ executeSkill(null,null); return; }
   B.mode="target";
   if(sk.r==="s"){
@@ -1565,6 +1576,7 @@ function chooseSkill(cat,idx){
 function executeSkill(tx,ty){
   var u=B.sel; var ps=B.pendingSkill; var sk=ps.sk;
   B.confirm=null;
+  B.preMove=null; /* 技の実行が確定したので、ここから先は全キャンセル不可 */
   u.mp-=sk.mp;
   blog("🔷 "+u.name+" の技「<b>"+sk.n+"</b>」！");
   var foesAlive=function(){ return B.foes.filter(function(f){return f.alive;}); };
@@ -1800,6 +1812,16 @@ function endBattle(win){
   advanceTurn();
   renderBattle();
 }
+/* 撤退：報酬なしで戦闘を終了する。ターンの進行（advanceTurn）と、その後の
+   帰還・自動保存の流れは通常の探索帰還（endBattle→結果パネル→拠点へ戻る）と同一。
+   勝利数・踏破記録には数えない。 */
+function retreatBattle(){
+  B.over=true; B.retreated=true; B.retreatAsk=false;
+  G.lastResult="探索から撤退（"+STAGES[B.si].name+" 深度"+(B.di+1)+"）素材：なし";
+  blog("🚪 戦闘から<b>撤退</b>した（報酬なし）");
+  advanceTurn();
+  renderBattle();
+}
 function leaveBattle(){ B=null; view= G.finished?"ending":"explore"; render(); }
 function terrainInfo(x,y){
   var t=TERRAIN[tIdx(x,y)]; var h=heightAt(x,y);
@@ -1879,7 +1901,8 @@ function renderBattle(){
    +'<button class="btn ghost sm" id="btn-rot" style="margin-top:calc(var(--k)*10);background:transparent;color:#eef3e6;border-color:rgba(120,200,210,.6)">⟳ マップ回転（'+(boardRot()*90)+'°）</button><div style="font-size:calc(var(--k)*10.5);color:#9fc3bb;margin-top:calc(var(--k)*4)">回転は表示だけを変えます</div>'
    +'<div class="bs-sec">ステージ'+(B.si+1)+'</div><div class="bs-stage">'+esc(STAGES[B.si].name.replace(/^ステージ\d+ /,""))+' 深度'+(B.di+1)+'</div><div class="bs-obj">目標：敵の全滅</div>'
    +'<div class="bs-sec">戦闘ログ</div><div class="b-log">'+B.logs.slice().reverse().join("<br>")+'</div>'
-   +(!B.over?'<button class="btn ghost sm" id="btn-endphase" style="margin-top:calc(var(--k)*12);background:transparent;color:#eef3e6;border-color:rgba(120,200,210,.6)">残りの味方全員 待機（この巡を順送り）</button>':"");
+   +(!B.over?'<button class="btn ghost sm" id="btn-endphase" style="margin-top:calc(var(--k)*12);background:transparent;color:#eef3e6;border-color:rgba(120,200,210,.6)">残りの味方全員 待機（この巡を順送り）</button>':"")
+   +(!B.over?'<button class="btn ghost sm" id="btn-retreat" style="margin-top:calc(var(--k)*8);background:transparent;color:#ffc9b8;border-color:rgba(230,140,110,.65)">撤退する</button>':"");
   /* turn order rail */
   /* 行動順レールは、その巡の開始時に確定した順表（B.order）をそのまま表示する。
      巡の途中で蘇生した等で順表に無いユニットは末尾に置き、この巡は行動しない（次巡から参加）。 */
@@ -1923,6 +1946,7 @@ function renderBattle(){
     } else if(B.mode==="target"){
       menu+='<p class="bm-guide">'+(B.pendingSkill?"赤〜ピンクのマス／対象を選んでください。":"隣接する敵を選んでください。")+'</p>'
        +'<button class="bm-btn" id="btn-cancel">もどる</button>';
+      if(B.preMove) menu+='<button class="bm-btn" id="btn-fullcancel">全キャンセル（元の位置に戻る）</button>';
     }
     menu+='</div>';
   }
@@ -1951,12 +1975,17 @@ function renderBattle(){
   }
   var result="";
   if(B.over){
-    result='<div class="b-result"><h3>'+(B.foes.some(function(f){return f.alive;})?"敗北…":"🎉 勝利！")+'</h3><p style="font-size:calc(var(--k)*13.5);line-height:1.7">'+esc(G.lastResult)+'</p><button class="btn gold" id="btn-leave" style="width:100%">拠点へ戻る</button></div>';
+    result='<div class="b-result"><h3>'+(B.retreated?"撤退しました":(B.foes.some(function(f){return f.alive;})?"敗北…":"🎉 勝利！"))+'</h3><p style="font-size:calc(var(--k)*13.5);line-height:1.7">'+esc(G.lastResult)+'</p><button class="btn gold" id="btn-leave" style="width:100%">拠点へ戻る</button></div>';
+  }
+  /* 撤退の確認パネル（戦闘中のみ。alert/confirm は使わず画面内UIで確認する） */
+  var retreat="";
+  if(!B.over && B.retreatAsk){
+    retreat='<div class="b-result"><h3>撤退しますか？</h3><p style="font-size:calc(var(--k)*13.5);line-height:1.7">戦闘を終了して拠点へ戻ります。<br>素材などの報酬は得られません。探索のターンは通常どおり1つ進みます。</p><div style="display:flex;gap:calc(var(--k)*10)"><button class="btn gold" id="btn-retreat-ok" style="flex:1">撤退する</button><button class="btn ghost" id="btn-retreat-no" style="flex:1;background:transparent;color:#eef3e6;border-color:rgba(120,200,210,.6)">やめる</button></div></div>';
   }
   app.innerHTML='<div class="battle-scene">'
    +'<aside class="b-side">'+sideHtml+'</aside>'
    +'<div class="b-main">'+skillbar
-   +'<div class="b-stage"><img src="assets/bg-battle-real.jpg" alt="水彩の川辺の戦闘背景"><div class="iso-board"><img class="iso-map" src="assets/map-battle.jpg" alt="戦闘マップ"'+(mapImgTransform()?' style="transform:'+mapImgTransform()+'"':"")+'>'+cells+'</div>'+menu+hint+terrain+predict+result+'</div>'
+   +'<div class="b-stage"><img src="assets/bg-battle-real.jpg" alt="水彩の川辺の戦闘背景"><div class="iso-board"><img class="iso-map" src="assets/map-battle.jpg" alt="戦闘マップ"'+(mapImgTransform()?' style="transform:'+mapImgTransform()+'"':"")+'>'+cells+'</div>'+menu+hint+terrain+predict+result+retreat+'</div>'
    +'</div>'
    +'<aside class="b-rail">'+rail+'</aside></div>';
   bindBattle();
@@ -2022,7 +2051,7 @@ function onCellTap(x,y){
     if(!B.sel) return;
     if(B.mode==="move"){
       if(u===B.sel){ afterMove(); return; }
-      if(B.targets.indexOf(x+","+y)>=0){ B.preMove={x:B.sel.x,y:B.sel.y}; fxPush({t:"slide",fx:B.sel.x,fy:B.sel.y,x:x,y:y}); setFacingDelta(B.sel,x-B.sel.x,y-B.sel.y); B.sel.x=x; B.sel.y=y; B.moved=true; B.focus={x:x,y:y}; afterMove(); }
+      if(B.targets.indexOf(x+","+y)>=0){ B.preMove={x:B.sel.x,y:B.sel.y,face:(B.sel.faceDir?B.sel.faceDir.slice():null)}; fxPush({t:"slide",fx:B.sel.x,fy:B.sel.y,x:x,y:y}); setFacingDelta(B.sel,x-B.sel.x,y-B.sel.y); B.sel.x=x; B.sel.y=y; B.moved=true; B.focus={x:x,y:y}; afterMove(); }
       return;
     }
     if(B.mode==="target"){
@@ -2077,6 +2106,10 @@ function bindBattle(){
   var fok=$("btn-face-ok"); if(fok) fok.addEventListener("click", confirmFacing);
   document.querySelectorAll("[data-face]").forEach(function(b){ b.addEventListener("click", function(){ var p=b.dataset.face.split(","); B.faceSel=[parseInt(p[0]),parseInt(p[1])]; renderBattle(); }); });
   var undo=$("btn-undomove"); if(undo) undo.addEventListener("click", undoMove);
+  var fullcancel=$("btn-fullcancel"); if(fullcancel) fullcancel.addEventListener("click", undoMove);
+  var ret=$("btn-retreat"); if(ret) ret.addEventListener("click", function(){ B.retreatAsk=true; renderBattle(); });
+  var retok=$("btn-retreat-ok"); if(retok) retok.addEventListener("click", retreatBattle);
+  var retno=$("btn-retreat-no"); if(retno) retno.addEventListener("click", function(){ B.retreatAsk=false; renderBattle(); });
   var cancelFn=function(){ B.mode="action"; B.pendingSkill=null; B.targets=[]; B.confirm=null; renderBattle(); };
   var cancel=$("btn-cancel"); if(cancel) cancel.addEventListener("click", cancelFn);
   var cancel2=$("btn-cancel2"); if(cancel2) cancel2.addEventListener("click", cancelFn);
