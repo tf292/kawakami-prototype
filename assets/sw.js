@@ -37,6 +37,7 @@ var CORE_ASSETS = [
   "./map-care.jpg",
   "./map-paint.jpg",
   "./map-paint-wide.jpg",
+  "./map-surround.jpg",
   "./map-forest-deep.jpg",
   "./care-dot-1-f1.png",
   "./care-dot-1-f2.png",

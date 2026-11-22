@@ -2027,20 +2027,28 @@ function positionPredict(){
        描き足して読みを安定させた。盤外拡張（6マス化）の差し替え後も、
        盤面内（新絵の座標で x1200〜3400・y1200〜4000）は元の絵のまま
        なので、中央100×100px・120×120pxの照合は不一致ゼロを再確認済み。
-   描画は4層：
+   描画は5層：
    (a0) 最背面：viewBox 全体に「深い森」の水彩画（assets/map-forest-deep.jpg、
-       真上から見た密林を全面に描いた絵を暗くしたもの）を敷く。風景画の
+       真上から見た密林を全面に描いた絵を暗くしたもの）を敷く。遠景の
        平行四辺形が届かない画面の隅々まで、平らな色面ではなく描かれた
-       森で覆うための層。全体表示（最大ズームアウト）で画面に入る範囲は
-       すべてこの層か (a) の風景画のどちらかで覆われる。
+       森で覆うための層。
+   (a1) 遠景：assets/map-surround.jpg（1950×2028＝1マス26px、盤外へ
+       32マス分まで拡張した格子75×78マス）を、(a) と同じ投影で1枚のまま
+       敷く。全体表示で画面に入る範囲をほぼ覆う広さがあり、川はこの絵の
+       中で上端から下端まで一続きに流れる。川の続きは、風景画そのものの
+       川の両端の切り抜きを流れ方向へ反転・引き伸ばして合成してあるため、
+       つなぎ目で川の位置がずれない。色調の段差対策として、風景画自身を
+       拡大・ぼかししたハローを遠景の下地に敷いて色を外側へ滲ませ、
+       四隅はビネットで深い森へ沈めてある。縁は大きめのぼかしマスクで
+       フェザーし、(a0) の深い森へ溶け込ませる。以前は (a) の風景画の
+       縁で川が止まって見えたため、この層で「戦闘マップの風景がそのまま
+       画面の端まで続く」状態にした。
    (a) 盤外の景色：拡張格子全体の平行四辺形に、風景画を1枚のまま同じ
        投影（rotXY・高さ0の平面）でアフィン変換して敷く。継ぎ目の無い
        一枚絵なので、ズームアウト／パン／回転でも景色が盤外へ続いて
-       見える。平行四辺形の縁はぼかしマスクでフェザーし、(a0) の深い森へ
-       溶け込ませる。風景画だけでは川が上下端で細く絞られて途切れて
-       見えるため、(a0) と (a) の間に riverExtSvg の川のリボンを敷く：
-       風景画の縁の川幅に合わせて始まり、盤外へ出るにつれて盤面内の
-       川幅（2マス）まで広がり、画面の端まで一続きに流れる。
+       見える。平行四辺形の縁はぼかしマスクでフェザーし、(a1) の遠景へ
+       溶け込ませる（遠景側にも同じ川が続いているため、川はここでも
+       切れずに流れていく）。
    (b) 盤面内：マスごとに「そのマスの正方形テクスチャ」を、セルと同じ
        投影（rotXY＋高さによる持ち上がり）で菱形へアフィン変換して貼る。
        ハードな切り貼りにはしない：クリップ菱形を30%拡大して隣マスへ
@@ -2064,6 +2072,8 @@ function positionPredict(){
    する（盤面＋森の帯が収まる表示は不変）。 */
 var PAINT_W=4600, PAINT_H=5200, PAINT_S=200; /* map-paint-wide.jpg の寸法と1マスのpx */
 var PAINT_OX=6, PAINT_OY=6; /* 風景画の中で盤面が始まるマス位置（盤外マージン6マス分） */
+var SUR_W=1950, SUR_H=2028, SUR_S=26; /* map-surround.jpg（遠景レイヤー）の寸法と1マスのpx */
+var SUR_OX=32, SUR_OY=32; /* 遠景の中で盤面が始まるマス位置（盤外マージン32マス分） */
 /* ============ 盤外の地形モデル（景色専用・歩行不可） ============
    盤外はゲームデータではなく見た目だけの景色。川は盤面内と同じ蛇行の
    周期（2行ごとに左右へ寄る帯）をそのまま延長し、盤の上下端で切れずに
@@ -2103,7 +2113,7 @@ function groundFill(x,y){ return groundFillTH(TERRAIN[tIdx(x,y)], heightAt(x,y))
    込み）で、格子の +x / +y 方向ベクトルは表示グリッド経由で求めるため、
    回転するとテクスチャもマスの中で剛体的に回る（90°回転＝絵も90°回った
    姿になる）。 */
-function paintBasis(){
+function paintBasisFor(S){
   var hw=ISO_SX*4.7, hh=ISO_SY*2;
   function dispVec(a,b){ return [a*hw - b*hw, a*hh + b*hh]; } /* 表示 (rx,ry) 方向→画面ベクトル */
   var r=boardRot(), gx, gy;
@@ -2111,9 +2121,9 @@ function paintBasis(){
   else if(r===2){ gx=dispVec(-1,0); gy=dispVec(0,-1); }
   else if(r===3){ gx=dispVec(0,-1); gy=dispVec(1,0); }
   else { gx=dispVec(1,0); gy=dispVec(0,1); }
-  var S=PAINT_S;
   return { a:gx[0]/S, b:gx[1]/S, c:gy[0]/S, d:gy[1]/S };
 }
+function paintBasis(){ return paintBasisFor(PAINT_S); }
 function paintMatrix(x,y,cc){
   var B=paintBasis(), S=PAINT_S;
   var uc=(x+PAINT_OX+0.5)*S, vc=(y+PAINT_OY+0.5)*S;
@@ -2124,47 +2134,15 @@ function paintMatrix(x,y,cc){
 /* 盤外の景色用：風景画全体を高さ0の平面へ1枚のまま写すアフィン行列。
    絵の中心は盤面の中心マスと一致する（絵の座標系では盤面は OX/OY 分
    ずれた位置から始まる）ため、中心同士を合わせれば全マスが連動する。 */
-function paintMatrixWide(){
-  var B=paintBasis();
+function paintMatrixFor(w,h,s){
+  var B=paintBasisFor(s);
   var cc=gCenter((COLS-1)/2,(ROWS-1)/2,0);
-  var uc=PAINT_W/2, vc=PAINT_H/2;
+  var uc=w/2, vc=h/2;
   var e=cc.x - B.a*uc - B.c*vc, f=cc.y - B.b*uc - B.d*vc;
   function n(v){ return Math.round(v*10000)/10000; }
   return "matrix("+n(B.a)+" "+n(B.b)+" "+n(B.c)+" "+n(B.d)+" "+n(e)+" "+n(f)+")";
 }
-/* 盤外へ続く川：風景画の上下端で川が細く絞られて終わって見えるため、
-   盤外の景色として川のリボンを画面の端まで延ばす。断面は
-   [論理y, 中心x, 半幅] の並びで、風景画の縁（北 y=-6.5／南 y=19.5）では
-   絵の端の川幅（約0.35マス・中心x≈5.5）に合わせ、盤外へ出るにつれて
-   盤面内の川幅（2マス・中心x=5.0）まで滑らかに広げる。こうすると継ぎ目で
-   幅が急に変わらず、川が森の中へ一続きに流れていく読みになる。
-   リボンは gCenter 経由で作るので回転（0°/90°/180°/270°）でも川の軸と
-   連動し、両端（北 y=-55／南 y=68）は viewBox の外まで届く。 */
-function riverRibbonPts(sections){
-  var left=[], right=[], i, p;
-  for(i=0;i<sections.length;i++){ p=gCenter(sections[i][1]-sections[i][2], sections[i][0], 0); left.push(gPt([p.x,p.y])); }
-  for(i=sections.length-1;i>=0;i--){ p=gCenter(sections[i][1]+sections[i][2], sections[i][0], 0); right.push(gPt([p.x,p.y])); }
-  return left.concat(right).join(" ");
-}
-function riverExtSvg(){
-  var nSec=[[-6.5,5.5,0.35],[-9,5.45,0.7],[-13,5.25,1.0],[-20,5.05,1.0],[-55,5.0,1.0]];
-  var sSec=[[19.5,5.5,0.35],[22,5.45,0.7],[26,5.25,1.0],[33,5.05,1.0],[68,5.0,1.0]];
-  function widen(sec, dw){ return sec.map(function(s){ return [s[0], s[1], s[2]+dw]; }); }
-  function narrow(sec, f){ return sec.map(function(s){ return [s[0], s[1], Math.max(0.12, s[2]*f)]; }); }
-  var out="";
-  /* 土手（水より一回り広い砂地）→ 水 → 中央の明るい流れ、の3層。
-     ぼかしはグループ全体にかけ、長い縁だけを森へ溶け込ませる。
-     風景画の下に敷くので、継ぎ目は絵に覆われて見えない。 */
-  out+='<g filter="url(#grivblur)">'
-    +'<polygon points="'+riverRibbonPts(widen(nSec,0.5))+'" fill="#c8b586" opacity="0.9"/>'
-    +'<polygon points="'+riverRibbonPts(widen(sSec,0.5))+'" fill="#c8b586" opacity="0.9"/>'
-    +'<polygon points="'+riverRibbonPts(nSec)+'" fill="#3a82b4" opacity="0.96"/>'
-    +'<polygon points="'+riverRibbonPts(sSec)+'" fill="#3a82b4" opacity="0.96"/>'
-    +'<polygon points="'+riverRibbonPts(narrow(nSec,0.45))+'" fill="#6fb0cc" opacity="0.55"/>'
-    +'<polygon points="'+riverRibbonPts(narrow(sSec,0.45))+'" fill="#6fb0cc" opacity="0.55"/>'
-    +'</g>';
-  return out;
-}
+function paintMatrixWide(){ return paintMatrixFor(PAINT_W,PAINT_H,PAINT_S); }
 function groundSvg(){
   var cellsList=[], gx, gy, x, y;
   var HW=ISO_SX*4.7, HH=ISO_SY*2;
@@ -2181,14 +2159,19 @@ function groundSvg(){
   }
   /* 盤外の景色：拡張格子全体の平行四辺形に、風景画を1枚のまま高さ0の
      平面へ貼る。川・川岸・草地が盤面の端で切れずに続く。平行四辺形の
-     縁はぼかしたマスクでフェザーし、最背面の深い森の絵へ溶け込ませる
+     縁はぼかしたマスクでフェザーし、下の遠景レイヤーへ溶け込ませる
      （硬い切り抜きの輪郭を出さない）。 */
   var eA=gCenter(-PAINT_OX-0.5,-PAINT_OY-0.5,0), eB=gCenter(COLS+PAINT_OX-0.5,-PAINT_OY-0.5,0),
       eC=gCenter(COLS+PAINT_OX-0.5,ROWS+PAINT_OY-0.5,0), eD=gCenter(-PAINT_OX-0.5,ROWS+PAINT_OY-0.5,0);
   var extPts=gPt([eA.x,eA.y])+" "+gPt([eB.x,eB.y])+" "+gPt([eC.x,eC.y])+" "+gPt([eD.x,eD.y]);
+  var sA=gCenter(-SUR_OX-0.5,-SUR_OY-0.5,0), sB=gCenter(COLS+SUR_OX-0.5,-SUR_OY-0.5,0),
+      sC=gCenter(COLS+SUR_OX-0.5,ROWS+SUR_OY-0.5,0), sD=gCenter(-SUR_OX-0.5,ROWS+SUR_OY-0.5,0);
+  var surPts=gPt([sA.x,sA.y])+" "+gPt([sB.x,sB.y])+" "+gPt([sC.x,sC.y])+" "+gPt([sD.x,sD.y]);
   var defs='<filter id="gsoft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="10"/></filter>'
-    +'<filter id="grivblur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="5"/></filter>'
-    +'<mask id="gextm" maskUnits="userSpaceOnUse" x="-265" y="-300" width="1000" height="800"><polygon points="'+extPts+'" fill="#fff" filter="url(#gsoft)"/></mask>';
+    +'<filter id="gsoft2" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="24"/></filter>'
+    +'<mask id="gextm" maskUnits="userSpaceOnUse" x="-265" y="-300" width="1000" height="800"><polygon points="'+extPts+'" fill="#fff" filter="url(#gsoft)"/></mask>'
+    +'<mask id="gsurm" maskUnits="userSpaceOnUse" x="-265" y="-300" width="1000" height="800"><polygon points="'+surPts+'" fill="#fff" filter="url(#gsoft2)"/></mask>';
+  var surround='<g mask="url(#gsurm)"><image href="assets/map-surround.jpg" width="'+SUR_W+'" height="'+SUR_H+'" transform="'+paintMatrixFor(SUR_W,SUR_H,SUR_S)+'" preserveAspectRatio="none"/></g>';
   var scenery='<g mask="url(#gextm)"><image href="assets/map-paint-wide.jpg" width="'+PAINT_W+'" height="'+PAINT_H+'" transform="'+paintMatrixWide()+'" preserveAspectRatio="none"/></g>';
   /* 盤面内マス（従来どおり：高さで持ち上がるフェザー付きパッチ） */
   for(y=0;y<ROWS;y++) for(x=0;x<COLS;x++){
@@ -2219,7 +2202,7 @@ function groundSvg(){
      絵が読めない環境向けの予備）。これにより全体表示で画面の隅まで
      平らな色面や図形が残らない。 */
   var out='<svg class="iso-ground" viewBox="-265 -300 1000 800" preserveAspectRatio="none" aria-hidden="true"><defs>'+defs+'</defs><rect x="-265" y="-300" width="1000" height="800" fill="#22401f"/><image href="assets/map-forest-deep.jpg" x="-265" y="-300" width="1000" height="800" preserveAspectRatio="none"/><rect x="-265" y="-300" width="1000" height="800" fill="rgba(10,24,12,0.12)"/>';
-  out+=riverExtSvg()+outer+scenery;
+  out+=outer+surround+scenery;
   cellsList.forEach(function(it){ out+=it.h; });
   return out+perim+'</svg>'; }
 /* ============ 地形（固定レイアウト：川が奥行き方向に流れる） ============
