@@ -333,7 +333,7 @@ select{font-family:inherit;font-size:calc(var(--k)*15);padding:calc(var(--k)*8);
 .b-side .bs-round b{font-size:calc(var(--k)*34);color:var(--gold2)}
 .b-side .bs-left{font-size:calc(var(--k)*12.5);color:#c8d4bd;border-bottom:1px solid rgba(42,122,134,.8);padding-bottom:calc(var(--k)*10)}
 .b-side .bs-sec{font-size:calc(var(--k)*12);font-weight:900;color:#9fc3bb;letter-spacing:.1em;margin:calc(var(--k)*14) 0 calc(var(--k)*7)}
-.minimap{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;background:rgba(0,0,0,.3);padding:calc(var(--k)*6);border-radius:calc(var(--k)*8);border:1px solid rgba(42,122,134,.7)}
+.minimap{display:grid;grid-template-columns:repeat(11,1fr);gap:2px;background:rgba(0,0,0,.3);padding:calc(var(--k)*6);border-radius:calc(var(--k)*8);border:1px solid rgba(42,122,134,.7)}
 .minimap i{aspect-ratio:1;border-radius:2px;background:#5da85e;display:block}
 .minimap i.w{background:#2ea8e0}.minimap i.r{background:#8a8474}.minimap i.h{background:#b5cf7d}
 .minimap i.a{background:#7ec8ff;box-shadow:inset 0 0 0 2px #fff}
@@ -366,7 +366,7 @@ select{font-family:inherit;font-size:calc(var(--k)*15);padding:calc(var(--k)*8);
    マスごとの淡色ティントと1px輪郭は「一つの風景」を断片化するので置かない。
    枠や色が付くのは is-move / is-target / is-blocked / is-sel の操作状態だけ。 */
 .iso-cell.t-high .diamond{background:transparent;box-shadow:none}
-.iso-cell{position:absolute;width:11.7647%;height:11.0588%;background:none;border:none;padding:0;margin:0;min-height:0;cursor:default;pointer-events:none}
+.iso-cell{position:absolute;width:8%;height:7.52%;background:none;border:none;padding:0;margin:0;min-height:0;cursor:default;pointer-events:none}
 .iso-cell .hit{position:absolute;inset:-26% -14%;z-index:4;pointer-events:auto;background:transparent}
 .iso-cell .diamond{position:absolute;inset:0;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);background:transparent;box-shadow:none}
 .iso-cell.t-grass .diamond{background:transparent;box-shadow:none}
@@ -1058,7 +1058,7 @@ function viewSelect(){
    +'<p style="line-height:1.8;margin:0">川を育てる育成ゲームの試作です。探索で素材を集め、手入れで川を育て、ツリーを解放して神様を強くし、進化を目指します。1行動＝1週間、50ターン（1年）で一区切りです。</p></div>'
    +pwaHintHtml()
    +'<h2 class="sec-title">育てる神様を選ぶ（御三家）</h2><div class="godcards">'+cards+'</div>'
-   +'<details class="help" style="margin-top:calc(var(--k)*14)"><summary>遊び方</summary><p class="muted">① <b>探索</b>：戦闘に勝つと素材が手に入ります（負けると半分だけ持ち帰り）。ステージと深度は順に解放されます。<br>② <b>手入れ</b>：素材を消費してパラメータポイント（水量・生命・資源）が貯まります。ポイントは<b>累計方式</b>で減りません。同じ場所は回数で3段階に上がります。<br>③ <b>ツリー</b>：共通ツリー→進化→各種パラメータツリーの順に開きます。ツリー解放数に応じて<b>技</b>が解放できます（消費なし・派生式）。<br>④ <b>戦闘</b>：7×10のSRPG。行動コマンドは「移動／攻撃／技／待機」。「移動」を押すと移動範囲が出て、移動先を選ぶとコマンドが「攻撃／技／待機／キャンセル」に変わります。「キャンセル」で移動前の位置に完全に戻って移動し直せます（攻撃や技を実行したあとは戻れません）。サイドバーの「撤退する」ボタンで、報酬なしで戦闘を終えて拠点へ戻ることもできます。地形には高さがあり（川底-10〜高台+17）、高い所から攻撃すると命中・ダメージが上がります（高さ差1ごとに命中+1・ダメージ+1%）。隣との高さ差が8以上のマスへは直接移動できません（崖）。サイドバーの⟳ボタンでマップを90°ずつ回転できます（表示だけが変わります）。カメラは行動キャラを中心に映し、盤面のドラッグでスクロール、サイドバーの＋/−ボタンやピンチでズームできます。行動キャラの番になると、キャラ絵の下に行動コマンドが出ます。移動はコマンドの「移動」を押してから移動先のマスをタップしてください（ボタンを押す前はマスをタップしても移動しません）。盤面のキャラをタップすると、左端のステータス枠にそのキャラの情報（HP・神力・攻撃・防御・素早さ・地形・バフ）が出ます。神力は戦闘ごとに、HPは戦闘後に全回復します。</p></details>';
+   +'<details class="help" style="margin-top:calc(var(--k)*14)"><summary>遊び方</summary><p class="muted">① <b>探索</b>：戦闘に勝つと素材が手に入ります（負けると半分だけ持ち帰り）。ステージと深度は順に解放されます。<br>② <b>手入れ</b>：素材を消費してパラメータポイント（水量・生命・資源）が貯まります。ポイントは<b>累計方式</b>で減りません。同じ場所は回数で3段階に上がります。<br>③ <b>ツリー</b>：共通ツリー→進化→各種パラメータツリーの順に開きます。ツリー解放数に応じて<b>技</b>が解放できます（消費なし・派生式）。<br>④ <b>戦闘</b>：11×14のSRPG。行動コマンドは「移動／攻撃／技／待機」。「移動」を押すと移動範囲が出て、移動先を選ぶとコマンドが「攻撃／技／待機／キャンセル」に変わります。「キャンセル」で移動前の位置に完全に戻って移動し直せます（攻撃や技を実行したあとは戻れません）。サイドバーの「撤退する」ボタンで、報酬なしで戦闘を終えて拠点へ戻ることもできます。地形には高さがあり（川底-10〜高台+17）、高い所から攻撃すると命中・ダメージが上がります（高さ差1ごとに命中+1・ダメージ+1%）。隣との高さ差が8以上のマスへは直接移動できません（崖）。サイドバーの⟳ボタンでマップを90°ずつ回転できます（表示だけが変わります）。カメラは行動キャラを中心に映し、盤面のドラッグでスクロール、サイドバーの＋/−ボタンやピンチでズームできます。行動キャラの番になると、キャラ絵の下に行動コマンドが出ます。移動はコマンドの「移動」を押してから移動先のマスをタップしてください（ボタンを押す前はマスをタップしても移動しません）。盤面のキャラをタップすると、左端のステータス枠にそのキャラの情報（HP・神力・攻撃・防御・素早さ・地形・バフ）が出ます。神力は戦闘ごとに、HPは戦闘後に全回復します。</p></details>';
 }
 function bindSelect(){ document.querySelectorAll("[data-god]").forEach(function(b){ b.addEventListener("click", function(){ newGame(b.dataset.god); toast(GODS[G.god].name+"の育成をはじめます"); }); }); bindPwaHint(); }
 /* ---------- ホーム（イメージ画像準拠） ---------- */
@@ -1712,17 +1712,20 @@ if(_restored) toast("保存データから再開しました（"+monthWeek()+"�
 "use strict";
 /* ============ 戦闘（SRPG） ============ */
 var B=null;
-/* ============ 盤面定数（7×10・縦長） ============
-   x: 0..6（横）、y: 0..9（奥行き。0=奥／敵側、9=手前／味方側）。
+/* ============ 盤面定数（11×14・縦長） ============
+   x: 0..10（横）、y: 0..13（奥行き。0=奥／敵側、13=手前／味方側）。
+   旧7×10盤面を各辺2マスずつ拡張したもの：旧地形・高さ・配置は全体を
+   +2マスずらして内側にそのまま移し、周囲の新しい輪は広域風景画
+   （15×18マス分）のその場所の絵に合わせて地形・高さを決めた。
    盤面サイズに依存する処理はすべてこの定数経由にし、描画・地形・配置・
    タップ吸着・移動/AIの範囲計算が同じ前提で動くようにする。
    アイソメ投影（縦圧縮0.40は従来どおり）：
      セル左端% = (x - y + ROWS-1) * ISO_SX、セル上端% = (x + y) * ISO_SY + ISO_TOP
      ISO_SX = 100/(COLS+ROWS)（菱形の半幅ステップ）、セル幅% = 2*ISO_SX
      ISO_SY = ISO_SX * (47/20) * 0.40（盤面アスペクト47/20 × 圧縮0.40 の半高ステップ） */
-var COLS=7, ROWS=10;
-var ISO_SX=100/(COLS+ROWS);           /* 5.8824 */
-var ISO_SY=5.5294, ISO_TOP=3;
+var COLS=11, ROWS=14;
+var ISO_SX=100/(COLS+ROWS);           /* 4.0 */
+var ISO_SY=3.76, ISO_TOP=3;
 function tIdx(x,y){ return y*COLS+x; }
 function inBoard(x,y){ return x>=0&&x<COLS&&y>=0&&y<ROWS; }
 /* ============ 高さ＆マップ回転の設定（数値はすべてここ1か所で調整） ============
@@ -1859,7 +1862,7 @@ function selectionCell(){
   if(B&&B.sel) return {x:B.sel.x, y:B.sel.y};
   if(B&&B.focus) return {x:B.focus.x, y:B.focus.y};
   if(B&&B.cur) return {x:B.cur.x, y:B.cur.y};
-  return {x:2, y:8};
+  return {x:4, y:10};
 }
 /* 論理マス → 現在のカメラ変換でのステージ内 px 座標（中心計算の共通処理） */
 function cellScreenPx(cx, cy){
@@ -1968,24 +1971,25 @@ function positionPredict(){
 /* ============ 盤面グラウンド描画（データ下絵＋連続した風景画＋盤外の景色） ============
    質感と回転整合を両立させるため、2層構造にする。
    (1) 下絵＝データ：地形（TERRAIN）と高さ（HEIGHT_MAP）から作った「真上から
-       見た格子マップ（7×10マス、各マス正方形）」が正確なレイアウトの源泉。
+       見た格子マップ（11×14マス、各マス正方形）」が正確なレイアウトの源泉。
    (2) 風景画＝質感：assets/map-paint-wide.jpg（3000×3600＝1マス200px）は、
-       その下絵を盤外へ4マス分ずつ拡張した格子（15×18マス）をガイドにして
+       その下絵を盤外へ2マス分ずつ拡張した格子（15×18マス）をガイドにして
        「一枚の連続した風景」として描いた水彩画。遊べる盤面は従来どおり
-       7×10マスのまま変えず、広げたのは「見える世界」のほうだけ。
+       11×14マス（旧7×10を各辺2マス拡張）。盤外の帯（2マス分）は森中心の
+       景色に描き直してあり、川が盤外へ流れ出る部分だけが森の切れ目になる。
        川は盤面の上下端で切れず一続きのリボンとして絵の上端から下端まで
        流れて盤外へ抜け、川岸の砂地・草の広がり・段差の連なりもマス境界を
        越えて盤外まで連続する。盤面の周囲には土と石の縁取りの小道が絵の
        中に描かれていて、盤面の輪郭の手がかりになる。光は方向性を持たせ
        ないフラットな光（回転しても違和感が出ない）。
-       整合は機械チェックで担保する：盤面内70マスすべてについて、各マス
+       整合は機械チェックで担保する：盤面内154マスすべてについて、各マス
        中央の100×100px（マスの50%）の平均色を、岩と水を分けた厳密な
        区分で地形データと照合し、不一致ゼロを確認済み（区分：水＝色相
        165〜245°・彩度0.13以上・B≧R／岩＝彩度0.24以下・G−R≦6・
        R−B≦26の灰色石／陸＝緑＋川岸の砂地。高台と草地は「緑の土地」
        として同区分：高さの違いは色ではなく高さデータ由来の持ち上がり
        と崖面で表すため）。中央80×80px・120×120pxのサンプルでも
-       不一致ゼロ。岩場5マス（(0,1)・(1,3)・(6,5)・(0,7)・(6,9)）は
+       不一致ゼロ。岩場5マス（(2,3)・(3,5)・(8,7)・(2,9)・(8,11)）は
        広めのサンプルで草地寄りに読めたため、絵の側に岩塊を大きく
        描き足して読みを安定させた。
    描画は3層：
@@ -2011,13 +2015,13 @@ function positionPredict(){
    広げた -235 -100 940 400（盤面の2倍の広さ）。SVG要素自体も盤面の
    200%サイズで -50%/-50% に置き、盤外まで描けるようにしてある。 */
 var PAINT_W=3000, PAINT_H=3600, PAINT_S=200; /* map-paint-wide.jpg の寸法と1マスのpx */
-var PAINT_OX=4, PAINT_OY=4; /* 風景画の中で盤面が始まるマス位置（盤外マージン4マス分） */
+var PAINT_OX=2, PAINT_OY=2; /* 風景画の中で盤面が始まるマス位置（盤外マージン2マス分） */
 /* ============ 盤外の地形モデル（景色専用・歩行不可） ============
    盤外はゲームデータではなく見た目だけの景色。川は盤面内と同じ蛇行の
    周期（2行ごとに左右へ寄る帯）をそのまま延長し、盤の上下端で切れずに
    盤外へ流れていく。両側は草地を基調に、決定的ハッシュで高台と岩を
    点在させる（下絵生成時と同一の規則で風景画と一致させてある）。 */
-function riverLeftAt(y){ var p=Math.floor(y/2); return ((p%2)+2)%2===0 ? 3 : 2; }
+function riverLeftAt(y){ var p=Math.floor(y/2); return ((p%2)+2)%2===0 ? 4 : 5; }
 function outerTerrain(x,y){
   if(x===riverLeftAt(y)||x===riverLeftAt(y)+1) return "water";
   var hv=cellHash(x,y);
@@ -2147,38 +2151,47 @@ function groundSvg(){
    このデータ自体がマップの見た目の源泉（groundSvg がここから絵を生成する）。
    川の帯（W=浅瀬）が盤面の奥（y=0）から手前（y=9）へ中央を蛇行して流れ、
    両岸は草地（G）、岩場（R）は点在。絵とマスは構造的に常に一致する。
-   行は y=0（奥）→ y=9（手前）、各行の文字は x=0→6。 */
+   行は y=0（奥）→ y=13（手前）、各行の文字は x=0→10。内側の7×10は
+   旧レイアウトを+2ずらしたもの、周囲の輪は風景画の絵からの読み取り。 */
 var TERRAIN_LAYOUT=[
-  "HGGWWGH",
-  "RGGWWGG",
-  "GGWWGGG",
-  "GRWWGGH",
-  "GGGWWGG",
-  "HGGWWGR",
-  "GGWWGGG",
-  "RGWWGGH",
-  "GGGWWGG",
-  "HGGWWGR"
+  "GGGGWWGGGGG",
+  "GGGGWWGGGGG",
+  "GGHGGWWGHGG",
+  "GGRGGWWGGGG",
+  "GGGGWWGGGGG",
+  "GGGRWWGGHGG",
+  "GGGGGWWGGGG",
+  "GGHGGWWGRGG",
+  "GGGGWWGGGGG",
+  "GGRGWWGGHGG",
+  "GGGGGWWGGGG",
+  "GGHGGWWGRGG",
+  "GGGGWWGGGGG",
+  "GGGGWWGGGGG"
 ];
 var TERRAIN=[];
 for(var tiy=0;tiy<ROWS;tiy++) for(var tix=0;tix<COLS;tix++){ var tc=TERRAIN_LAYOUT[tiy].charAt(tix); TERRAIN.push(tc==="W"?"water":(tc==="R"?"rock":(tc==="H"?"high":"grass"))); }
 /* ============ マスの高さ（-10〜+17：背景画の起伏と一致） ============
-   行は TERRAIN_LAYOUT と同じ y=0（奥）→9（手前）、各行 x=0→6。
+   行は TERRAIN_LAYOUT と同じ y=0（奥）→13（手前）、各行 x=0→10。
    川底（W）=-10/-9 が最低、川岸の草地=-3、斜面=+4、台地=+9/+10、
    高台（H）=+16/+17、岩場（R）=+12（侵入不可なので表示用）。
    隣接差が8以上になる縁は「崖」として段差制限（maxStep=7）で通行不可になるよう、
    高台の片側だけを急斜面にし、もう片側は差7以内の緩斜面で登れるようにしてある。 */
 var HEIGHT_MAP=[
-  17,10,-3,-10,-9,-3,17,
-  12, 4,-3,-10,-9,-3,10,
-   9,-3,-10,-9,-3, 4, 9,
-   9,12,-10,-9,-3, 4,16,
-  10, 4,-3,-10,-9,-3,10,
-  16, 4,-3,-10,-9,-3,12,
-   9,-3,-10,-9,-3, 4, 9,
-  12,-3,-10,-9,-3, 4,16,
-  10, 4,-3,-10,-9,-3,10,
-  17, 4,-3,-10,-9,-3,12
+   9, 10,  4, -3,-10, -9, -3,  4,  9, 10,  9,
+  10,  9, 10, -3,-10, -9, -3,  4, 10,  9, 10,
+   9, 10, 17, 10, -3,-10, -9, -3, 17, 10,  9,
+  10,  9, 12,  4, -3,-10, -9, -3, 10,  9, 10,
+   9, 10,  9, -3,-10, -9, -3,  4,  9, 10,  9,
+  10,  9,  9, 12,-10, -9, -3,  4, 16, 10, 10,
+   9, 10, 10,  4, -3,-10, -9, -3, 10, 10,  9,
+  10, 10, 16,  4, -3,-10, -9, -3, 12,  9, 10,
+   9, 10,  9, -3,-10, -9, -3,  4,  9, 10,  9,
+  10,  9, 12, -3,-10, -9, -3,  4, 16, 10, 10,
+   9, 10, 10,  4, -3,-10, -9, -3, 10, 10,  9,
+  10, 10, 17,  4, -3,-10, -9, -3, 12,  9, 10,
+   9, 10, 10, -3,-10, -9, -3,  4,  9, 10,  9,
+  10,  9,  4, -3,-10, -9, -3,  4, 10,  9, 10
 ];
 var ENEMY_TYPES=[
   [{n:"ブルーギル",art:"bluegill"},{n:"外来ガメ",art:"turtle"},{n:"流木のかたまり",art:"driftwood"}],
@@ -2203,12 +2216,12 @@ function startBattle(si,di){
   var st=calcStats(); var god=GODS[G.god];
   function mkUnit(o){ o.buffs=[]; o.acted=false; o.alive=true; o.faceDir = o.side==="e" ? [0,1] : [0,-1]; return o; }
   var allies=[
-    mkUnit({side:"a",god:true,name:god.short,face:god.face,x:2,y:8,hp:st.hp,maxhp:st.hp,mp:st.mp,maxmp:st.mp,atk:st.atk,def:st.def,spd:st.spd,move:4}),
-    mkUnit({side:"a",name:"お供アユ",art:"ayu",face:"🐟",x:0,y:8,hp:48+G.evo*10,maxhp:48+G.evo*10,mp:0,maxmp:0,atk:13+G.evo*3,def:8+G.evo*2,spd:14,move:4}),
-    mkUnit({side:"a",name:"お供ドジョウ",art:"dojou",face:"🦎",x:2,y:9,hp:72+G.evo*12,maxhp:72+G.evo*12,mp:0,maxmp:0,atk:10+G.evo*3,def:13+G.evo*2,spd:8,move:3})
+    mkUnit({side:"a",god:true,name:god.short,face:god.face,x:4,y:10,hp:st.hp,maxhp:st.hp,mp:st.mp,maxmp:st.mp,atk:st.atk,def:st.def,spd:st.spd,move:4}),
+    mkUnit({side:"a",name:"お供アユ",art:"ayu",face:"🐟",x:2,y:10,hp:48+G.evo*10,maxhp:48+G.evo*10,mp:0,maxmp:0,atk:13+G.evo*3,def:8+G.evo*2,spd:14,move:4}),
+    mkUnit({side:"a",name:"お供ドジョウ",art:"dojou",face:"🦎",x:4,y:11,hp:72+G.evo*12,maxhp:72+G.evo*12,mp:0,maxmp:0,atk:10+G.evo*3,def:13+G.evo*2,spd:8,move:3})
   ];
   var foes=[]; var cnt=3+di; var types=ENEMY_TYPES[si];
-  var spots=[[5,0],[6,2],[5,1],[6,4],[2,0],[5,3]];
+  var spots=[[7,2],[8,4],[7,3],[8,6],[4,2],[7,5]];
   for(var i=0;i<cnt;i++){ var t=types[i%types.length];
     var prof=ENEMY_PROFILES[t.art]||null;
     var hpB=26+si*14+di*10+Math.floor(Math.random()*8);
@@ -2924,7 +2937,7 @@ function renderBattle(){
     menu+='</div>';
   }
   /* terrain info */
-  var fc = B.focus || (B.sel?{x:B.sel.x,y:B.sel.y}:{x:2,y:8});
+  var fc = B.focus || (B.sel?{x:B.sel.x,y:B.sel.y}:{x:4,y:10});
   var ti = terrainInfo(fc.x,fc.y);
   var terrain='<div class="b-terrain"><div class="tt"><b id="t-name">'+ti.name+'</b><span>地形情報</span></div><div class="td" id="t-body">X'+String(fc.x).padStart(2,"0")+' Y'+String(fc.y).padStart(2,"0")+'<br>高さ '+ti.h+'<br>'+ti.cost+'<br>'+ti.note+'</div></div>';
   /* 「もどる」ボタンの統一：移動先の選択中だけでなく、攻撃／技の対象選択中・
