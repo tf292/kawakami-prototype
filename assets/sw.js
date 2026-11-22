@@ -3,7 +3,7 @@
    更新時は CACHE_VERSION を上げることで古いキャッシュが破棄され、新版が反映されます。 */
 "use strict";
 
-var CACHE_VERSION = "kawakami-v18";
+var CACHE_VERSION = "kawakami-v19";
 var CORE_CACHE = CACHE_VERSION + "-core";
 var RUNTIME_CACHE = CACHE_VERSION + "-runtime";
 
@@ -25,7 +25,6 @@ var CORE_ASSETS = [
   "./art-kare-face.jpg",
   "./art-kare-full.jpg",
   "./art-keyvisual.jpg",
-  "./bg-battle-real.jpg",
   "./bg-common.jpg",
   "./bg-common-kare.jpg",
   "./bg-common-akayu.jpg",
@@ -36,8 +35,6 @@ var CORE_ASSETS = [
   "./map-dobu.jpg",
   "./map-kare.jpg",
   "./map-care.jpg",
-  "./map-battle.jpg",
-  "./map-battle-wide.jpg",
   "./care-dot-1-f1.png",
   "./care-dot-1-f2.png",
   "./care-dot-1-f3.png",
