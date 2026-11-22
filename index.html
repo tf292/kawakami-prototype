@@ -347,7 +347,7 @@ select{font-family:inherit;font-size:calc(var(--k)*15);padding:calc(var(--k)*8);
 .b-skillbar{position:absolute;top:calc(var(--k)*10);left:50%;transform:translateX(-50%);max-width:97%;background:linear-gradient(180deg,rgba(18,58,71,.97),rgba(10,34,43,.97));border:1.5px solid rgba(230,200,120,.75);border-radius:calc(var(--k)*99);padding:calc(var(--k)*6) calc(var(--k)*16);display:flex;flex-wrap:wrap;gap:calc(var(--k)*6) calc(var(--k)*14);align-items:center;color:#eef3e6;font-size:calc(var(--k)*13.5);z-index:9}
 .b-skillbar .sk-nm{font-family:"Shippori Mincho",serif;font-weight:800;font-size:calc(var(--k)*16.5);color:var(--gold2)}
 .b-skillbar .cancel{margin-left:auto;background:rgba(255,255,255,.08);border:1px solid rgba(230,200,120,.7);color:#ffe9a8;border-radius:calc(var(--k)*99);padding:calc(var(--k)*4) calc(var(--k)*14);font-weight:800;font-size:calc(var(--k)*12.5);min-height:30px}
-.b-stage{position:relative;margin:0;border-radius:0;overflow:hidden;border:none;flex:1;min-height:0;touch-action:none;background-color:#1d3824;background-image:radial-gradient(120% 90% at 20% 0%,rgba(74,120,66,.35),rgba(74,120,66,0) 60%),radial-gradient(100% 80% at 85% 90%,rgba(46,92,52,.4),rgba(46,92,52,0) 60%),linear-gradient(160deg,#26502e 0%,#1d3a22 55%,#17301d 100%)}
+.b-stage{position:relative;margin:0;border-radius:0;overflow:hidden;border:none;flex:1;min-height:0;touch-action:none;background-color:#1d3824;background-image:radial-gradient(circle at 32% 38%,rgba(96,146,74,.5) 0 15px,rgba(96,146,74,0) 16px),radial-gradient(circle at 68% 62%,rgba(16,44,20,.55) 0 24px,rgba(16,44,20,0) 25px),radial-gradient(circle at 55% 22%,rgba(52,102,50,.45) 0 11px,rgba(52,102,50,0) 12px),radial-gradient(120% 90% at 20% 0%,rgba(74,120,66,.35),rgba(74,120,66,0) 60%),radial-gradient(100% 80% at 85% 90%,rgba(46,92,52,.4),rgba(46,92,52,0) 60%),linear-gradient(160deg,#26502e 0%,#1d3a22 55%,#17301d 100%);background-size:132px 92px,196px 142px,168px 118px,100% 100%,100% 100%,100% 100%}
 /* カメラ：盤面全体を内包するワールドを translate/scale して、センタリング・
    ズーム・パンを行う。盤面の % 座標系はそのまま（タップ吸着は変換後の実座標で判定）。 */
 .cam-world{position:absolute;left:0;top:0;width:100%;height:140%;transform-origin:0 0;will-change:transform}
@@ -359,11 +359,13 @@ select{font-family:inherit;font-size:calc(var(--k)*15);padding:calc(var(--k)*8);
 .iso-board>svg.iso-ground{position:absolute;left:-50%;top:-50%;width:200%;height:200%;display:block;z-index:0}
 /* ---- マス表示：上面は枠と淡い地形色だけ。段差は側面で表す ----
    側面（.blk-l/.blk-r）は手前2方向の隣マスとの高さ差ぶんだけ菱形の下辺から垂らす。
-   色は背景画の水彩に合わせた土・岩の質感にし、輪郭線は引かない。積み重ねた
-   ブロックに見えないよう、横方向の縞（地層の帯）は入れず、色は細かい刻みの
-   グラデーションで滑らかにつなぎ、下端は renderBattle 側で緩い曲線にして
-   僅かにぼかす。接地部を暗く落として景色に馴染ませる。寸法とclip-pathは
-   renderBattle がマスごとにインラインで与える（高さデータ・ルールは不変）。 */
+   「箱の側面」に見えないよう、質感だけでなく形そのものを崩す：稜線（上辺）は
+   renderBattle 側で中間点を入れて折り、側辺は中腹で内側へ寄せて面を台形寄りにし、
+   大きな段差（落差の割合が大きい面）には .bench の帯で中間の土の斜面を挟む。
+   上端には ::before で草の縁（風景画の草・土の色）を滲ませ、面の色自体も
+   草→土のグラデーションで風景画由来の色を混ぜる。下端は緩い曲線＋僅かな
+   ぼかしで接地部を景色に馴染ませる。寸法とclip-pathは renderBattle が
+   マスごとにインラインで与える（高さデータ・段差ルールは不変）。 */
 /* 静止時の .diamond は無地・無枠：地形の見分けは下の風景画（groundSvg）自体が担い、
    マスごとの淡色ティントと1px輪郭は「一つの風景」を断片化するので置かない。
    枠や色が付くのは is-move / is-target / is-blocked / is-sel の操作状態だけ。 */
@@ -375,6 +377,8 @@ select{font-family:inherit;font-size:calc(var(--k)*15);padding:calc(var(--k)*8);
 .iso-cell.t-water .diamond{background:transparent;box-shadow:none}
 .iso-cell.t-rock .diamond{background:transparent;box-shadow:none}
 .iso-cell .blk{position:absolute;pointer-events:none;opacity:.88}
+.iso-cell .blk::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(133,164,84,.9) 0%,rgba(124,154,78,.45) 9%,rgba(124,154,78,0) 20%)}
+.iso-cell .blk.bench::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 40%,rgba(228,210,152,.55) 47%,rgba(158,138,92,.6) 54%,rgba(70,54,26,.3) 60%,rgba(0,0,0,0) 67%)}
 .iso-cell .blk-l{background:repeating-linear-gradient(97deg,rgba(46,28,8,.05) 0 2px,rgba(46,28,8,0) 2px 9px,rgba(255,240,200,.02) 9px 11px,rgba(255,240,200,0) 11px 17px),linear-gradient(180deg,#7c9a4e 0%,#81975a 8%,#88754d 15%,#82683f 24%,#77592f 38%,#654622 55%,#533a18 72%,#46300f 88%,#3c2a0d 100%)}
 .iso-cell .blk-r{background:repeating-linear-gradient(83deg,rgba(46,28,8,.04) 0 2px,rgba(46,28,8,0) 2px 8px,rgba(255,244,210,.02) 8px 10px,rgba(255,244,210,0) 10px 15px),linear-gradient(180deg,#93a95e 0%,#96a05c 8%,#9a7f4b 15%,#93703f 24%,#86622f 38%,#755226 55%,#62431d 72%,#513812 88%,#46300e 100%)}
 .iso-cell.t-high .blk-l{background:repeating-linear-gradient(97deg,rgba(46,28,8,.05) 0 2px,rgba(46,28,8,0) 2px 9px,rgba(255,240,200,.02) 9px 11px,rgba(255,240,200,0) 11px 17px),linear-gradient(180deg,#a3ad58 0%,#a8a95e 8%,#9a7f4b 15%,#95753e 24%,#86652f 38%,#715322 55%,#5f421b 72%,#4c3311 88%,#3e2a0c 100%)}
@@ -1850,6 +1854,22 @@ function centerCameraOn(x,y,animate){
   CAM.ty=e.stage.clientHeight/2 - wy*CAM.z;
   applyCam(animate);
 }
+/* 全体表示：盤面（11×14）＋周囲の景色（盤面の2倍の広さ＝森の帯まで）が
+   一画面に収まるズームとセンタリングにする。景色の矩形は盤面を中心に
+   上下左右へ各50%広がった範囲（地面SVGの表示範囲と一致）で、回転しても
+   外形は変わらないため、どの向きでも同じ計算で全体が収まる。
+   戦闘開始直後（CAM.fitPending）と「全体を表示」ボタンから使う。 */
+function fitCameraToBoard(animate){
+  var e=camEls(); if(!e.stage||!e.board) return;
+  var vw=e.stage.clientWidth, vh=e.stage.clientHeight;
+  if(!vw||!vh||!e.board.offsetWidth) return;
+  var bw=e.board.offsetWidth, bh=e.board.offsetHeight;
+  var cx=e.board.offsetLeft + bw/2, cy=e.board.offsetTop + bh/2;
+  CAM.z=Math.min(vw/(bw*2), vh/(bh*2))*0.97;
+  CAM.tx=vw/2 - cx*CAM.z;
+  CAM.ty=vh/2 - cy*CAM.z;
+  applyCam(animate);
+}
 function setZoomAt(nz, px, py){
   var e=camEls(); if(!e.stage) return;
   clampCam();
@@ -2098,11 +2118,18 @@ function groundSvg(){
     return (Math.round(cc.x*10)/10)+","+(Math.round((cc.y-h2)*10)/10)+" "+(Math.round((cc.x+w2)*10)/10)+","+(Math.round(cc.y*10)/10)+" "+(Math.round(cc.x*10)/10)+","+(Math.round((cc.y+h2)*10)/10)+" "+(Math.round((cc.x-w2)*10)/10)+","+(Math.round(cc.y*10)/10); }
   /* 盤外の森：風景画の範囲のさらに外側にだけ、論理座標を延長した位置へ
      木・茂みを置く（同じ投影なので回転に追随する）。絵のある範囲は
-     絵自身の植生に任せ、手続き描画の円を重ねない。 */
+     絵自身の植生に任せ、手続き描画を重ねない。等間隔の格子に均一な木を
+     並べると「緑の丸の列」に読めるため、配置はマス中心から大きくずらし
+     （ジッター±8／±4単位）、本数はやや間引き、1本の樹冠は隣のマスへ
+     大きくはみ出すサイズにして、木々が重なり合う森の塊として読ませる。
+     その下の地面も平らな濃緑にせず、樹冠の濃淡パターン（gforest1/2）を
+     敷いて余白全体を森のテクスチャで埋める。 */
   for(gy=-8;gy<ROWS+8;gy++) for(gx=-8;gx<COLS+8;gx++){
     if(gx>=-PAINT_OX&&gx<COLS+PAINT_OX&&gy>=-PAINT_OY&&gy<ROWS+PAINT_OY) continue;
-    var hv=cellHash(gx,gy); if(hv>=0.68) continue;
+    var hv=cellHash(gx,gy); if(hv>=0.60) continue;
     var c=gCenter(gx,gy,0); if(c.x<-245||c.x>715||c.y<-110||c.y>310) continue;
+    c.x+=Math.round((cellHash(gx*3+501,gy*7+77)-0.5)*160)/10;
+    c.y+=Math.round((cellHash(gx*11+31,gy*5+907)-0.5)*80)/10;
     var body="";
     function fe(dx,dy,rx,ry,col){ return '<ellipse cx="'+(Math.round((c.x+dx)*10)/10)+'" cy="'+(Math.round((c.y+dy)*10)/10)+'" rx="'+(Math.round(rx*10)/10)+'" ry="'+(Math.round(ry*10)/10)+'" fill="'+col+'"/>'; }
     /* 樹冠は円ではなく、半径をハッシュで揺らした9点の輪郭を滑らかにつないだ
@@ -2123,7 +2150,7 @@ function groundSvg(){
       for(i=0;i<3;i++){ a=cellHash(gx*3+salt+i*7, gy*5+i*11); b=cellHash(gx*13+i*3, gy*3+salt*7);
         s+='<circle cx="'+(Math.round((c.x+dx+(a-0.5)*9)*10)/10)+'" cy="'+(Math.round((c.y+dy+(b-0.5)*6)*10)/10)+'" r="'+(0.8+a*0.7).toFixed(1)+'" fill="rgba(12,32,12,0.35)"/>'; }
       return s; }
-    var sc=0.85+((hv*53)%1)*0.5; /* 木ごとの大きさ 0.85〜1.35倍 */
+    var sc=1.15+((hv*53)%1)*0.85; /* 木ごとの大きさ 1.15〜2.0倍（樹冠が隣へはみ出して重なる） */
     var o1x=Math.round(((hv*97)%1-0.5)*70)/10, o2x=Math.round(((hv*41)%1-0.5)*90)/10;
     if(hv<0.52){ /* 木 */
       body=fe(0,3,13.5*sc,5.5*sc,"rgba(14,32,14,0.35)")
@@ -2152,7 +2179,9 @@ function groundSvg(){
   var eA=gCenter(-PAINT_OX-0.5,-PAINT_OY-0.5,0), eB=gCenter(COLS+PAINT_OX-0.5,-PAINT_OY-0.5,0),
       eC=gCenter(COLS+PAINT_OX-0.5,ROWS+PAINT_OY-0.5,0), eD=gCenter(-PAINT_OX-0.5,ROWS+PAINT_OY-0.5,0);
   var extPts=gPt([eA.x,eA.y])+" "+gPt([eB.x,eB.y])+" "+gPt([eC.x,eC.y])+" "+gPt([eD.x,eD.y]);
-  var defs='<clipPath id="gext"><polygon points="'+extPts+'"/></clipPath>';
+  var defs='<pattern id="gforest2" patternUnits="userSpaceOnUse" width="157" height="113"><ellipse cx="40" cy="34" rx="38" ry="20" fill="#244d27"/><ellipse cx="118" cy="82" rx="44" ry="23" fill="#2e5f31"/><ellipse cx="140" cy="18" rx="19" ry="11" fill="#3c7340"/></pattern>'
+    +'<pattern id="gforest1" patternUnits="userSpaceOnUse" width="92" height="62"><ellipse cx="18" cy="16" rx="21" ry="12" fill="#356b38"/><ellipse cx="63" cy="40" rx="26" ry="14" fill="#2a5a2e"/><ellipse cx="82" cy="8" rx="13" ry="8" fill="#477f45"/><ellipse cx="38" cy="52" rx="11" ry="6" fill="#1f4423"/></pattern>'
+    +'<clipPath id="gext"><polygon points="'+extPts+'"/></clipPath>';
   var scenery='<g clip-path="url(#gext)"><image href="assets/map-paint-wide.jpg" width="'+PAINT_W+'" height="'+PAINT_H+'" transform="'+paintMatrixWide()+'" preserveAspectRatio="none"/></g>';
   /* 盤面内マス（従来どおり：高さで持ち上がるフェザー付きパッチ） */
   for(y=0;y<ROWS;y++) for(x=0;x<COLS;x++){
@@ -2179,7 +2208,7 @@ function groundSvg(){
   var pA=gCenter(-0.5,-0.5,0), pB=gCenter(COLS-0.5,-0.5,0), pC=gCenter(COLS-0.5,ROWS-0.5,0), pD=gCenter(-0.5,ROWS-0.5,0);
   var perim='<polygon points="'+gPt([pA.x,pA.y])+" "+gPt([pB.x,pB.y])+" "+gPt([pC.x,pC.y])+" "+gPt([pD.x,pD.y])+'" fill="none" stroke="rgba(43,32,12,0.45)" stroke-width="2.2" stroke-linejoin="round"/>';
   items.sort(function(a,b){ return a.s-b.s; }); cellsList.sort(function(a,b){ return a.s-b.s; });
-  var out='<svg class="iso-ground" viewBox="-235 -100 940 400" preserveAspectRatio="none" aria-hidden="true"><defs>'+defs+'</defs><rect x="-235" y="-100" width="940" height="400" fill="#2c4c2c"/>';
+  var out='<svg class="iso-ground" viewBox="-235 -100 940 400" preserveAspectRatio="none" aria-hidden="true"><defs>'+defs+'</defs><rect x="-235" y="-100" width="940" height="400" fill="#274a28"/><rect x="-235" y="-100" width="940" height="400" fill="url(#gforest2)"/><rect x="-235" y="-100" width="940" height="400" fill="url(#gforest1)" opacity="0.55"/>';
   out+=outer+scenery;
   items.forEach(function(it){ out+=it.h; }); cellsList.forEach(function(it){ out+=it.h; });
   return out+perim+'</svg>'; }
@@ -2275,8 +2304,10 @@ function startBattle(si,di){
   allies.forEach(function(u){ faceNearestOpponent(u,foes); });
   foes.forEach(function(u){ faceNearestOpponent(u,allies); });
   allies.concat(foes).forEach(function(u){ TERRAIN[tIdx(u.x,u.y)]="grass"; });
-  /* 初期ズームは少し引いて、盤面の周囲の景色も少し見える広さで始める */
-  CAM={z:0.88, tx:0, ty:0, zMin:0.5, suppressTapUntil:0, centerReq:false}; lastCenteredCur=null;
+  /* 戦闘開始直後は盤面全体（11×14＋周囲の森の帯）が一画面に収まる全体表示で
+     始める（fitPending を立て、最初の renderBattle で fitCameraToBoard を適用）。
+     その後のターン開始時のカメラ寄せ（行動者センタリング）は従来どおり。 */
+  CAM={z:0.88, tx:0, ty:0, zMin:0.5, suppressTapUntil:0, centerReq:false, fitPending:true}; lastCenteredCur=null;
   B={si:si,di:di,rot:0,loot:STAGES[si].loot[di],allies:allies,foes:foes,round:1,sel:null,moved:false,preMove:null,mode:"select",targets:[],pendingSkill:null,showSkills:false,confirm:null,focus:null,logs:["<b>"+STAGES[si].name+" 深度"+(di+1)+"</b> の戦闘開始！ 敵を全て倒すと勝利、神様が倒れると敗北です。","行動順は各巡の開始時に素早さ順（味方・敵混在）で確定します。素早さの増減は次巡の順序から反映されます。","地形には高さがあります（川底-10〜高台+17）。高い所から攻撃すると命中・ダメージが上がり（高さ差1ごとに命中+1・ダメージ+1%）、隣との高さ差が8以上のマスへは直接移動できません（崖）。⟳ボタンでマップを90°ずつ回転できます。","向き：側面からの攻撃は与ダメージ+15%、背面からは+30%（正面は変動なし）。待機・攻撃・技のあとに、ターンを終える向きを選べます。足元の矢印が今の向きです。","カメラ：行動するキャラクターが画面の中心に来ます。盤面をドラッグすると上下左右にスクロール、サイドバーの＋/−ボタンやピンチ操作でズームできます。"],over:false,order:[],turnIdx:0,skipAllies:false,cur:null,faceSel:null,predict:null,focusUnit:null,actFrom:null,actionSpent:false};
   var roleNotes=[], roleSeen={};
   foes.forEach(function(f){ var p=ENEMY_PROFILES[f.art]; if(p&&!roleSeen[f.art]){ roleSeen[f.art]=1; roleNotes.push(f.name+"＝"+p.label); } });
@@ -2870,23 +2901,31 @@ function renderBattle(){
       if(f<0.04) return "";
       f=Math.min(1.15, f);
       var bh=50+100*f, p1=(50/bh*100), p2=(100*f/bh*100);
-      /* 下端は直線で切らず、中間点を置いて緩やかに垂れる曲線にする（垂れ量は
-         マスごとの決定的ハッシュで少しだけ散らし、侵食された土の斜面に見せる）。
-         上辺と左右端は隣マスとの整合のため直線のままにする。 */
+      /* 形そのものを「箱の側面」から崩す（質感だけでは直方体に見えたため）：
+         - 稜線（上辺）に中間点2つを入れ、マスごとの決定的ハッシュで上下に
+           ずらして直線でなくす（端点は隣マスとの整合のため固定）。
+         - 側辺は中腹（落差の55%付近）で内側へ3.2%寄せ、面の下半分が
+           すぼまる台形寄りの輪郭にする（平行四辺形＝箱の幾何を崩す）。
+         - 下端は従来どおり中間点で緩やかに垂れる曲線にする。
+         - 大きな段差（f>0.5＝高さ差およそ7以上）では .bench を付け、
+           CSS側の帯で面の中間に土の斜面（なだらかな段）を挟む。
+         高さの垂れ量（落差の大きさ）自体は従来どおり高さデータと一致する。 */
       var hs=(x*31+y*17+(cls==="blk-l"?7:13))%10/10; /* 0〜0.9 */
       function sag(t){ return (2.4+hs*1.5)*Math.sin(Math.PI*t); }
       function pt(px,py){ return px+"% "+(Math.round(py*10)/10)+"%"; }
+      var r1=(cellHash(x*3+(cls==="blk-l"?101:211), y*5+57)-0.5)*4.4;
+      var r2=(cellHash(x*7+(cls==="blk-l"?307:409), y*3+719)-0.5)*4.4;
       var poly;
-      if(cls==="blk-l"){ /* 下端：(0,p2) → (100,100) */
-        poly="0 0,"+pt(100,p1)+","+pt(100,100)+","+pt(64,p2+(100-p2)*0.64+sag(0.64))+","+pt(34,p2+(100-p2)*0.34+sag(0.34))+","+pt(0,p2);
-      } else { /* 下端：(0,100) → (100,p2) */
-        poly=pt(0,p1)+",100% 0,"+pt(100,p2)+","+pt(66,100+(p2-100)*0.66+sag(0.66))+","+pt(32,100+(p2-100)*0.32+sag(0.32))+","+pt(0,100);
+      if(cls==="blk-l"){ /* 稜線：(0,0) → (100,p1)／下端：(0,p2) → (100,100) */
+        poly="0 0,"+pt(33,p1*0.33+r1)+","+pt(66,p1*0.66+r2)+","+pt(100,p1)+","+pt(96.8,p1+(100-p1)*0.55)+","+pt(100,100)+","+pt(64,p2+(100-p2)*0.64+sag(0.64))+","+pt(34,p2+(100-p2)*0.34+sag(0.34))+","+pt(0,p2)+","+pt(3.2,p2*0.45);
+      } else { /* 稜線：(0,p1) → (100,0)／下端：(0,100) → (100,p2) */
+        poly=pt(0,p1)+","+pt(33,p1*0.67+r1)+","+pt(66,p1*0.34+r2)+",100% 0,"+pt(96.8,p2*0.55)+","+pt(100,p2)+","+pt(66,100+(p2-100)*0.66+sag(0.66))+","+pt(32,100+(p2-100)*0.32+sag(0.32))+","+pt(0,100)+","+pt(3.2,p1+(100-p1)*0.45);
       }
       var pos = cls==="blk-l" ? "left:0" : "left:50%";
       /* マスごとの明暗差は小さく抑える（差が大きいと側面が別々のブロックに
          見える）。輪郭には僅かなぼかしを入れ、水彩の絵へ溶け込ませる。 */
       var br=(0.97+((x*7+y*13+(cls==="blk-l"?0:3))%5)*0.015).toFixed(3);
-      return '<span class="blk '+cls+'" style="'+pos+';top:50%;width:50%;height:'+bh.toFixed(1)+'%;clip-path:polygon('+poly+');filter:brightness('+br+') blur(0.5px)"></span>';
+      return '<span class="blk '+cls+(f>0.5?" bench":"")+'" style="'+pos+';top:50%;width:50%;height:'+bh.toFixed(1)+'%;clip-path:polygon('+poly+');filter:brightness('+br+') blur(0.5px)"></span>';
     }
     var blocks = blkSpan("blk-l", lt.h-dispH(drx,dry+1)) + blkSpan("blk-r", lt.h-dispH(drx+1,dry));
     var inner=blocks+'<span class="diamond"></span><span class="hit"></span>';
@@ -2920,6 +2959,7 @@ function renderBattle(){
    +'<div class="bs-round"><b>'+B.round+'</b> 巡</div>'
    +'<div class="bs-left">敵全滅まで あと'+foesLeft+'体</div>'
    +'<div class="bs-sec">全体MAP</div><div class="minimap" style="grid-template-columns:repeat('+RW+',1fr)">'+mini+'</div><div class="mini-legend"><span style="color:#7ec8ff">●</span> 味方　<span style="color:#ff8a7a">●</span> 敵　<span style="color:#b5cf7d">●</span> 高台</div>'
+   +'<button class="btn ghost sm" id="btn-fit" style="margin-top:calc(var(--k)*8);width:100%;background:transparent;color:#eef3e6;border-color:rgba(120,200,210,.6)">全体を表示</button>'
    +'<button class="btn ghost sm" id="btn-rot" style="margin-top:calc(var(--k)*10);background:transparent;color:#eef3e6;border-color:rgba(120,200,210,.6)">⟳ マップ回転（'+(boardRot()*90)+'°）</button><div style="font-size:calc(var(--k)*10.5);color:#9fc3bb;margin-top:calc(var(--k)*4)">画面の中心にある地点を軸に回転します（表示だけ変更）</div>'
    +'<div class="row" style="margin-top:calc(var(--k)*10);gap:calc(var(--k)*6);align-items:center;flex-wrap:nowrap"><button class="btn ghost sm" id="btn-zoomout" style="background:transparent;color:#eef3e6;border-color:rgba(120,200,210,.6);flex:1" title="縮小">−</button><span id="zoom-pct" style="font-size:calc(var(--k)*12);color:#c8d4bd;min-width:calc(var(--k)*40);text-align:center">'+Math.round(CAM.z*100)+'%</span><button class="btn ghost sm" id="btn-zoomin" style="background:transparent;color:#eef3e6;border-color:rgba(120,200,210,.6);flex:1" title="拡大">＋</button></div><div style="font-size:calc(var(--k)*10.5);color:#9fc3bb;margin-top:calc(var(--k)*4)">拡縮は選択中の地点が中心です。盤面ドラッグでスクロール／ピンチでも拡縮できます</div>'
    +'<div class="bs-sec">ステージ'+(B.si+1)+'</div><div class="bs-stage">'+esc(STAGES[B.si].name.replace(/^ステージ\d+ /,""))+' 深度'+(B.di+1)+'</div><div class="bs-obj">目標：敵の全滅</div>'
@@ -3036,9 +3076,11 @@ function renderBattle(){
    +'<aside class="b-rail">'+rail+'</aside></div>';
   bindBattle();
   playFX();
-  /* カメラ：行動者が切り替わったとき（または回転直後）だけセンタリングし、
+  /* カメラ：戦闘開始直後の1回だけ全体表示（盤面＋森の帯）にし、それ以外は
+     行動者が切り替わったとき（または回転直後）だけセンタリングする。
      それ以外の再描画ではプレイヤーのスクロール位置をそのまま保つ */
-  if(CAM.centerReq){ CAM.centerReq=false; if(B.cur) centerCameraOn(B.cur.x,B.cur.y,true); else applyCam(false); }
+  if(CAM.fitPending){ CAM.fitPending=false; lastCenteredCur=B.cur; fitCameraToBoard(false); }
+  else if(CAM.centerReq){ CAM.centerReq=false; if(B.cur) centerCameraOn(B.cur.x,B.cur.y,true); else applyCam(false); }
   else if(B.cur && B.cur!==lastCenteredCur){ lastCenteredCur=B.cur; centerCameraOn(B.cur.x,B.cur.y,true); }
   else applyCam(false);
   positionMenu();
@@ -3206,6 +3248,7 @@ function bindBattle(){
   });
   var zin=$("btn-zoomin"); if(zin) zin.addEventListener("click", function(){ zoomAtSelection(CAM.z*1.25); });
   var zout=$("btn-zoomout"); if(zout) zout.addEventListener("click", function(){ zoomAtSelection(CAM.z/1.25); });
+  var fitb=$("btn-fit"); if(fitb) fitb.addEventListener("click", function(){ fitCameraToBoard(true); });
   bindCameraInput();
   var leave=$("btn-leave"); if(leave) leave.addEventListener("click", leaveBattle);
   document.querySelectorAll("[data-bskill]").forEach(function(b){ b.addEventListener("click", function(){ var p=b.dataset.bskill.split("-"); chooseSkill(p[0], parseInt(p[1])); }); });
