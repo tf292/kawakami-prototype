@@ -475,7 +475,7 @@ select{font-family:inherit;font-size:calc(var(--k)*15);padding:calc(var(--k)*8);
 .b-predict.single{bottom:auto;width:min(calc(var(--k)*370),calc(100% - calc(var(--k)*24)))}
 /* 移動選択中の「もどる」：盤面コンテナ（.b-stage）の右下に固定表示。
    .cam-world の外に置くため、ズーム／パン／回転の影響を受けない。 */
-.b-move-back{position:absolute;right:calc(var(--k)*12);bottom:calc(var(--k)*12);z-index:26;background:linear-gradient(180deg,#e3c169,#c39a3e);color:#2c2410;border:1.5px solid #8a6d24;border-radius:calc(var(--k)*10);padding:calc(var(--k)*10) calc(var(--k)*26);font-family:"Shippori Mincho",serif;font-size:calc(var(--k)*17);font-weight:800;letter-spacing:.06em;box-shadow:0 calc(var(--k)*8) calc(var(--k)*20) rgba(0,0,0,.5);min-height:calc(var(--k)*44)}
+.b-move-back{position:absolute;right:calc(var(--k)*12);bottom:calc(var(--k)*12);z-index:26;background:linear-gradient(180deg,#e3c169,#c39a3e);color:#2c2410;border:2.25px solid #8a6d24;border-radius:calc(var(--k)*15);padding:calc(var(--k)*15) calc(var(--k)*39);font-family:"Shippori Mincho",serif;font-size:calc(var(--k)*25.5);font-weight:800;letter-spacing:.06em;box-shadow:0 calc(var(--k)*8) calc(var(--k)*20) rgba(0,0,0,.5);min-height:calc(var(--k)*66)}
 .b-move-back:hover{filter:brightness(1.06)}
 /* 攻撃確認パネル（中央・大きめ）：通常攻撃と攻撃系の単体技専用。
    盤面中央を覆う前提で、背後に半透明の幕を敷いて戦闘画面の一部として見せる。
@@ -1262,14 +1262,25 @@ function startCareAnim(){
   var ctx=cv.getContext("2d");
   var reduced = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
   var dur = reduced?700:3400;
-  var t0=performance.now();
+  var t0=null;
   function frame(now){
+    if(t0===null) t0=now;
     var el=now-t0, p=Math.min(1, el/dur);
     drawCareScene(ctx, careResult.i, el/1000, p);
     if(el<dur){ careAnimRAF=requestAnimationFrame(frame); }
     else { careAnimRAF=null; finishCareAnim(); }
   }
-  careAnimRAF=requestAnimationFrame(frame);
+  /* 場面画像（ドット絵風アレンジ）を先に読み込んでから再生を始める。
+     読み込みに失敗しても演出自体は止めない（従来描画で代替される）。 */
+  var pre=careImg("assets/care-pix-"+(careResult.i+1)+".png");
+  var started=false;
+  function begin(){ if(started) return; started=true; careAnimRAF=requestAnimationFrame(frame); }
+  if(pre.complete && pre.naturalWidth) begin();
+  else {
+    pre.addEventListener("load", begin);
+    pre.addEventListener("error", begin);
+    setTimeout(begin, 900);
+  }
 }
 function finishCareAnim(){
   if(careAnimRAF){ cancelAnimationFrame(careAnimRAF); careAnimRAF=null; }
@@ -1301,6 +1312,23 @@ function drawCareScene(ctx, spot, t, p){
     ctx.drawImage(im, Math.round((cx-w/2)*S), Math.round((feetY-hgt)*S), Math.round(w*S), Math.round(hgt*S));
   }
   function riverCX(gy){ return 146-(gy-24)*0.16; }
+  /* 場面画像：手入れスポットごとの水彩イメージ画面（ホーム画面と同じ画風）を
+     ドット絵風に加工した assets/care-pix-(spot+1).png を全面に敷く。
+     画像自体が「何の作業をしている場所か」を伝えるので、読み込み済みの場合は
+     場所ごとの小道具描画は画像側に任せ、その手前でドット絵キャラ（神様）が
+     コマ送りで作業する形にする。未読込の間だけ従来の手続き描画で代替する。 */
+  var bgImg=careImg("assets/care-pix-"+(spot+1)+".png");
+  if(bgImg.complete && bgImg.naturalWidth){
+    ctx.drawImage(bgImg,0,0,480,270);
+    drawCareGod(ctx, spr, R, CARE_GODX[spot], 84, FR, CARE_ACTION[spot], spot);
+    if(p>=1){
+      [[30,52],[74,40],[120,66],[52,30],[100,24]].forEach(function(sp3,ix){
+        if((FR+ix)%2) return;
+        R(sp3[0],sp3[1]-2,1.4,5.4,"#ffe9a8"); R(sp3[0]-2,sp3[1],5.4,1.4,"#ffe9a8");
+      });
+    }
+    return;
+  }
   /* 空と遠景（雲はフレーム単位でカクカク流れる） */
   R(0,0,160,24,"#a9d3e8"); R(0,24,160,4,"#c4e2da");
   for(var ci=0;ci<3;ci++){ var cx=((FR+ci*58)%190)-15; R(cx,3+ci*4,13,2.5,"#eef8fc"); R(cx+3,5.5+ci*4,8,2,"#eef8fc"); }
@@ -2178,7 +2206,7 @@ function startBattle(si,di){
   foes.forEach(function(u){ faceNearestOpponent(u,allies); });
   allies.concat(foes).forEach(function(u){ TERRAIN[tIdx(u.x,u.y)]="grass"; });
   CAM={z:1, tx:0, ty:0, zMin:0.5, suppressTapUntil:0, centerReq:false}; lastCenteredCur=null;
-  B={si:si,di:di,rot:0,loot:STAGES[si].loot[di],allies:allies,foes:foes,round:1,sel:null,moved:false,preMove:null,mode:"select",targets:[],pendingSkill:null,showSkills:false,confirm:null,focus:null,logs:["<b>"+STAGES[si].name+" 深度"+(di+1)+"</b> の戦闘開始！ 敵を全て倒すと勝利、神様が倒れると敗北です。","行動順は各巡の開始時に素早さ順（味方・敵混在）で確定します。素早さの増減は次巡の順序から反映されます。","地形には高さがあります（川底-10〜高台+17）。高い所から攻撃すると命中・ダメージが上がり（高さ差1ごとに命中+1・ダメージ+1%）、隣との高さ差が8以上のマスへは直接移動できません（崖）。⟳ボタンでマップを90°ずつ回転できます。","向き：側面からの攻撃は与ダメージ+15%、背面からは+30%（正面は変動なし）。待機・攻撃・技のあとに、ターンを終える向きを選べます。足元の矢印が今の向きです。","カメラ：行動するキャラクターが画面の中心に来ます。盤面をドラッグすると上下左右にスクロール、サイドバーの＋/−ボタンやピンチ操作でズームできます。"],over:false,order:[],turnIdx:0,skipAllies:false,cur:null,faceSel:null,predict:null,focusUnit:null,actFrom:null};
+  B={si:si,di:di,rot:0,loot:STAGES[si].loot[di],allies:allies,foes:foes,round:1,sel:null,moved:false,preMove:null,mode:"select",targets:[],pendingSkill:null,showSkills:false,confirm:null,focus:null,logs:["<b>"+STAGES[si].name+" 深度"+(di+1)+"</b> の戦闘開始！ 敵を全て倒すと勝利、神様が倒れると敗北です。","行動順は各巡の開始時に素早さ順（味方・敵混在）で確定します。素早さの増減は次巡の順序から反映されます。","地形には高さがあります（川底-10〜高台+17）。高い所から攻撃すると命中・ダメージが上がり（高さ差1ごとに命中+1・ダメージ+1%）、隣との高さ差が8以上のマスへは直接移動できません（崖）。⟳ボタンでマップを90°ずつ回転できます。","向き：側面からの攻撃は与ダメージ+15%、背面からは+30%（正面は変動なし）。待機・攻撃・技のあとに、ターンを終える向きを選べます。足元の矢印が今の向きです。","カメラ：行動するキャラクターが画面の中心に来ます。盤面をドラッグすると上下左右にスクロール、サイドバーの＋/−ボタンやピンチ操作でズームできます。"],over:false,order:[],turnIdx:0,skipAllies:false,cur:null,faceSel:null,predict:null,focusUnit:null,actFrom:null,actionSpent:false};
   var roleNotes=[], roleSeen={};
   foes.forEach(function(f){ var p=ENEMY_PROFILES[f.art]; if(p&&!roleSeen[f.art]){ roleSeen[f.art]=1; roleNotes.push(f.name+"＝"+p.label); } });
   if(roleNotes.length) B.logs.push("敵の個性："+roleNotes.join("／")+"。種類ごとに狙い方と倒し方が変わります。");
@@ -2297,6 +2325,7 @@ function executePredicted(){
   if(p.kind==="atk"){
     var u=unitAt(p.x,p.y);
     if(u&&u.side==="e"&&dist(B.sel,u)<=1){
+      B.actionSpent=true; /* 通常攻撃は実行済み：向き選択から戻っても再行動はできない */
       dealDamage(B.sel,u,100,null);
       if(B.over){ renderBattle(); return; }
       if(!B.foes.some(function(f){return f.alive;})){ finishAction(); endBattle(true); return; }
@@ -2350,7 +2379,7 @@ function moveTargets(u){ var seen=moveDistances(u); return Object.keys(seen).fil
 function selectUnit(u){
   if(B.over||u.acted||!u.alive) return;
   if(B.cur&&u!==B.cur) return; /* 個別ターン制：操作できるのは行動順が回ってきた本人のみ */
-  B.sel=u; B.focusUnit=u; B.moved=false; B.preMove=null; B.mode="action"; B.targets=[]; B.showSkills=false; B.confirm=null; B.focus={x:u.x,y:u.y}; renderBattle();
+  B.sel=u; B.focusUnit=u; B.moved=false; B.preMove=null; B.actionSpent=false; B.mode="action"; B.targets=[]; B.showSkills=false; B.confirm=null; B.focus={x:u.x,y:u.y}; renderBattle();
 }
 /* 行動の流れ（コマンド起点）：
    mode="action"（移動前）…メニューは「移動／攻撃／技／待機」。盤面タップでは移動しない。
@@ -2363,6 +2392,25 @@ function startMove(){
   B.mode="move"; B.targets=moveTargets(u); B.showSkills=false; B.confirm=null; B.pendingSkill=null; B.predict=null; renderBattle();
 }
 function cancelMoveSelect(){ B.mode="action"; B.targets=[]; B.showSkills=false; renderBattle(); }
+/* 右下固定「もどる」ボタンの統一処理：どのモードでも行動メニューへ戻す。
+   - move（移動先の選択中）…移動せずに行動メニューへ（従来どおり）
+   - target（攻撃／技の対象選択中）…対象選択を取りやめて行動メニューへ
+     （移動済みなら B.moved／B.preMove は残るので、メニューから移動の巻き戻しもできる）
+   - facing（待機の向き選択中）…向きを確定せずに行動メニューへ。
+     攻撃／技の実行後（B.actionSpent）の場合は、メニュー側が「待機」だけに
+     絞られるため、二重行動にはならない。 */
+function unifiedBack(){
+  if(!B||B.over||!B.sel) return;
+  if(B.mode==="move"){ cancelMoveSelect(); return; }
+  if(B.mode==="target"){
+    B.mode="action"; B.pendingSkill=null; B.confirm=null; B.predict=null; B.showSkills=false; B.targets=[];
+    renderBattle(); return;
+  }
+  if(B.mode==="facing"){
+    B.mode="action"; B.targets=[];
+    renderBattle(); return;
+  }
+}
 function afterMove(){ B.mode="action"; B.targets=[]; B.showSkills=false; renderBattle(); }
 /* キャンセル（移動の巻き戻し）：移動後の行動メニューでのみ使う。
    位置・向き・移動済みフラグをすべて移動前に戻し、移動前メニュー
@@ -2407,6 +2455,7 @@ function chooseSkill(cat,idx){
 }
 function executeSkill(tx,ty){
   var u=B.sel; var ps=B.pendingSkill; var sk=ps.sk;
+  B.actionSpent=true; /* 技は実行済み：向き選択から戻っても再行動はできない */
   B.confirm=null; B.predict=null;
   B.preMove=null; /* 技の実行が確定したので、ここから先は移動のキャンセル不可 */
   u.mp-=sk.mp;
@@ -2534,7 +2583,7 @@ function processTurns(){
     B.cur=u; B.focusUnit=u; u.turnSeq=(u.turnSeq||0)+1; startTurnEffects(u);
     if(!u.alive){ u.acted=true; B.turnIdx++; continue; }
     if(B.over) return;
-    B.sel=u; B.moved=false; B.preMove=null; B.mode="action"; B.targets=[]; B.showSkills=false; B.confirm=null; B.pendingSkill=null; B.focus={x:u.x,y:u.y};
+    B.sel=u; B.moved=false; B.preMove=null; B.actionSpent=false; B.mode="action"; B.targets=[]; B.showSkills=false; B.confirm=null; B.pendingSkill=null; B.focus={x:u.x,y:u.y};
     return;
   }
   /* 全員が行動し終えたら次の巡へ：順表を作り直す（素早さの増減はここから反映） */
@@ -2548,7 +2597,7 @@ function processTurns(){
 function finishAction(){
   if(B.sel){ B.sel.acted=true; endTurnTicks(B.sel); }
   var cur=B.cur;
-  B.sel=null; B.mode="select"; B.targets=[]; B.pendingSkill=null; B.showSkills=false; B.confirm=null; B.predict=null; B.preMove=null;
+  B.sel=null; B.mode="select"; B.targets=[]; B.pendingSkill=null; B.showSkills=false; B.confirm=null; B.predict=null; B.preMove=null; B.actionSpent=false;
   if(B.over) return;
   if(!B.foes.some(function(f){return f.alive;})) return; /* 勝利判定は呼び出し側の endBattle に任せる */
   if(cur&&B.order[B.turnIdx]===cur) B.turnIdx++;
@@ -2776,7 +2825,7 @@ function renderBattle(){
   var skillbar="";
   if(!B.over && B.mode==="target" && B.pendingSkill){
     var sk=B.pendingSkill.sk;
-    skillbar='<div class="b-skillbar"><span class="sk-nm">'+esc(sk.n)+'</span><span>消費神力 '+sk.mp+'</span><button class="cancel" id="btn-cancel2">キャンセル</button></div>';
+    skillbar='<div class="b-skillbar"><span class="sk-nm">'+esc(sk.n)+'</span><span>消費神力 '+sk.mp+'</span></div>';
   }
   /* minimap（表示の回転に合わせて並べる。高台は h クラス） */
   var _dims=rotXY(0,0), RW=_dims[2], RD=_dims[3];
@@ -2811,7 +2860,7 @@ function renderBattle(){
      メニュー内はコマンドのラベルのみ（ステータス・説明文は左のステータス枠へ集約）。
      サブリンク（移動に戻る／全キャンセル）は廃止し、役割は移動後の「キャンセル」へ移した。 */
   var menu="";
-  if(!B.over && B.sel && B.mode!=="move"){
+  if(!B.over && B.sel && B.mode!=="move" && B.mode!=="target"){
     var u2=B.sel;
     menu='<div class="b-menu">'; /* 行動メニューはボタンラベルのみ（見出し・ステータス行・説明文は置かない） */
     if(B.mode==="facing"){
@@ -2822,7 +2871,11 @@ function renderBattle(){
        +'<span></span>'+fp([0,1])+'<span></span></div>'
        +'<button class="bm-btn sel" id="btn-face-ok">'+faceDirName(fs)+' を向いて終了</button>';
     } else if(B.mode==="action"){
-      if(!B.showSkills){
+      if(B.actionSpent){
+        /* 攻撃／技は実行済み（向き選択から戻ってきた状態）：二重に行動できないよう、
+           残りの選択肢は「待機」（向き選択へ進む）だけにする */
+        menu+='<div class="bm-row" style="display:flex;flex-direction:row;flex-wrap:nowrap"><button class="bm-btn" id="btn-wait">待機</button></div>';
+      } else if(!B.showSkills){
         menu+='<div class="bm-row" style="display:flex;flex-direction:row;flex-wrap:nowrap">';
         if(!B.moved) menu+='<button class="bm-btn" id="btn-move">移動</button>';
         menu+='<button class="bm-btn" id="btn-atk">攻撃</button>';
@@ -2844,8 +2897,6 @@ function renderBattle(){
           menu+='<button class="bm-btn" id="btn-backskills">もどる</button></div>';
         }
       }
-    } else if(B.mode==="target"){
-      menu+='<div class="bm-row" style="display:flex;flex-direction:row;flex-wrap:nowrap"><button class="bm-btn" id="btn-cancel">もどる</button></div>';
     }
     menu+='</div>';
   }
@@ -2853,10 +2904,12 @@ function renderBattle(){
   var fc = B.focus || (B.sel?{x:B.sel.x,y:B.sel.y}:{x:2,y:8});
   var ti = terrainInfo(fc.x,fc.y);
   var terrain='<div class="b-terrain"><div class="tt"><b id="t-name">'+ti.name+'</b><span>地形情報</span></div><div class="td" id="t-body">X'+String(fc.x).padStart(2,"0")+' Y'+String(fc.y).padStart(2,"0")+'<br>高さ '+ti.h+'<br>'+ti.cost+'<br>'+ti.note+'</div></div>';
-  /* 移動選択中の「もどる」：盤面コンテナ右下に固定。地形パネルと重なるため、
-     移動選択中は地形パネルを隠してこのボタンを同じ右下に置く。 */
+  /* 「もどる」ボタンの統一：移動先の選択中だけでなく、攻撃／技の対象選択中と
+     待機の向き選択中も、盤面コンテナ右下に固定の同じ金色ボタン（.b-move-back）を使う。
+     地形パネルと重なるため、表示中は地形パネルを隠してこのボタンを同じ右下に置く。
+     予測パネル（確認ダイアログ）が出ている間は、そちらの「戻る」が優先なので出さない。 */
   var moveBack="";
-  if(!B.over && B.sel && B.mode==="move"){
+  if(!B.over && B.sel && (B.mode==="move"||B.mode==="target"||B.mode==="facing") && !B.predict && !B.confirm){
     moveBack='<button class="b-move-back" id="btn-move-back">もどる</button>';
     terrain="";
   }
@@ -3033,7 +3086,7 @@ function bindBattle(){
   var fok=$("btn-face-ok"); if(fok) fok.addEventListener("click", confirmFacing);
   document.querySelectorAll("[data-face]").forEach(function(b){ b.addEventListener("click", function(){ var p=b.dataset.face.split(","); B.faceSel=[parseInt(p[0]),parseInt(p[1])]; renderBattle(); }); });
   var cmv=$("btn-cancelmove"); if(cmv) cmv.addEventListener("click", undoMove);
-  var mvback=$("btn-move-back"); if(mvback) mvback.addEventListener("click", cancelMoveSelect);
+  var mvback=$("btn-move-back"); if(mvback) mvback.addEventListener("click", unifiedBack);
   var ret=$("btn-retreat"); if(ret) ret.addEventListener("click", function(){ B.retreatAsk=true; renderBattle(); });
   var retok=$("btn-retreat-ok"); if(retok) retok.addEventListener("click", retreatBattle);
   var retno=$("btn-retreat-no"); if(retno) retno.addEventListener("click", function(){ B.retreatAsk=false; renderBattle(); });

@@ -3,7 +3,7 @@
    更新時は CACHE_VERSION を上げることで古いキャッシュが破棄され、新版が反映されます。 */
 "use strict";
 
-var CACHE_VERSION = "kawakami-v15";
+var CACHE_VERSION = "kawakami-v16";
 var CORE_CACHE = CACHE_VERSION + "-core";
 var RUNTIME_CACHE = CACHE_VERSION + "-runtime";
 
@@ -37,7 +37,16 @@ var CORE_ASSETS = [
   "./map-kare.jpg",
   "./map-care.jpg",
   "./map-battle.jpg",
-  "./map-battle-wide.jpg"
+  "./map-battle-wide.jpg",
+  "./care-pix-1.png",
+  "./care-pix-2.png",
+  "./care-pix-3.png",
+  "./care-pix-4.png",
+  "./care-pix-5.png",
+  "./care-pix-6.png",
+  "./care-pix-7.png",
+  "./care-pix-8.png",
+  "./care-pix-9.png"
 ];
 
 self.addEventListener("install", function (event) {
