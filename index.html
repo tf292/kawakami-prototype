@@ -347,7 +347,7 @@ select{font-family:inherit;font-size:calc(var(--k)*15);padding:calc(var(--k)*8);
 .b-skillbar{position:absolute;top:calc(var(--k)*10);left:50%;transform:translateX(-50%);max-width:97%;background:linear-gradient(180deg,rgba(18,58,71,.97),rgba(10,34,43,.97));border:1.5px solid rgba(230,200,120,.75);border-radius:calc(var(--k)*99);padding:calc(var(--k)*6) calc(var(--k)*16);display:flex;flex-wrap:wrap;gap:calc(var(--k)*6) calc(var(--k)*14);align-items:center;color:#eef3e6;font-size:calc(var(--k)*13.5);z-index:9}
 .b-skillbar .sk-nm{font-family:"Shippori Mincho",serif;font-weight:800;font-size:calc(var(--k)*16.5);color:var(--gold2)}
 .b-skillbar .cancel{margin-left:auto;background:rgba(255,255,255,.08);border:1px solid rgba(230,200,120,.7);color:#ffe9a8;border-radius:calc(var(--k)*99);padding:calc(var(--k)*4) calc(var(--k)*14);font-weight:800;font-size:calc(var(--k)*12.5);min-height:30px}
-.b-stage{position:relative;margin:0;border-radius:0;overflow:hidden;border:none;flex:1;min-height:0;touch-action:none;background-color:#1e3a26;background-image:radial-gradient(circle at 30% 35%,rgba(88,140,84,.5) 0 14px,rgba(88,140,84,0) 15px),radial-gradient(circle at 72% 68%,rgba(52,96,56,.55) 0 18px,rgba(52,96,56,0) 19px),radial-gradient(circle at 55% 20%,rgba(30,66,36,.6) 0 10px,rgba(30,66,36,0) 11px);background-size:120px 120px,170px 170px,90px 90px}
+.b-stage{position:relative;margin:0;border-radius:0;overflow:hidden;border:none;flex:1;min-height:0;touch-action:none;background-color:#1d3824;background-image:radial-gradient(120% 90% at 20% 0%,rgba(74,120,66,.35),rgba(74,120,66,0) 60%),radial-gradient(100% 80% at 85% 90%,rgba(46,92,52,.4),rgba(46,92,52,0) 60%),linear-gradient(160deg,#26502e 0%,#1d3a22 55%,#17301d 100%)}
 /* カメラ：盤面全体を内包するワールドを translate/scale して、センタリング・
    ズーム・パンを行う。盤面の % 座標系はそのまま（タップ吸着は変換後の実座標で判定）。 */
 .cam-world{position:absolute;left:0;top:0;width:100%;height:140%;transform-origin:0 0;will-change:transform}
@@ -360,18 +360,21 @@ select{font-family:inherit;font-size:calc(var(--k)*15);padding:calc(var(--k)*8);
    色は背景画の水彩に合わせた土・岩の質感（芝の縁取り＋土の層＋根元の陰影）にし、
    輪郭線は引かず、接地部を暗く落として景色に馴染ませる。寸法とclip-pathは
    renderBattle がマスごとにインラインで与える（高さデータ・ルールは不変）。 */
-.iso-cell.t-high .diamond{background:rgba(226,205,130,.13);box-shadow:inset 0 0 0 1.5px rgba(250,240,200,.38)}
+/* 静止時の .diamond は無地・無枠：地形の見分けは下の風景画（groundSvg）自体が担い、
+   マスごとの淡色ティントと1px輪郭は「一つの風景」を断片化するので置かない。
+   枠や色が付くのは is-move / is-target / is-blocked / is-sel の操作状態だけ。 */
+.iso-cell.t-high .diamond{background:transparent;box-shadow:none}
 .iso-cell{position:absolute;width:11.7647%;height:11.0588%;background:none;border:none;padding:0;margin:0;min-height:0;cursor:default;pointer-events:none}
 .iso-cell .hit{position:absolute;inset:-26% -14%;z-index:4;pointer-events:auto;background:transparent}
-.iso-cell .diamond{position:absolute;inset:0;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);background:rgba(255,255,255,.03);box-shadow:inset 0 0 0 1px rgba(252,248,228,.16)}
-.iso-cell.t-grass .diamond{background:rgba(120,190,95,.05);box-shadow:inset 0 0 0 1px rgba(225,245,195,.20)}
-.iso-cell.t-water .diamond{background:rgba(60,170,230,.11);box-shadow:inset 0 0 0 1.5px rgba(170,230,255,.50)}
-.iso-cell.t-rock .diamond{background:rgba(150,140,120,.08);box-shadow:inset 0 0 0 1px rgba(235,226,200,.22)}
+.iso-cell .diamond{position:absolute;inset:0;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);background:transparent;box-shadow:none}
+.iso-cell.t-grass .diamond{background:transparent;box-shadow:none}
+.iso-cell.t-water .diamond{background:transparent;box-shadow:none}
+.iso-cell.t-rock .diamond{background:transparent;box-shadow:none}
 .iso-cell .blk{position:absolute;pointer-events:none;opacity:.86}
-.iso-cell .blk-l{background:repeating-linear-gradient(96deg,rgba(46,28,8,.08) 0 3px,rgba(255,240,200,.04) 3px 7px,rgba(46,28,8,0) 7px 12px),repeating-linear-gradient(178deg,rgba(52,32,10,.07) 0 5px,rgba(52,32,10,0) 5px 11px),linear-gradient(180deg,#7c9a4e 0%,#7d8f4c 5%,#7d5c33 14%,#6b4a26 58%,#4e3315 88%,#38230d 100%)}
-.iso-cell .blk-r{background:repeating-linear-gradient(84deg,rgba(46,28,8,.06) 0 3px,rgba(255,244,210,.04) 3px 7px,rgba(46,28,8,0) 7px 12px),repeating-linear-gradient(178deg,rgba(52,32,10,.06) 0 5px,rgba(52,32,10,0) 5px 11px),linear-gradient(180deg,#8fae5c 0%,#8da254 5%,#96703c 14%,#7d5a2e 58%,#5f421e 88%,#46300f 100%)}
-.iso-cell.t-high .blk-l{background:repeating-linear-gradient(96deg,rgba(46,28,8,.08) 0 3px,rgba(255,240,200,.04) 3px 7px,rgba(46,28,8,0) 7px 12px),repeating-linear-gradient(178deg,rgba(52,32,10,.07) 0 5px,rgba(52,32,10,0) 5px 11px),linear-gradient(180deg,#a3ad58 0%,#a3a656 5%,#8a6536 14%,#73512a 58%,#553a17 88%,#3e270d 100%)}
-.iso-cell.t-high .blk-r{background:repeating-linear-gradient(84deg,rgba(46,28,8,.06) 0 3px,rgba(255,244,210,.04) 3px 7px,rgba(46,28,8,0) 7px 12px),repeating-linear-gradient(178deg,rgba(52,32,10,.06) 0 5px,rgba(52,32,10,0) 5px 11px),linear-gradient(180deg,#b3bc66 0%,#adb45f 5%,#a1763e 14%,#86602f 58%,#68471f 88%,#4c320f 100%)}
+.iso-cell .blk-l{background:repeating-linear-gradient(96deg,rgba(46,28,8,.045) 0 3px,rgba(255,240,200,.022) 3px 7px,rgba(46,28,8,0) 7px 12px),repeating-linear-gradient(178deg,rgba(52,32,10,.04) 0 5px,rgba(52,32,10,0) 5px 11px),linear-gradient(180deg,#7c9a4e 0%,#82975a 9%,#8a6f42 24%,#77572e 58%,#5a3f1c 88%,#46300f 100%)}
+.iso-cell .blk-r{background:repeating-linear-gradient(84deg,rgba(46,28,8,.035) 0 3px,rgba(255,244,210,.022) 3px 7px,rgba(46,28,8,0) 7px 12px),repeating-linear-gradient(178deg,rgba(52,32,10,.035) 0 5px,rgba(52,32,10,0) 5px 11px),linear-gradient(180deg,#93a95e 0%,#96a05c 9%,#9c7c46 24%,#86622f 58%,#6a4a20 88%,#513812 100%)}
+.iso-cell.t-high .blk-l{background:repeating-linear-gradient(96deg,rgba(46,28,8,.045) 0 3px,rgba(255,240,200,.022) 3px 7px,rgba(46,28,8,0) 7px 12px),repeating-linear-gradient(178deg,rgba(52,32,10,.04) 0 5px,rgba(52,32,10,0) 5px 11px),linear-gradient(180deg,#a3ad58 0%,#a8a95e 9%,#95753e 24%,#7d5c2c 58%,#5f421b 88%,#483110 100%)}
+.iso-cell.t-high .blk-r{background:repeating-linear-gradient(84deg,rgba(46,28,8,.035) 0 3px,rgba(255,244,210,.022) 3px 7px,rgba(46,28,8,0) 7px 12px),repeating-linear-gradient(178deg,rgba(52,32,10,.035) 0 5px,rgba(52,32,10,0) 5px 11px),linear-gradient(180deg,#b3bc66 0%,#b2b465 9%,#a98344 24%,#8d682f 58%,#6e4c20 88%,#543a12 100%)}
 .iso-cell.t-rock .blk-l{background:repeating-linear-gradient(96deg,rgba(20,16,10,.09) 0 3px,rgba(255,250,235,.04) 3px 7px,rgba(20,16,10,0) 7px 12px),linear-gradient(180deg,#8b8378 0%,#7e7668 10%,#6a6154 55%,#4e463c 88%,#38312a 100%)}
 .iso-cell.t-rock .blk-r{background:repeating-linear-gradient(84deg,rgba(20,16,10,.07) 0 3px,rgba(255,250,235,.04) 3px 7px,rgba(20,16,10,0) 7px 12px),linear-gradient(180deg,#a29a8b 0%,#948b7c 10%,#7d7466 55%,#5d554a 88%,#453e35 100%)}
 .iso-cell.t-water .blk-l{background:linear-gradient(180deg,#5d6b46 0%,#4c4a30 22%,#3a3320 62%,#28220f 100%)}
@@ -1958,26 +1961,30 @@ function positionPredict(){
   if(top+ph>vh-6) top=Math.max(6, vh-ph-6);
   panel.style.left=left+"px"; panel.style.top=top+"px";
 }
-/* ============ 盤面グラウンド描画（データ下絵＋水彩一枚絵のハイブリッド） ============
+/* ============ 盤面グラウンド描画（データ下絵＋連続した風景画） ============
    質感と回転整合を両立させるため、2層構造にする。
    (1) 下絵＝データ：地形（TERRAIN）と高さ（HEIGHT_MAP）から作った「真上から
        見た格子マップ（7×10マス、各マス正方形）」が正確なレイアウトの源泉。
-   (2) 一枚絵＝質感：その下絵をベースに水彩で描き起こした assets/map-paint.jpg
-       （2100×3000＝1マス300px）。川の蛇行・岩5箇所・花の高台6箇所は下絵の
-       位置のまま動かさず、光は方向性を持たせないフラットな光で描いてある。
-       v2ではにじみ・顔料の溜まりと粒状感・紙の目を強め、生成後に実測した
-       格子位置でマスごとに切り直して均一格子へ再配置し、同種地形どうしの
-       境界はテクスチャ側でフェザーをかけて継ぎ目を消してある。さらに
-       全70マスの平均色を地形データと照合し、不一致ゼロまでセル単位の
-       色調補正で地形の同一性を機械的に担保してある。
+   (2) 風景画＝質感：assets/map-paint.jpg（2100×3000＝1マス300px）は、その
+       下絵をレイアウトのガイドにして「一枚の連続した風景」として描いた
+       水彩画。川は一続きのリボンとして上端から下端まで流れ、川岸の砂地・
+       草の広がり・段差の連なりはマス境界を越えて連続する。マス単位の
+       描き分け・切り直し・セル単位の色調補正は一切していない（それが
+       「風景にならない」断片化の原因だった）。岩5箇所・花の高台6箇所は
+       下絵の位置のまま、光は方向性を持たせないフラットな光。
+       整合は、全70マスの中心部の平均色を地形データと照合する機械チェック
+       で担保し、不一致ゼロを確認済み（分類が際どかった2マスだけ、大きな
+       フェザーをかけた柔らかい色洗いを絵の側に施して読みを安定させた）。
    描画時は、マスごとに「そのマスの正方形テクスチャ」を、セルと同じ投影
-   （rotXY＋高さによる持ち上がり）で菱形へアフィン変換し、菱形でクリップ
-   して貼る。クリップ菱形は5%だけ拡大して隣マスと重ね、罫線ストロークは
-   引かない（髪の毛ほどの隙間とパッチワーク感を防ぐため。重なり部分は
-   テクスチャ同士がほぼ連続しているので自然に馴染む）。テクスチャは
-   マス単位で剛体的に回るため、0°/90°/180°/270°のどの向きでも川・岩・
-   段差の位置がタイルと一致したまま「同じ一枚絵を回しただけ」になる。
-   高さの持ち上がりもマス単位でそのまま効く。
+   （rotXY＋高さによる持ち上がり）で菱形へアフィン変換して貼るが、
+   ハードな切り貼りにはしない：クリップ菱形を30%拡大して隣マスへ大きく
+   重ね、各パッチの縁は放射グラデーションのマスクでフェザー（中心は
+   不透明のまま、外周で透明へ）し、重なり部分はクロスフェードさせる。
+   その上に地形色のごく薄いティント（不透明度0.08）を敷き、地形の
+   判別だけを静かに補助する。テクスチャはマス単位で剛体的に回るため、
+   0°/90°/180°/270°のどの向きでも川・岩・段差の位置がタイルと一致した
+   まま「同じ一枚の風景を回しただけ」になる。高さの持ち上がりも
+   マス単位でそのまま効く。
    下には従来のフラット塗り（groundFill）を敷くので、絵が読めない環境でも
    盤面は成立する。盤外の森は従来どおり同じ投影の手続き描画。
    viewBox は盤面アスペクト 47/20 に合わせた 470×200（%座標 ×4.7 / ×2）。 */
@@ -2021,7 +2028,10 @@ function groundSvg(){
     var hv=cellHash(gx,gy); if(hv>=0.68) continue;
     var c=gCenter(gx,gy,0); if(c.x<-30||c.x>500||c.y<-30||c.y>230) continue;
     var cx1=Math.round(c.x*10)/10, body="";
-    if(hv<0.5){ body='<circle cx="'+cx1+'" cy="'+(Math.round((c.y-6)*10)/10)+'" r="13.5" fill="#2e5c31"/><circle cx="'+cx1+'" cy="'+(Math.round((c.y-8)*10)/10)+'" r="9.6" fill="#3a6f3c"/><circle cx="'+cx1+'" cy="'+(Math.round((c.y-9.5)*10)/10)+'" r="5.4" fill="#4a854c"/>'; }
+    if(hv<0.5){ /* 樹冠は同心円の的ではなく、中心をずらした円の重なりで茂みらしく */
+      var ox=Math.round(((hv*97)%1-0.5)*80)/10, oy=Math.round(((hv*57)%1-0.5)*40)/10;
+      function fc(dx,dy,r,col){ return '<circle cx="'+(Math.round((c.x+dx)*10)/10)+'" cy="'+(Math.round((c.y+dy)*10)/10)+'" r="'+r+'" fill="'+col+'"/>'; }
+      body=fc(0,-5,12.5,"#2e5c31")+fc(ox-4.5,-7.5,8.2,"#3a6f3c")+fc(-ox+5,-3.5,6.8,"#356b38")+fc(ox*0.5+1.5,-9.5,4.6,"#4a854c"); }
     else { body='<ellipse cx="'+cx1+'" cy="'+(Math.round((c.y-2)*10)/10)+'" rx="7.5" ry="4.8" fill="#38663a"/>'; }
     items.push({s:c.s, h:body});
   }
@@ -2029,14 +2039,21 @@ function groundSvg(){
   for(y=0;y<ROWS;y++) for(x=0;x<COLS;x++){
     var cc=gCenter(x,y,heightAt(x,y)); var hw=ISO_SX*4.7, hh=ISO_SY*2;
     var dia=(Math.round(cc.x*10)/10)+","+(Math.round((cc.y-hh)*10)/10)+" "+(Math.round((cc.x+hw)*10)/10)+","+(Math.round(cc.y*10)/10)+" "+(Math.round(cc.x*10)/10)+","+(Math.round((cc.y+hh)*10)/10)+" "+(Math.round((cc.x-hw)*10)/10)+","+(Math.round(cc.y*10)/10);
-    /* クリップ用は中心から5%拡大した菱形：隣マスのテクスチャと少し重ねて
-       アンチエイリアスの隙間（下地の見える髪線）と継ぎ目を消す */
-    var hw2=hw*1.05, hh2=hh*1.05;
+    /* クリップ用は中心から30%拡大した菱形：隣マスのテクスチャへ大きく重ね、
+       その重なりを放射グラデーションのマスクでフェザーしてクロスフェード
+       させる（ハードな切り貼りの継ぎ目を消し、一枚の風景として読ませる）。
+       マスクは中心55%まで完全不透明、外周で透明へ落とす。 */
+    var hw2=hw*1.3, hh2=hh*1.3;
     var diaC=(Math.round(cc.x*10)/10)+","+(Math.round((cc.y-hh2)*10)/10)+" "+(Math.round((cc.x+hw2)*10)/10)+","+(Math.round(cc.y*10)/10)+" "+(Math.round(cc.x*10)/10)+","+(Math.round((cc.y+hh2)*10)/10)+" "+(Math.round((cc.x-hw2)*10)/10)+","+(Math.round(cc.y*10)/10);
-    var cid="gcp"+x+"-"+y;
-    defs+='<clipPath id="'+cid+'"><polygon points="'+diaC+'"/></clipPath>';
+    var cid="gcp"+x+"-"+y, mid="gmk"+x+"-"+y, gid="gfg"+x+"-"+y;
+    var gr=Math.round(Math.sqrt(hw2*hw2+hh2*hh2)*10)/10;
+    var ccx=Math.round(cc.x*10)/10, ccy=Math.round(cc.y*10)/10;
+    defs+='<clipPath id="'+cid+'"><polygon points="'+diaC+'"/></clipPath>'
+      +'<radialGradient id="'+gid+'" gradientUnits="userSpaceOnUse" cx="'+ccx+'" cy="'+ccy+'" r="'+gr+'"><stop offset="0" stop-color="#fff"/><stop offset="0.55" stop-color="#fff"/><stop offset="1" stop-color="#000"/></radialGradient>'
+      +'<mask id="'+mid+'" maskUnits="userSpaceOnUse" x="'+(Math.round((cc.x-gr)*10)/10)+'" y="'+(Math.round((cc.y-gr)*10)/10)+'" width="'+(Math.round(gr*2*10)/10)+'" height="'+(Math.round(gr*2*10)/10)+'"><polygon points="'+diaC+'" fill="url(#'+gid+')"/></mask>';
     cellsList.push({s:cc.s, h:'<polygon points="'+dia+'" fill="'+groundFill(x,y)+'"/>'
-      +'<g clip-path="url(#'+cid+')"><image href="assets/map-paint.jpg" width="'+PAINT_W+'" height="'+PAINT_H+'" transform="'+paintMatrix(x,y,cc)+'" preserveAspectRatio="none"/></g>'});
+      +'<g clip-path="url(#'+cid+')" mask="url(#'+mid+')"><image href="assets/map-paint.jpg" width="'+PAINT_W+'" height="'+PAINT_H+'" transform="'+paintMatrix(x,y,cc)+'" preserveAspectRatio="none"/></g>'
+      +'<polygon points="'+dia+'" fill="'+groundFill(x,y)+'" opacity="0.08"/>'});
   }
   items.sort(function(a,b){ return a.s-b.s; }); cellsList.sort(function(a,b){ return a.s-b.s; });
   var out='<svg class="iso-ground" viewBox="0 0 470 200" preserveAspectRatio="none" aria-hidden="true"><defs>'+defs+'</defs><rect x="0" y="0" width="470" height="200" fill="#2c4c2c"/>';
