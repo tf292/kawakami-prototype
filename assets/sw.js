@@ -3,7 +3,7 @@
    更新時は CACHE_VERSION を上げることで古いキャッシュが破棄され、新版が反映されます。 */
 "use strict";
 
-var CACHE_VERSION = "kawakami-v19";
+var CACHE_VERSION = "kawakami-v20";
 var CORE_CACHE = CACHE_VERSION + "-core";
 var RUNTIME_CACHE = CACHE_VERSION + "-runtime";
 
@@ -35,6 +35,7 @@ var CORE_ASSETS = [
   "./map-dobu.jpg",
   "./map-kare.jpg",
   "./map-care.jpg",
+  "./map-paint.jpg",
   "./care-dot-1-f1.png",
   "./care-dot-1-f2.png",
   "./care-dot-1-f3.png",

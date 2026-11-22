@@ -1861,6 +1861,36 @@ function cellScreenPx(cx, cy){
   return { x:(e.board.offsetLeft + c.cx/100*e.board.offsetWidth)*CAM.z + CAM.tx,
            y:(e.board.offsetTop + c.cy/100*e.board.offsetHeight)*CAM.z + CAM.ty };
 }
+/* ============ 回転軸（画面中央）用の座標変換 ============
+   回転ボタンは「今画面中央に映っている地点」を軸にする（ズーム軸＝選択地点
+   とは独立）。画面中央のステージpx → 盤面% → 表示グリッド（小数）→
+   論理グリッド（小数）へ逆変換した地点を保持し、回転後の投影でその地点の
+   盤面%を再計算して、ステージ中央に来るようカメラを合わせる。
+   高さの持ち上がりは軸計算では無視する（地表平面で近似）。 */
+function stageCenterLogical(){
+  var e=camEls(); if(!e.stage||!e.board) return null;
+  var vw=e.stage.clientWidth, vh=e.stage.clientHeight;
+  var bx=((vw/2-CAM.tx)/CAM.z - e.board.offsetLeft)/e.board.offsetWidth*100;
+  var by=((vh/2-CAM.ty)/CAM.z - e.board.offsetTop)/e.board.offsetHeight*100;
+  var RD=rotXY(0,0)[3];
+  var P=(bx-ISO_SX)/ISO_SX - RD + 1;  /* rx - ry */
+  var Q=(by-ISO_TOP-ISO_SY)/ISO_SY;  /* rx + ry */
+  var rx=(P+Q)/2, ry=(Q-P)/2, r=boardRot(), x, y;
+  if(r===1){ x=ry; y=(ROWS-1)-rx; }
+  else if(r===2){ x=(COLS-1)-rx; y=(ROWS-1)-ry; }
+  else if(r===3){ x=(COLS-1)-ry; y=rx; }
+  else { x=rx; y=ry; }
+  return {x:x, y:y};
+}
+function logicalCenterPct(lx, ly){
+  var r=boardRot(), rx, ry;
+  if(r===1){ rx=(ROWS-1)-ly; ry=lx; }
+  else if(r===2){ rx=(COLS-1)-lx; ry=(ROWS-1)-ly; }
+  else if(r===3){ rx=ly; ry=(COLS-1)-lx; }
+  else { rx=lx; ry=ly; }
+  var RD=rotXY(0,0)[3];
+  return { cx:(rx-ry+RD-1)*ISO_SX+ISO_SX, cy:(rx+ry)*ISO_SY+ISO_TOP+ISO_SY };
+}
 /* 選択地点が画面上の同じ位置に留まるようにズームする */
 function zoomAtSelection(nz){
   var e=camEls(); if(!e.stage) return;
@@ -1928,17 +1958,24 @@ function positionPredict(){
   if(top+ph>vh-6) top=Math.max(6, vh-ph-6);
   panel.style.left=left+"px"; panel.style.top=top+"px";
 }
-/* ============ 盤面グラウンド描画（地形・高さデータから生成） ============
-   以前は0°前提で描かれた一枚絵（map-battle-wide.jpg）を盤面に貼り、回転時は
-   線形変換で無理に追随させていたため、絵の中の起伏・川岸・陰影の向きが
-   タイルや高さデータと食い違って見えた。現在は一枚絵を使わず、地形（TERRAIN）
-   と高さ（HEIGHT_MAP）そのものから盤面の絵を毎回生成する。マスの色・川の
-   流れ・岩・草はすべて論理マス（x,y）に紐づき、セルと同じ投影（rotXY／
-   cellLeftTop と同じ式）を通して描かれるので、回転しても「同じマップを
-   回しただけ」の絵になる。絵柄は方向性のある遠近・陰影に頼らないフラットな
-   塗り＋論理マスで決まる色むらだけにし、盤外の森も同じ投影で盤の周囲に
-   木を置く（回転にそのまま追随する）。viewBox は盤面アスペクト 47/20 に
-   合わせた 470×200（%座標 ×4.7 / ×2）。 */
+/* ============ 盤面グラウンド描画（データ下絵＋水彩一枚絵のハイブリッド） ============
+   質感と回転整合を両立させるため、2層構造にする。
+   (1) 下絵＝データ：地形（TERRAIN）と高さ（HEIGHT_MAP）から作った「真上から
+       見た格子マップ（7×10マス、各マス正方形）」が正確なレイアウトの源泉。
+   (2) 一枚絵＝質感：その下絵をベースに水彩で描き起こした assets/map-paint.jpg
+       （1400×2000＝1マス200px）。川の蛇行・岩5箇所・花の高台6箇所は下絵の
+       位置のまま動かさず、光は方向性を持たせないフラットな光で描いてある。
+       生成後に全70マスの平均色を地形データと照合し、セル単位の色調補正で
+       地形の同一性を機械的に担保してある。
+   描画時は、マスごとに「そのマスの正方形テクスチャ」を、セルと同じ投影
+   （rotXY＋高さによる持ち上がり）で菱形へアフィン変換し、菱形でクリップ
+   して貼る。テクスチャはマス単位で剛体的に回るため、0°/90°/180°/270°の
+   どの向きでも川・岩・段差の位置がタイルと一致したまま「同じ一枚絵を
+   回しただけ」になる。高さの持ち上がりもマス単位でそのまま効く。
+   下には従来のフラット塗り（groundFill）を敷くので、絵が読めない環境でも
+   盤面は成立する。盤外の森は従来どおり同じ投影の手続き描画。
+   viewBox は盤面アスペクト 47/20 に合わせた 470×200（%座標 ×4.7 / ×2）。 */
+var PAINT_W=1400, PAINT_H=2000, PAINT_S=200; /* map-paint.jpg の寸法と1マスのpx */
 function cellHash(x,y){ var n=((x+61)*374761393 + (y+149)*668265263)>>>0; n=Math.imul(n^(n>>>13),1274126177)>>>0; return ((n^(n>>>16))>>>0)/4294967296; }
 function gCenter(x,y,h){ var p=rotXY(x,y); var rx=p[0], ry=p[1], RD=p[3];
   return { x:((rx-ry+RD-1)*ISO_SX+ISO_SX)*4.7, y:((rx+ry)*ISO_SY+ISO_TOP-(h||0)*ELEV_PCT+ISO_SY)*2, s:rx+ry }; }
@@ -1950,28 +1987,26 @@ function groundFill(x,y){ var t=TERRAIN[tIdx(x,y)], h=heightAt(x,y);
   if(t==="rock") return "#8d8474";
   if(t==="high") return "#a9bf6c";
   return h<=-3 ? "#6f9e52" : (h<=4 ? "#7cab58" : "#8cb464"); }
-function groundDeco(x,y){ var t=TERRAIN[tIdx(x,y)], v=cellHash(x,y), s="";
-  if(t==="water"){
-    /* 川の流れ：論理 +y（下流）方向へのシェブロン。gLocal 経由なので回転で向きが追随する */
-    s+='<polyline points="'+gPt(gLocal(x,y,-0.19,0.03))+" "+gPt(gLocal(x,y,0,0.32))+" "+gPt(gLocal(x,y,0.19,0.03))+'" fill="none" stroke="#dff3fb" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" opacity="0.75"/>';
-    if(v>0.35){ var sp=gLocal(x,y,0.24,-0.22); s+='<circle cx="'+(Math.round(sp[0]*10)/10)+'" cy="'+(Math.round(sp[1]*10)/10)+'" r="1.3" fill="#eaf7fd" opacity="0.8"/>'; }
-    if(v<0.5){ var sp2=gLocal(x,y,-0.27,-0.05); s+='<circle cx="'+(Math.round(sp2[0]*10)/10)+'" cy="'+(Math.round(sp2[1]*10)/10)+'" r="1" fill="#eaf7fd" opacity="0.6"/>'; }
-  } else if(t==="rock"){
-    /* 岩：論理マスの局所座標で描く多角形なので、面の向きごと回転に追随する */
-    var rp=[[-0.30,0.10],[-0.16,-0.17],[0.08,-0.27],[0.30,-0.02],[0.20,0.19],[-0.08,0.25]].map(function(o){ return gPt(gLocal(x,y,o[0],o[1])); }).join(" ");
-    var rf=[[-0.16,-0.17],[0.08,-0.27],[0.05,0.03],[-0.14,0.05]].map(function(o){ return gPt(gLocal(x,y,o[0],o[1])); }).join(" ");
-    var sm=[[0.20,0.16],[0.30,0.10],[0.40,0.20],[0.34,0.30],[0.22,0.28]].map(function(o){ return gPt(gLocal(x,y,o[0],o[1])); }).join(" ");
-    s+='<polygon points="'+rp+'" fill="#8d8474" stroke="#5f594e" stroke-width="0.8"/><polygon points="'+rf+'" fill="#a29a89"/><polygon points="'+sm+'" fill="#7e7668"/>';
-  } else {
-    /* 草地・高台：草むら（位置は論理マスに固定、穂先は画面上向き）＋高台は小花 */
-    var tufts=[[-0.17,-0.08],[0.15,0.12]];
-    for(var i=0;i<tufts.length;i++){ if(i===1 && v<0.45) continue; var b=gLocal(x,y,tufts[i][0],tufts[i][1]);
-      s+='<path d="M'+(Math.round((b[0]-2.4)*10)/10)+' '+(Math.round(b[1]*10)/10)+' L'+(Math.round(b[0]*10)/10)+' '+(Math.round((b[1]-6.2)*10)/10)+' L'+(Math.round((b[0]+2.4)*10)/10)+' '+(Math.round(b[1]*10)/10)+'" fill="none" stroke="#4e7d3a" stroke-width="1.3" stroke-linecap="round"/>';
-      if(t==="high") s+='<circle cx="'+(Math.round(b[0]*10)/10)+'" cy="'+(Math.round((b[1]-7)*10)/10)+'" r="1.4" fill="'+(v>0.5?"#f2d06b":"#fdf6dd")+'"/>';
-    }
-    if(v>0.72){ var pb=gLocal(x,y,0.24,-0.17); s+='<circle cx="'+(Math.round(pb[0]*10)/10)+'" cy="'+(Math.round(pb[1]*10)/10)+'" r="1.6" fill="#7e7668" opacity="0.7"/>'; }
-  }
-  return s; }
+/* 一枚絵テクスチャの貼り付け：論理マス (x,y) の正方形（絵の座標で
+   [(x*S, y*S), ((x+1)*S, (y+1)*S)]）を、現在の回転での菱形へ写すアフィン
+   行列を返す。菱形の中心は gCenter（高さの持ち上がり込み）で、格子の
+   +x / +y 方向ベクトルは表示グリッド経由で求めるため、回転すると
+   テクスチャもマスの中で剛体的に回る（90°回転＝絵も90°回った姿になる）。 */
+function paintMatrix(x,y,cc){
+  var hw=ISO_SX*4.7, hh=ISO_SY*2;
+  function dispVec(a,b){ return [a*hw - b*hw, a*hh + b*hh]; } /* 表示 (rx,ry) 方向→画面ベクトル */
+  var r=boardRot(), gx, gy;
+  if(r===1){ gx=dispVec(0,1); gy=dispVec(-1,0); }
+  else if(r===2){ gx=dispVec(-1,0); gy=dispVec(0,-1); }
+  else if(r===3){ gx=dispVec(0,-1); gy=dispVec(1,0); }
+  else { gx=dispVec(1,0); gy=dispVec(0,1); }
+  var S=PAINT_S;
+  var a=gx[0]/S, b=gx[1]/S, c=gy[0]/S, d=gy[1]/S;
+  var uc=(x+0.5)*S, vc=(y+0.5)*S;
+  var e=cc.x - a*uc - c*vc, f=cc.y - b*uc - d*vc;
+  function n(v){ return Math.round(v*10000)/10000; }
+  return "matrix("+n(a)+" "+n(b)+" "+n(c)+" "+n(d)+" "+n(e)+" "+n(f)+")";
+}
 function groundSvg(){
   var items=[], cellsList=[], gx, gy, x, y;
   /* 盤外の森：論理座標を盤の外側へ延長した位置に木・茂みを置く（同じ投影なので回転に追随する） */
@@ -1984,15 +2019,18 @@ function groundSvg(){
     else { body='<ellipse cx="'+cx1+'" cy="'+(Math.round((c.y-2)*10)/10)+'" rx="7.5" ry="4.8" fill="#38663a"/>'; }
     items.push({s:c.s, h:body});
   }
+  var defs="";
   for(y=0;y<ROWS;y++) for(x=0;x<COLS;x++){
     var cc=gCenter(x,y,heightAt(x,y)); var hw=ISO_SX*4.7, hh=ISO_SY*2;
     var dia=(Math.round(cc.x*10)/10)+","+(Math.round((cc.y-hh)*10)/10)+" "+(Math.round((cc.x+hw)*10)/10)+","+(Math.round(cc.y*10)/10)+" "+(Math.round(cc.x*10)/10)+","+(Math.round((cc.y+hh)*10)/10)+" "+(Math.round((cc.x-hw)*10)/10)+","+(Math.round(cc.y*10)/10);
-    var v=cellHash(x,y);
-    var shade = v<0.33 ? '<polygon points="'+dia+'" fill="#000" opacity="0.05"/>' : (v>0.67 ? '<polygon points="'+dia+'" fill="#fff" opacity="0.06"/>' : "");
-    cellsList.push({s:cc.s, h:'<polygon points="'+dia+'" fill="'+groundFill(x,y)+'" stroke="rgba(28,44,22,0.20)" stroke-width="0.7"/>'+shade+groundDeco(x,y)});
+    var cid="gcp"+x+"-"+y;
+    defs+='<clipPath id="'+cid+'"><polygon points="'+dia+'"/></clipPath>';
+    cellsList.push({s:cc.s, h:'<polygon points="'+dia+'" fill="'+groundFill(x,y)+'"/>'
+      +'<g clip-path="url(#'+cid+')"><image href="assets/map-paint.jpg" width="'+PAINT_W+'" height="'+PAINT_H+'" transform="'+paintMatrix(x,y,cc)+'" preserveAspectRatio="none"/></g>'
+      +'<polygon points="'+dia+'" fill="none" stroke="rgba(28,44,22,0.20)" stroke-width="0.7"/>'});
   }
   items.sort(function(a,b){ return a.s-b.s; }); cellsList.sort(function(a,b){ return a.s-b.s; });
-  var out='<svg class="iso-ground" viewBox="0 0 470 200" preserveAspectRatio="none" aria-hidden="true"><rect x="0" y="0" width="470" height="200" fill="#2c4c2c"/>';
+  var out='<svg class="iso-ground" viewBox="0 0 470 200" preserveAspectRatio="none" aria-hidden="true"><defs>'+defs+'</defs><rect x="0" y="0" width="470" height="200" fill="#2c4c2c"/>';
   items.forEach(function(it){ out+=it.h; }); cellsList.forEach(function(it){ out+=it.h; });
   return out+'</svg>'; }
 /* ============ 地形（固定レイアウト：川が奥行き方向に流れる） ============
@@ -2710,7 +2748,7 @@ function renderBattle(){
    +'<div class="bs-round"><b>'+B.round+'</b> 巡</div>'
    +'<div class="bs-left">敵全滅まで あと'+foesLeft+'体</div>'
    +'<div class="bs-sec">全体MAP</div><div class="minimap" style="grid-template-columns:repeat('+RW+',1fr)">'+mini+'</div><div class="mini-legend"><span style="color:#7ec8ff">●</span> 味方　<span style="color:#ff8a7a">●</span> 敵　<span style="color:#b5cf7d">●</span> 高台</div>'
-   +'<button class="btn ghost sm" id="btn-rot" style="margin-top:calc(var(--k)*10);background:transparent;color:#eef3e6;border-color:rgba(120,200,210,.6)">⟳ マップ回転（'+(boardRot()*90)+'°）</button><div style="font-size:calc(var(--k)*10.5);color:#9fc3bb;margin-top:calc(var(--k)*4)">選択中の地点を中心に回転します（表示だけ変更）</div>'
+   +'<button class="btn ghost sm" id="btn-rot" style="margin-top:calc(var(--k)*10);background:transparent;color:#eef3e6;border-color:rgba(120,200,210,.6)">⟳ マップ回転（'+(boardRot()*90)+'°）</button><div style="font-size:calc(var(--k)*10.5);color:#9fc3bb;margin-top:calc(var(--k)*4)">画面の中心にある地点を軸に回転します（表示だけ変更）</div>'
    +'<div class="row" style="margin-top:calc(var(--k)*10);gap:calc(var(--k)*6);align-items:center;flex-wrap:nowrap"><button class="btn ghost sm" id="btn-zoomout" style="background:transparent;color:#eef3e6;border-color:rgba(120,200,210,.6);flex:1" title="縮小">−</button><span id="zoom-pct" style="font-size:calc(var(--k)*12);color:#c8d4bd;min-width:calc(var(--k)*40);text-align:center">'+Math.round(CAM.z*100)+'%</span><button class="btn ghost sm" id="btn-zoomin" style="background:transparent;color:#eef3e6;border-color:rgba(120,200,210,.6);flex:1" title="拡大">＋</button></div><div style="font-size:calc(var(--k)*10.5);color:#9fc3bb;margin-top:calc(var(--k)*4)">拡縮は選択中の地点が中心です。盤面ドラッグでスクロール／ピンチでも拡縮できます</div>'
    +'<div class="bs-sec">ステージ'+(B.si+1)+'</div><div class="bs-stage">'+esc(STAGES[B.si].name.replace(/^ステージ\d+ /,""))+' 深度'+(B.di+1)+'</div><div class="bs-obj">目標：敵の全滅</div>'
    +'<div class="bs-sec">戦闘ログ</div><div class="b-log">'+B.logs.slice().reverse().join("<br>")+'</div>'
@@ -2978,15 +3016,19 @@ function bindBattle(){
   var cno=$("btn-confirm-no"); if(cno) cno.addEventListener("click", function(){ B.confirm=null; renderBattle(); });
   var endp=$("btn-endphase"); if(endp) endp.addEventListener("click", function(){ enemyPhase(); renderBattle(); });
   var rotb=$("btn-rot"); if(rotb) rotb.addEventListener("click", function(){
-    /* 回転は選択地点を中心に：回転前の選択地点の画面位置を記録し、
-       回転後の投影で同じマスが同じ画面位置に来るようカメラをずらす */
-    var sc=selectionCell();
-    var before=cellScreenPx(sc.x, sc.y);
+    /* 回転軸は「今画面中央に映っている地点」：回転前に画面中央の論理座標
+       （小数マス）を求め、回転後の投影で同じ地点が画面中央に来るよう
+       カメラをずらす。視点が飛ばず、その場で盤面だけが回る。
+       回転後に盤面がはみ出す場合は renderBattle→applyCam→clampCam が
+       従来のクランプ範囲に収める。ズームの軸（選択地点）は変更しない。 */
+    var e=camEls();
+    var piv=(e.stage&&e.board)?stageCenterLogical():null;
+    var vw=e.stage?e.stage.clientWidth:0, vh=e.stage?e.stage.clientHeight:0;
     B.rot=((B.rot||0)+1)%4;
-    if(before){
-      var e2=camEls(), nc=cellCenter(sc.x, sc.y);
-      if(e2.board){ CAM.tx=before.x-(e2.board.offsetLeft + nc.cx/100*e2.board.offsetWidth)*CAM.z;
-                    CAM.ty=before.y-(e2.board.offsetTop + nc.cy/100*e2.board.offsetHeight)*CAM.z; }
+    if(piv&&e.board){
+      var nc=logicalCenterPct(piv.x, piv.y);
+      CAM.tx=vw/2-(e.board.offsetLeft + nc.cx/100*e.board.offsetWidth)*CAM.z;
+      CAM.ty=vh/2-(e.board.offsetTop + nc.cy/100*e.board.offsetHeight)*CAM.z;
     }
     renderBattle();
   });
