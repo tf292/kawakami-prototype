@@ -352,9 +352,11 @@ select{font-family:inherit;font-size:calc(var(--k)*15);padding:calc(var(--k)*8);
    ズーム・パンを行う。盤面の % 座標系はそのまま（タップ吸着は変換後の実座標で判定）。 */
 .cam-world{position:absolute;left:0;top:0;width:100%;height:140%;transform-origin:0 0;will-change:transform}
 .b-stage>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.iso-board{position:absolute;left:0;right:0;margin:0 auto;top:10.5%;width:min(148%,calc(var(--k)*1580));aspect-ratio:47/20;box-shadow:0 calc(var(--k)*7) calc(var(--k)*13) rgba(4,20,16,.38),0 calc(var(--k)*16) calc(var(--k)*24) rgba(30,24,10,.32),inset 0 0 0 2px rgba(52,38,16,.45),inset 0 0 calc(var(--k)*70) rgba(20,26,8,.30);background:#2c4c2c}
+.iso-board{position:absolute;left:0;right:0;margin:0 auto;top:10.5%;width:min(148%,calc(var(--k)*1580));aspect-ratio:47/20;box-shadow:0 calc(var(--k)*7) calc(var(--k)*13) rgba(4,20,16,.38),0 calc(var(--k)*16) calc(var(--k)*24) rgba(30,24,10,.32),inset 0 0 0 2px rgba(52,38,16,.45),inset 0 0 calc(var(--k)*70) rgba(20,26,8,.30);background:#2c4c2c;overflow:visible}
 .iso-board::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;box-shadow:inset 0 0 calc(var(--k)*54) rgba(24,30,10,.42),inset 0 calc(var(--k)*-18) calc(var(--k)*30) rgba(24,30,10,.3)}
-.iso-board>svg.iso-ground{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0}
+/* 地面SVGは盤面の2倍の広さ（盤外の景色を含む viewBox -235 -100 940 400）で
+   盤面の外へはみ出して描く。盤面要素自体の寸法・位置は従来どおり。 */
+.iso-board>svg.iso-ground{position:absolute;left:-50%;top:-50%;width:200%;height:200%;display:block;z-index:0}
 /* ---- マス表示：上面は枠と淡い地形色だけ。段差はブロック式の側面で表す ----
    側面（.blk-l/.blk-r）は手前2方向の隣マスとの高さ差ぶんだけ菱形の下辺から垂らす。
    色は背景画の水彩に合わせた土・岩の質感（芝の縁取り＋土の層＋根元の陰影）にし、
@@ -1808,10 +1810,12 @@ function camEls(){ return { stage:document.querySelector(".b-stage"), world:docu
 function clampCam(){
   var e=camEls(); if(!e.stage||!e.board) return;
   var vw=e.stage.clientWidth, vh=e.stage.clientHeight;
-  CAM.zMin=Math.min(vw/e.board.offsetWidth, vh/e.board.offsetHeight)*0.94;
+  /* ズームアウトの下限は「盤外の景色（盤面の2倍の広さ）全体が見える」所まで */
+  CAM.zMin=Math.min(vw/(e.board.offsetWidth*2), vh/(e.board.offsetHeight*2))*0.94;
   if(CAM.z<CAM.zMin) CAM.z=CAM.zMin;
   if(CAM.z>2.4) CAM.z=2.4;
-  var bl=e.board.offsetLeft-24, bt=e.board.offsetTop-24, br=bl+e.board.offsetWidth+48, bb=bt+e.board.offsetHeight+48;
+  /* パンの可動範囲も盤面ではなく盤外の景色の範囲（盤面の上下左右に各50%ずつ）に合わせる */
+  var bl=e.board.offsetLeft-e.board.offsetWidth*0.5-24, bt=e.board.offsetTop-e.board.offsetHeight*0.5-24, br=bl+e.board.offsetWidth*2+48, bb=bt+e.board.offsetHeight*2+48;
   function clampAxis(t, vsize, c0, c1){
     var span=(c1-c0)*CAM.z;
     if(span<=vsize) return (vsize-span)/2 - c0*CAM.z;
@@ -1961,51 +1965,93 @@ function positionPredict(){
   if(top+ph>vh-6) top=Math.max(6, vh-ph-6);
   panel.style.left=left+"px"; panel.style.top=top+"px";
 }
-/* ============ 盤面グラウンド描画（データ下絵＋連続した風景画） ============
+/* ============ 盤面グラウンド描画（データ下絵＋連続した風景画＋盤外の景色） ============
    質感と回転整合を両立させるため、2層構造にする。
    (1) 下絵＝データ：地形（TERRAIN）と高さ（HEIGHT_MAP）から作った「真上から
        見た格子マップ（7×10マス、各マス正方形）」が正確なレイアウトの源泉。
-   (2) 風景画＝質感：assets/map-paint.jpg（2100×3000＝1マス300px）は、その
-       下絵をレイアウトのガイドにして「一枚の連続した風景」として描いた
-       水彩画。川は一続きのリボンとして上端から下端まで流れ、川岸の砂地・
-       草の広がり・段差の連なりはマス境界を越えて連続する。マス単位の
-       描き分け・切り直し・セル単位の色調補正は一切していない（それが
-       「風景にならない」断片化の原因だった）。岩5箇所・花の高台6箇所は
-       下絵の位置のまま、光は方向性を持たせないフラットな光。
-       整合は、全70マスの中心部の平均色を地形データと照合する機械チェック
-       で担保し、不一致ゼロを確認済み（分類が際どかった2マスだけ、大きな
-       フェザーをかけた柔らかい色洗いを絵の側に施して読みを安定させた）。
-   描画時は、マスごとに「そのマスの正方形テクスチャ」を、セルと同じ投影
-   （rotXY＋高さによる持ち上がり）で菱形へアフィン変換して貼るが、
-   ハードな切り貼りにはしない：クリップ菱形を30%拡大して隣マスへ大きく
-   重ね、各パッチの縁は放射グラデーションのマスクでフェザー（中心は
-   不透明のまま、外周で透明へ）し、重なり部分はクロスフェードさせる。
-   その上に地形色のごく薄いティント（不透明度0.08）を敷き、地形の
-   判別だけを静かに補助する。テクスチャはマス単位で剛体的に回るため、
-   0°/90°/180°/270°のどの向きでも川・岩・段差の位置がタイルと一致した
-   まま「同じ一枚の風景を回しただけ」になる。高さの持ち上がりも
-   マス単位でそのまま効く。
-   下には従来のフラット塗り（groundFill）を敷くので、絵が読めない環境でも
-   盤面は成立する。盤外の森は従来どおり同じ投影の手続き描画。
-   viewBox は盤面アスペクト 47/20 に合わせた 470×200（%座標 ×4.7 / ×2）。 */
-var PAINT_W=2100, PAINT_H=3000, PAINT_S=300; /* map-paint.jpg の寸法と1マスのpx */
+   (2) 風景画＝質感：assets/map-paint-wide.jpg（3000×3600＝1マス200px）は、
+       その下絵を盤外へ4マス分ずつ拡張した格子（15×18マス）をガイドにして
+       「一枚の連続した風景」として描いた水彩画。遊べる盤面は従来どおり
+       7×10マスのまま変えず、広げたのは「見える世界」のほうだけ。
+       川は盤面の上下端で切れず一続きのリボンとして絵の上端から下端まで
+       流れて盤外へ抜け、川岸の砂地・草の広がり・段差の連なりもマス境界を
+       越えて盤外まで連続する。盤面の周囲には土と石の縁取りの小道が絵の
+       中に描かれていて、盤面の輪郭の手がかりになる。光は方向性を持たせ
+       ないフラットな光（回転しても違和感が出ない）。
+       整合は機械チェックで担保する：盤面内70マスすべてについて、各マス
+       中央の100×100px（マスの50%）の平均色を、岩と水を分けた厳密な
+       区分で地形データと照合し、不一致ゼロを確認済み（区分：水＝色相
+       165〜245°・彩度0.13以上・B≧R／岩＝彩度0.24以下・G−R≦6・
+       R−B≦26の灰色石／陸＝緑＋川岸の砂地。高台と草地は「緑の土地」
+       として同区分：高さの違いは色ではなく高さデータ由来の持ち上がり
+       と崖面で表すため）。中央80×80px・120×120pxのサンプルでも
+       不一致ゼロ。岩場5マス（(0,1)・(1,3)・(6,5)・(0,7)・(6,9)）は
+       広めのサンプルで草地寄りに読めたため、絵の側に岩塊を大きく
+       描き足して読みを安定させた。
+   描画は3層：
+   (a) 盤外の景色：拡張格子全体の菱形に、風景画を1枚のまま同じ投影
+       （rotXY・高さ0の平面）でアフィン変換して敷く。継ぎ目の無い一枚絵
+       なので、ズームアウト／パン／回転でも景色が盤外へ続いて見える。
+   (b) 盤面内：マスごとに「そのマスの正方形テクスチャ」を、セルと同じ
+       投影（rotXY＋高さによる持ち上がり）で菱形へアフィン変換して貼る。
+       ハードな切り貼りにはしない：クリップ菱形を30%拡大して隣マスへ
+       大きく重ね、各パッチの縁は放射グラデーションのマスクでフェザー
+       （中心は不透明のまま、外周で透明へ）し、重なり部分はクロス
+       フェードさせる。その上に地形色のごく薄いティント（不透明度
+       0.08）を敷き、地形の判別だけを静かに補助する。テクスチャは
+       マス単位で剛体的に回るため、0°/90°/180°/270°のどの向きでも
+       川・岩・段差の位置がタイルと一致したまま「同じ一枚の風景を
+       回しただけ」になる。高さの持ち上がりもマス単位でそのまま効く。
+   (c) 仕上げ：盤面の外周に細い暗色の縁取りポリゴン（高さ0の平面）を
+       描き、歩ける盤面の輪郭が景色の中でも分かるようにする。
+   下にはフラット塗り（groundFill／盤外は outerTerrain の色）を敷くので、
+   絵が読めない環境でも盤面と景色は成立する。絵の範囲のさらに外側は
+   従来どおり同じ投影の手続き描画（森）で埋める。
+   viewBox は盤面アスペクト 47/20 の 470×200 を中心に、景色の分だけ
+   広げた -235 -100 940 400（盤面の2倍の広さ）。SVG要素自体も盤面の
+   200%サイズで -50%/-50% に置き、盤外まで描けるようにしてある。 */
+var PAINT_W=3000, PAINT_H=3600, PAINT_S=200; /* map-paint-wide.jpg の寸法と1マスのpx */
+var PAINT_OX=4, PAINT_OY=4; /* 風景画の中で盤面が始まるマス位置（盤外マージン4マス分） */
+/* ============ 盤外の地形モデル（景色専用・歩行不可） ============
+   盤外はゲームデータではなく見た目だけの景色。川は盤面内と同じ蛇行の
+   周期（2行ごとに左右へ寄る帯）をそのまま延長し、盤の上下端で切れずに
+   盤外へ流れていく。両側は草地を基調に、決定的ハッシュで高台と岩を
+   点在させる（下絵生成時と同一の規則で風景画と一致させてある）。 */
+function riverLeftAt(y){ var p=Math.floor(y/2); return ((p%2)+2)%2===0 ? 3 : 2; }
+function outerTerrain(x,y){
+  if(x===riverLeftAt(y)||x===riverLeftAt(y)+1) return "water";
+  var hv=cellHash(x,y);
+  if(hv<0.07) return "rock";
+  if(hv<0.22) return "high";
+  return "grass";
+}
+function outerHeight(x,y){
+  var t=outerTerrain(x,y);
+  if(t==="water") return x===riverLeftAt(y) ? -10 : -9;
+  if(t==="rock") return 12;
+  if(t==="high") return 16;
+  var hv=cellHash(x+977,y+331);
+  return hv<0.4 ? -3 : (hv<0.75 ? 4 : 9);
+}
 function cellHash(x,y){ var n=((x+61)*374761393 + (y+149)*668265263)>>>0; n=Math.imul(n^(n>>>13),1274126177)>>>0; return ((n^(n>>>16))>>>0)/4294967296; }
 function gCenter(x,y,h){ var p=rotXY(x,y); var rx=p[0], ry=p[1], RD=p[3];
   return { x:((rx-ry+RD-1)*ISO_SX+ISO_SX)*4.7, y:((rx+ry)*ISO_SY+ISO_TOP-(h||0)*ELEV_PCT+ISO_SY)*2, s:rx+ry }; }
 function gLocal(x,y,fx,fy){ var c=gCenter(x,y,heightAt(x,y)); var a=gCenter(x,y,0), bx=gCenter(x+1,y,0), by=gCenter(x,y+1,0);
   return [c.x+fx*(bx.x-a.x)+fy*(by.x-a.x), c.y+fx*(bx.y-a.y)+fy*(by.y-a.y)]; }
 function gPt(p){ return (Math.round(p[0]*10)/10)+","+(Math.round(p[1]*10)/10); }
-function groundFill(x,y){ var t=TERRAIN[tIdx(x,y)], h=heightAt(x,y);
+function groundFillTH(t,h){
   if(t==="water") return h<=-10 ? "#2e6da0" : "#3a82b4";
   if(t==="rock") return "#8d8474";
   if(t==="high") return "#a9bf6c";
   return h<=-3 ? "#6f9e52" : (h<=4 ? "#7cab58" : "#8cb464"); }
+function groundFill(x,y){ return groundFillTH(TERRAIN[tIdx(x,y)], heightAt(x,y)); }
 /* 一枚絵テクスチャの貼り付け：論理マス (x,y) の正方形（絵の座標で
-   [(x*S, y*S), ((x+1)*S, (y+1)*S)]）を、現在の回転での菱形へ写すアフィン
-   行列を返す。菱形の中心は gCenter（高さの持ち上がり込み）で、格子の
-   +x / +y 方向ベクトルは表示グリッド経由で求めるため、回転すると
-   テクスチャもマスの中で剛体的に回る（90°回転＝絵も90°回った姿になる）。 */
-function paintMatrix(x,y,cc){
+   [((x+OX)*S, (y+OY)*S), ((x+OX+1)*S, (y+OY+1)*S)]）を、現在の回転での
+   菱形へ写すアフィン行列を返す。菱形の中心は gCenter（高さの持ち上がり
+   込み）で、格子の +x / +y 方向ベクトルは表示グリッド経由で求めるため、
+   回転するとテクスチャもマスの中で剛体的に回る（90°回転＝絵も90°回った
+   姿になる）。 */
+function paintBasis(){
   var hw=ISO_SX*4.7, hh=ISO_SY*2;
   function dispVec(a,b){ return [a*hw - b*hw, a*hh + b*hh]; } /* 表示 (rx,ry) 方向→画面ベクトル */
   var r=boardRot(), gx, gy;
@@ -2014,19 +2060,38 @@ function paintMatrix(x,y,cc){
   else if(r===3){ gx=dispVec(0,-1); gy=dispVec(1,0); }
   else { gx=dispVec(1,0); gy=dispVec(0,1); }
   var S=PAINT_S;
-  var a=gx[0]/S, b=gx[1]/S, c=gy[0]/S, d=gy[1]/S;
-  var uc=(x+0.5)*S, vc=(y+0.5)*S;
-  var e=cc.x - a*uc - c*vc, f=cc.y - b*uc - d*vc;
+  return { a:gx[0]/S, b:gx[1]/S, c:gy[0]/S, d:gy[1]/S };
+}
+function paintMatrix(x,y,cc){
+  var B=paintBasis(), S=PAINT_S;
+  var uc=(x+PAINT_OX+0.5)*S, vc=(y+PAINT_OY+0.5)*S;
+  var e=cc.x - B.a*uc - B.c*vc, f=cc.y - B.b*uc - B.d*vc;
   function n(v){ return Math.round(v*10000)/10000; }
-  return "matrix("+n(a)+" "+n(b)+" "+n(c)+" "+n(d)+" "+n(e)+" "+n(f)+")";
+  return "matrix("+n(B.a)+" "+n(B.b)+" "+n(B.c)+" "+n(B.d)+" "+n(e)+" "+n(f)+")";
+}
+/* 盤外の景色用：風景画全体を高さ0の平面へ1枚のまま写すアフィン行列。
+   絵の中心は盤面の中心マスと一致する（絵の座標系では盤面は OX/OY 分
+   ずれた位置から始まる）ため、中心同士を合わせれば全マスが連動する。 */
+function paintMatrixWide(){
+  var B=paintBasis();
+  var cc=gCenter((COLS-1)/2,(ROWS-1)/2,0);
+  var uc=PAINT_W/2, vc=PAINT_H/2;
+  var e=cc.x - B.a*uc - B.c*vc, f=cc.y - B.b*uc - B.d*vc;
+  function n(v){ return Math.round(v*10000)/10000; }
+  return "matrix("+n(B.a)+" "+n(B.b)+" "+n(B.c)+" "+n(B.d)+" "+n(e)+" "+n(f)+")";
 }
 function groundSvg(){
   var items=[], cellsList=[], gx, gy, x, y;
-  /* 盤外の森：論理座標を盤の外側へ延長した位置に木・茂みを置く（同じ投影なので回転に追随する） */
-  for(gy=-6;gy<ROWS+6;gy++) for(gx=-6;gx<COLS+6;gx++){
-    if(gx>=0&&gx<COLS&&gy>=0&&gy<ROWS) continue;
+  var HW=ISO_SX*4.7, HH=ISO_SY*2;
+  function diaPts(cc,fx){ var w2=HW*(fx||1), h2=HH*(fx||1);
+    return (Math.round(cc.x*10)/10)+","+(Math.round((cc.y-h2)*10)/10)+" "+(Math.round((cc.x+w2)*10)/10)+","+(Math.round(cc.y*10)/10)+" "+(Math.round(cc.x*10)/10)+","+(Math.round((cc.y+h2)*10)/10)+" "+(Math.round((cc.x-w2)*10)/10)+","+(Math.round(cc.y*10)/10); }
+  /* 盤外の森：風景画の範囲のさらに外側にだけ、論理座標を延長した位置へ
+     木・茂みを置く（同じ投影なので回転に追随する）。絵のある範囲は
+     絵自身の植生に任せ、手続き描画の円を重ねない。 */
+  for(gy=-8;gy<ROWS+8;gy++) for(gx=-8;gx<COLS+8;gx++){
+    if(gx>=-PAINT_OX&&gx<COLS+PAINT_OX&&gy>=-PAINT_OY&&gy<ROWS+PAINT_OY) continue;
     var hv=cellHash(gx,gy); if(hv>=0.68) continue;
-    var c=gCenter(gx,gy,0); if(c.x<-30||c.x>500||c.y<-30||c.y>230) continue;
+    var c=gCenter(gx,gy,0); if(c.x<-245||c.x>715||c.y<-110||c.y>310) continue;
     var cx1=Math.round(c.x*10)/10, body="";
     if(hv<0.5){ /* 樹冠は同心円の的ではなく、中心をずらした円の重なりで茂みらしく */
       var ox=Math.round(((hv*97)%1-0.5)*80)/10, oy=Math.round(((hv*57)%1-0.5)*40)/10;
@@ -2035,30 +2100,49 @@ function groundSvg(){
     else { body='<ellipse cx="'+cx1+'" cy="'+(Math.round((c.y-2)*10)/10)+'" rx="7.5" ry="4.8" fill="#38663a"/>'; }
     items.push({s:c.s, h:body});
   }
-  var defs="";
+  /* 盤外のフラット塗り（絵が読めない環境での景色の下地）：盤外地形モデル
+     の色で拡張格子全体を敷く。絵が読める環境では次の景色レイヤーに覆われる。 */
+  var outer="";
+  for(gy=-PAINT_OY;gy<ROWS+PAINT_OY;gy++) for(gx=-PAINT_OX;gx<COLS+PAINT_OX;gx++){
+    if(gx>=0&&gx<COLS&&gy>=0&&gy<ROWS) continue;
+    outer+='<polygon points="'+diaPts(gCenter(gx,gy,0))+'" fill="'+groundFillTH(outerTerrain(gx,gy),outerHeight(gx,gy))+'"/>';
+  }
+  /* 盤外の景色：拡張格子の外周の菱形でクリップし、風景画を1枚のまま
+     高さ0の平面へ貼る。川・川岸・草地が盤面の端で切れずに続く。 */
+  var eA=gCenter(-PAINT_OX-0.5,-PAINT_OY-0.5,0), eB=gCenter(COLS+PAINT_OX-0.5,-PAINT_OY-0.5,0),
+      eC=gCenter(COLS+PAINT_OX-0.5,ROWS+PAINT_OY-0.5,0), eD=gCenter(-PAINT_OX-0.5,ROWS+PAINT_OY-0.5,0);
+  var extPts=gPt([eA.x,eA.y])+" "+gPt([eB.x,eB.y])+" "+gPt([eC.x,eC.y])+" "+gPt([eD.x,eD.y]);
+  var defs='<clipPath id="gext"><polygon points="'+extPts+'"/></clipPath>';
+  var scenery='<g clip-path="url(#gext)"><image href="assets/map-paint-wide.jpg" width="'+PAINT_W+'" height="'+PAINT_H+'" transform="'+paintMatrixWide()+'" preserveAspectRatio="none"/></g>';
+  /* 盤面内マス（従来どおり：高さで持ち上がるフェザー付きパッチ） */
   for(y=0;y<ROWS;y++) for(x=0;x<COLS;x++){
-    var cc=gCenter(x,y,heightAt(x,y)); var hw=ISO_SX*4.7, hh=ISO_SY*2;
-    var dia=(Math.round(cc.x*10)/10)+","+(Math.round((cc.y-hh)*10)/10)+" "+(Math.round((cc.x+hw)*10)/10)+","+(Math.round(cc.y*10)/10)+" "+(Math.round(cc.x*10)/10)+","+(Math.round((cc.y+hh)*10)/10)+" "+(Math.round((cc.x-hw)*10)/10)+","+(Math.round(cc.y*10)/10);
+    var cc=gCenter(x,y,heightAt(x,y)); var hw=HW, hh=HH;
+    var dia=diaPts(cc);
     /* クリップ用は中心から30%拡大した菱形：隣マスのテクスチャへ大きく重ね、
        その重なりを放射グラデーションのマスクでフェザーしてクロスフェード
        させる（ハードな切り貼りの継ぎ目を消し、一枚の風景として読ませる）。
        マスクは中心55%まで完全不透明、外周で透明へ落とす。 */
-    var hw2=hw*1.3, hh2=hh*1.3;
-    var diaC=(Math.round(cc.x*10)/10)+","+(Math.round((cc.y-hh2)*10)/10)+" "+(Math.round((cc.x+hw2)*10)/10)+","+(Math.round(cc.y*10)/10)+" "+(Math.round(cc.x*10)/10)+","+(Math.round((cc.y+hh2)*10)/10)+" "+(Math.round((cc.x-hw2)*10)/10)+","+(Math.round(cc.y*10)/10);
+    var diaC=diaPts(cc,1.3);
     var cid="gcp"+x+"-"+y, mid="gmk"+x+"-"+y, gid="gfg"+x+"-"+y;
-    var gr=Math.round(Math.sqrt(hw2*hw2+hh2*hh2)*10)/10;
+    var gr=Math.round(Math.sqrt((hw*1.3)*(hw*1.3)+(hh*1.3)*(hh*1.3))*10)/10;
     var ccx=Math.round(cc.x*10)/10, ccy=Math.round(cc.y*10)/10;
     defs+='<clipPath id="'+cid+'"><polygon points="'+diaC+'"/></clipPath>'
       +'<radialGradient id="'+gid+'" gradientUnits="userSpaceOnUse" cx="'+ccx+'" cy="'+ccy+'" r="'+gr+'"><stop offset="0" stop-color="#fff"/><stop offset="0.55" stop-color="#fff"/><stop offset="1" stop-color="#000"/></radialGradient>'
       +'<mask id="'+mid+'" maskUnits="userSpaceOnUse" x="'+(Math.round((cc.x-gr)*10)/10)+'" y="'+(Math.round((cc.y-gr)*10)/10)+'" width="'+(Math.round(gr*2*10)/10)+'" height="'+(Math.round(gr*2*10)/10)+'"><polygon points="'+diaC+'" fill="url(#'+gid+')"/></mask>';
     cellsList.push({s:cc.s, h:'<polygon points="'+dia+'" fill="'+groundFill(x,y)+'"/>'
-      +'<g clip-path="url(#'+cid+')" mask="url(#'+mid+')"><image href="assets/map-paint.jpg" width="'+PAINT_W+'" height="'+PAINT_H+'" transform="'+paintMatrix(x,y,cc)+'" preserveAspectRatio="none"/></g>'
+      +'<g clip-path="url(#'+cid+')" mask="url(#'+mid+')"><image href="assets/map-paint-wide.jpg" width="'+PAINT_W+'" height="'+PAINT_H+'" transform="'+paintMatrix(x,y,cc)+'" preserveAspectRatio="none"/></g>'
       +'<polygon points="'+dia+'" fill="'+groundFill(x,y)+'" opacity="0.08"/>'});
   }
+  /* 盤面の輪郭：外周（高さ0の平面）に細い暗色の縁取りを描き、景色の中で
+     歩ける盤面の範囲が分かるようにする。絵の中の土の小道の縁取りと
+     重なって、盤面の境界を二重に示す。 */
+  var pA=gCenter(-0.5,-0.5,0), pB=gCenter(COLS-0.5,-0.5,0), pC=gCenter(COLS-0.5,ROWS-0.5,0), pD=gCenter(-0.5,ROWS-0.5,0);
+  var perim='<polygon points="'+gPt([pA.x,pA.y])+" "+gPt([pB.x,pB.y])+" "+gPt([pC.x,pC.y])+" "+gPt([pD.x,pD.y])+'" fill="none" stroke="rgba(43,32,12,0.45)" stroke-width="2.2" stroke-linejoin="round"/>';
   items.sort(function(a,b){ return a.s-b.s; }); cellsList.sort(function(a,b){ return a.s-b.s; });
-  var out='<svg class="iso-ground" viewBox="0 0 470 200" preserveAspectRatio="none" aria-hidden="true"><defs>'+defs+'</defs><rect x="0" y="0" width="470" height="200" fill="#2c4c2c"/>';
+  var out='<svg class="iso-ground" viewBox="-235 -100 940 400" preserveAspectRatio="none" aria-hidden="true"><defs>'+defs+'</defs><rect x="-235" y="-100" width="940" height="400" fill="#2c4c2c"/>';
+  out+=outer+scenery;
   items.forEach(function(it){ out+=it.h; }); cellsList.forEach(function(it){ out+=it.h; });
-  return out+'</svg>'; }
+  return out+perim+'</svg>'; }
 /* ============ 地形（固定レイアウト：川が奥行き方向に流れる） ============
    このデータ自体がマップの見た目の源泉（groundSvg がここから絵を生成する）。
    川の帯（W=浅瀬）が盤面の奥（y=0）から手前（y=9）へ中央を蛇行して流れ、
@@ -2142,7 +2226,8 @@ function startBattle(si,di){
   allies.forEach(function(u){ faceNearestOpponent(u,foes); });
   foes.forEach(function(u){ faceNearestOpponent(u,allies); });
   allies.concat(foes).forEach(function(u){ TERRAIN[tIdx(u.x,u.y)]="grass"; });
-  CAM={z:1, tx:0, ty:0, zMin:0.5, suppressTapUntil:0, centerReq:false}; lastCenteredCur=null;
+  /* 初期ズームは少し引いて、盤面の周囲の景色も少し見える広さで始める */
+  CAM={z:0.88, tx:0, ty:0, zMin:0.5, suppressTapUntil:0, centerReq:false}; lastCenteredCur=null;
   B={si:si,di:di,rot:0,loot:STAGES[si].loot[di],allies:allies,foes:foes,round:1,sel:null,moved:false,preMove:null,mode:"select",targets:[],pendingSkill:null,showSkills:false,confirm:null,focus:null,logs:["<b>"+STAGES[si].name+" 深度"+(di+1)+"</b> の戦闘開始！ 敵を全て倒すと勝利、神様が倒れると敗北です。","行動順は各巡の開始時に素早さ順（味方・敵混在）で確定します。素早さの増減は次巡の順序から反映されます。","地形には高さがあります（川底-10〜高台+17）。高い所から攻撃すると命中・ダメージが上がり（高さ差1ごとに命中+1・ダメージ+1%）、隣との高さ差が8以上のマスへは直接移動できません（崖）。⟳ボタンでマップを90°ずつ回転できます。","向き：側面からの攻撃は与ダメージ+15%、背面からは+30%（正面は変動なし）。待機・攻撃・技のあとに、ターンを終える向きを選べます。足元の矢印が今の向きです。","カメラ：行動するキャラクターが画面の中心に来ます。盤面をドラッグすると上下左右にスクロール、サイドバーの＋/−ボタンやピンチ操作でズームできます。"],over:false,order:[],turnIdx:0,skipAllies:false,cur:null,faceSel:null,predict:null,focusUnit:null,actFrom:null,actionSpent:false};
   var roleNotes=[], roleSeen={};
   foes.forEach(function(f){ var p=ENEMY_PROFILES[f.art]; if(p&&!roleSeen[f.art]){ roleSeen[f.art]=1; roleNotes.push(f.name+"＝"+p.label); } });
