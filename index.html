@@ -354,9 +354,11 @@ select{font-family:inherit;font-size:calc(var(--k)*15);padding:calc(var(--k)*8);
 .b-stage>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .iso-board{position:absolute;left:0;right:0;margin:0 auto;top:10.5%;width:min(148%,calc(var(--k)*1580));aspect-ratio:47/20;box-shadow:0 calc(var(--k)*7) calc(var(--k)*13) rgba(4,20,16,.38),0 calc(var(--k)*16) calc(var(--k)*24) rgba(30,24,10,.32),inset 0 0 0 2px rgba(52,38,16,.45),inset 0 0 calc(var(--k)*70) rgba(20,26,8,.30);background:#2c4c2c;overflow:visible}
 .iso-board::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;box-shadow:inset 0 0 calc(var(--k)*54) rgba(24,30,10,.42),inset 0 calc(var(--k)*-18) calc(var(--k)*30) rgba(24,30,10,.3)}
-/* 地面SVGは盤面の2倍の広さ（盤外の景色を含む viewBox -235 -100 940 400）で
-   盤面の外へはみ出して描く。盤面要素自体の寸法・位置は従来どおり。 */
-.iso-board>svg.iso-ground{position:absolute;left:-50%;top:-50%;width:200%;height:200%;display:block;z-index:0}
+/* 地面SVGは盤外の景色を含む viewBox -265 -300 1000 800（盤面比で
+   横約213%・縦400%）で盤面の外へ大きくはみ出して描く。viewBox 全体が
+   「深い森」の絵で覆われ、全体表示でも画面の隅まで絵が届く。
+   盤面要素自体の寸法・位置は従来どおり。 */
+.iso-board>svg.iso-ground{position:absolute;left:-56.38%;top:-150%;width:212.77%;height:400%;display:block;z-index:0}
 /* ---- マス表示：上面は枠と淡い地形色だけ。段差は側面で表す ----
    側面（.blk-l/.blk-r）は手前2方向の隣マスとの高さ差ぶんだけ菱形の下辺から垂らす。
    「箱の側面」に見えないよう、質感だけでなく形そのものを崩す：稜線（上辺）は
@@ -1855,9 +1857,11 @@ function centerCameraOn(x,y,animate){
   applyCam(animate);
 }
 /* 全体表示：盤面（11×14）＋周囲の景色（盤面の2倍の広さ＝森の帯まで）が
-   一画面に収まるズームとセンタリングにする。景色の矩形は盤面を中心に
-   上下左右へ各50%広がった範囲（地面SVGの表示範囲と一致）で、回転しても
-   外形は変わらないため、どの向きでも同じ計算で全体が収まる。
+   一画面に収まるズームとセンタリングにする。フィットの基準矩形は盤面を
+   中心に上下左右へ各50%広がった範囲で、回転しても外形は変わらないため、
+   どの向きでも同じ計算で全体が収まる。地面SVG自体はこの矩形より広く
+   描かれていて（viewBox -265 -300 1000 800）、フィット表示で基準矩形の
+   外が画面に入っても、隅まで森の絵で覆われる。
    戦闘開始直後（CAM.fitPending）と「全体を表示」ボタンから使う。 */
 function fitCameraToBoard(animate){
   var e=camEls(); if(!e.stage||!e.board) return;
@@ -1994,16 +1998,23 @@ function positionPredict(){
    質感と回転整合を両立させるため、2層構造にする。
    (1) 下絵＝データ：地形（TERRAIN）と高さ（HEIGHT_MAP）から作った「真上から
        見た格子マップ（11×14マス、各マス正方形）」が正確なレイアウトの源泉。
-   (2) 風景画＝質感：assets/map-paint-wide.jpg（3000×3600＝1マス200px）は、
-       その下絵を盤外へ2マス分ずつ拡張した格子（15×18マス）をガイドにして
+   (2) 風景画＝質感：assets/map-paint-wide.jpg（4600×5200＝1マス200px）は、
+       その下絵を盤外へ6マス分ずつ拡張した格子（23×26マス）をガイドにして
        「一枚の連続した風景」として描いた水彩画。遊べる盤面は従来どおり
-       11×14マス（旧7×10を各辺2マス拡張）。盤外の帯（2マス分）は森中心の
-       景色に描き直してあり、川が盤外へ流れ出る部分だけが森の切れ目になる。
-       川は盤面の上下端で切れず一続きのリボンとして絵の上端から下端まで
-       流れて盤外へ抜け、川岸の砂地・草の広がり・段差の連なりもマス境界を
-       越えて盤外まで連続する。盤面の周囲には土と石の縁取りの小道が絵の
-       中に描かれていて、盤面の輪郭の手がかりになる。光は方向性を持たせ
-       ないフラットな光（回転しても違和感が出ない）。
+       11×14マス（旧7×10を各辺2マス拡張）。盤外はすべて森で、川が盤外へ
+       流れ出る部分だけが森の切れ目になる。川は盤面の上下端で切れず
+       一続きのリボンとして絵の上端から下端まで流れて森の中へ抜け、
+       川岸の砂地・草の広がり・段差の連なりもマス境界を越えて盤外まで
+       連続する。盤面の周囲には土と石の縁取りの小道が絵の中に描かれて
+       いて、盤面の輪郭の手がかりになる。光は方向性を持たせない
+       フラットな光（回転しても違和感が出ない）。
+       この絵は合成で作ってある：内側（旧絵の3000×3600、盤面＋2マス分の
+       帯）は従来の絵をそのまま温存し、その外側の輪（6マス分までの拡張部）
+       だけを、幹と枝のある木々が大きさも形もばらばらに密集し樹冠が
+       何層にも重なる水彩の森として新規に描いた絵に差し替えた。継ぎ目は
+       約30pxのフェザーでぼかしてある（盤面内はフェザーの範囲外なので
+       影響なし）。手続き描画の木（図形の木）や樹冠パターンは、実画面で
+       「森に見えない」ことが繰り返し確認されたため廃止した。
        整合は機械チェックで担保する：盤面内154マスすべてについて、各マス
        中央の100×100px（マスの50%）の平均色を、岩と水を分けた厳密な
        区分で地形データと照合し、不一致ゼロを確認済み（区分：水＝色相
@@ -2013,16 +2024,20 @@ function positionPredict(){
        と崖面で表すため）。中央80×80px・120×120pxのサンプルでも
        不一致ゼロ。岩場5マス（(2,3)・(3,5)・(8,7)・(2,9)・(8,11)）は
        広めのサンプルで草地寄りに読めたため、絵の側に岩塊を大きく
-       描き足して読みを安定させた。その後、盤外の帯が単調な「緑の丸」
-       模様に見えたため、帯だけを大きさも形も違う木々（幹・重なる樹冠・
-       濃淡のある下草）の森として描き直した絵に差し替えた。差し替えは
-       合成で行い、盤面内（絵の座標で x400〜2600・y400〜3200）は元の絵を
-       そのまま残してあるので、盤面内の照合結果は差し替え前と同一
-       （中央100×100px・120×120pxとも不一致ゼロを再確認済み）。
-   描画は3層：
-   (a) 盤外の景色：拡張格子全体の菱形に、風景画を1枚のまま同じ投影
-       （rotXY・高さ0の平面）でアフィン変換して敷く。継ぎ目の無い一枚絵
-       なので、ズームアウト／パン／回転でも景色が盤外へ続いて見える。
+       描き足して読みを安定させた。盤外拡張（6マス化）の差し替え後も、
+       盤面内（新絵の座標で x1200〜3400・y1200〜4000）は元の絵のまま
+       なので、中央100×100px・120×120pxの照合は不一致ゼロを再確認済み。
+   描画は4層：
+   (a0) 最背面：viewBox 全体に「深い森」の水彩画（assets/map-forest-deep.jpg、
+       真上から見た密林を全面に描いた絵を暗くしたもの）を敷く。風景画の
+       平行四辺形が届かない画面の隅々まで、平らな色面ではなく描かれた
+       森で覆うための層。全体表示（最大ズームアウト）で画面に入る範囲は
+       すべてこの層か (a) の風景画のどちらかで覆われる。
+   (a) 盤外の景色：拡張格子全体の平行四辺形に、風景画を1枚のまま同じ
+       投影（rotXY・高さ0の平面）でアフィン変換して敷く。継ぎ目の無い
+       一枚絵なので、ズームアウト／パン／回転でも景色が盤外へ続いて
+       見える。平行四辺形の縁はぼかしマスクでフェザーし、(a0) の深い森へ
+       溶け込ませる（川は縁に届く前に森の中で細くなって消える）。
    (b) 盤面内：マスごとに「そのマスの正方形テクスチャ」を、セルと同じ
        投影（rotXY＋高さによる持ち上がり）で菱形へアフィン変換して貼る。
        ハードな切り貼りにはしない：クリップ菱形を30%拡大して隣マスへ
@@ -2035,14 +2050,17 @@ function positionPredict(){
        回しただけ」になる。高さの持ち上がりもマス単位でそのまま効く。
    (c) 仕上げ：盤面の外周に細い暗色の縁取りポリゴン（高さ0の平面）を
        描き、歩ける盤面の輪郭が景色の中でも分かるようにする。
-   下にはフラット塗り（groundFill／盤外は outerTerrain の色）を敷くので、
-   絵が読めない環境でも盤面と景色は成立する。絵の範囲のさらに外側は
-   従来どおり同じ投影の手続き描画（森）で埋める。
-   viewBox は盤面アスペクト 47/20 の 470×200 を中心に、景色の分だけ
-   広げた -235 -100 940 400（盤面の2倍の広さ）。SVG要素自体も盤面の
-   200%サイズで -50%/-50% に置き、盤外まで描けるようにしてある。 */
-var PAINT_W=3000, PAINT_H=3600, PAINT_S=200; /* map-paint-wide.jpg の寸法と1マスのpx */
-var PAINT_OX=2, PAINT_OY=2; /* 風景画の中で盤面が始まるマス位置（盤外マージン2マス分） */
+   風景画の下にはフラット塗り（groundFill／盤外は outerTerrain の色）を
+   敷くので、絵が読めない環境でも盤面と景色は成立する（読める環境では
+   常に絵に覆われて見えない）。
+   viewBox は盤面アスペクト 47/20 の 470×200 を中心に、全体表示で
+   画面に入る範囲（ステージのアスペクト比が縦長寄りの場合も含む）を
+   (a0) の森の絵で覆い切れるよう広げた -265 -300 1000 800。SVG要素
+   自体も盤面の約213%×400%サイズで置き、盤外まで描けるようにしてある。
+   全体表示のフィット計算自体は従来どおり「盤面の2倍の広さ」を基準に
+   する（盤面＋森の帯が収まる表示は不変）。 */
+var PAINT_W=4600, PAINT_H=5200, PAINT_S=200; /* map-paint-wide.jpg の寸法と1マスのpx */
+var PAINT_OX=6, PAINT_OY=6; /* 風景画の中で盤面が始まるマス位置（盤外マージン6マス分） */
 /* ============ 盤外の地形モデル（景色専用・歩行不可） ============
    盤外はゲームデータではなく見た目だけの景色。川は盤面内と同じ蛇行の
    周期（2行ごとに左右へ寄る帯）をそのまま延長し、盤の上下端で切れずに
@@ -2112,61 +2130,12 @@ function paintMatrixWide(){
   return "matrix("+n(B.a)+" "+n(B.b)+" "+n(B.c)+" "+n(B.d)+" "+n(e)+" "+n(f)+")";
 }
 function groundSvg(){
-  var items=[], cellsList=[], gx, gy, x, y;
+  var cellsList=[], gx, gy, x, y;
   var HW=ISO_SX*4.7, HH=ISO_SY*2;
   function diaPts(cc,fx){ var w2=HW*(fx||1), h2=HH*(fx||1);
     return (Math.round(cc.x*10)/10)+","+(Math.round((cc.y-h2)*10)/10)+" "+(Math.round((cc.x+w2)*10)/10)+","+(Math.round(cc.y*10)/10)+" "+(Math.round(cc.x*10)/10)+","+(Math.round((cc.y+h2)*10)/10)+" "+(Math.round((cc.x-w2)*10)/10)+","+(Math.round(cc.y*10)/10); }
-  /* 盤外の森：風景画の範囲のさらに外側にだけ、論理座標を延長した位置へ
-     木・茂みを置く（同じ投影なので回転に追随する）。絵のある範囲は
-     絵自身の植生に任せ、手続き描画を重ねない。等間隔の格子に均一な木を
-     並べると「緑の丸の列」に読めるため、配置はマス中心から大きくずらし
-     （ジッター±8／±4単位）、本数はやや間引き、1本の樹冠は隣のマスへ
-     大きくはみ出すサイズにして、木々が重なり合う森の塊として読ませる。
-     その下の地面も平らな濃緑にせず、樹冠の濃淡パターン（gforest1/2）を
-     敷いて余白全体を森のテクスチャで埋める。 */
-  for(gy=-8;gy<ROWS+8;gy++) for(gx=-8;gx<COLS+8;gx++){
-    if(gx>=-PAINT_OX&&gx<COLS+PAINT_OX&&gy>=-PAINT_OY&&gy<ROWS+PAINT_OY) continue;
-    var hv=cellHash(gx,gy); if(hv>=0.60) continue;
-    var c=gCenter(gx,gy,0); if(c.x<-245||c.x>715||c.y<-110||c.y>310) continue;
-    c.x+=Math.round((cellHash(gx*3+501,gy*7+77)-0.5)*160)/10;
-    c.y+=Math.round((cellHash(gx*11+31,gy*5+907)-0.5)*80)/10;
-    var body="";
-    function fe(dx,dy,rx,ry,col){ return '<ellipse cx="'+(Math.round((c.x+dx)*10)/10)+'" cy="'+(Math.round((c.y+dy)*10)/10)+'" rx="'+(Math.round(rx*10)/10)+'" ry="'+(Math.round(ry*10)/10)+'" fill="'+col+'"/>'; }
-    /* 樹冠は円ではなく、半径をハッシュで揺らした9点の輪郭を滑らかにつないだ
-       「こんもりした塊」のパスで描く（円の並びが「緑の丸」に見えるのを避ける）。
-       影→幹→樹冠（暗・主・明の3層）→斑点の順で1本の木として描き、樹冠は
-       隣のマスへはみ出す大きさにして、木々が重なって森の塊に見えるようにする。 */
-    function blob(dx,dy,r,salt,col){
-      var n=9, pts=[], i, ang, rr;
-      for(i=0;i<n;i++){ ang=Math.PI*2*i/n; rr=r*(0.76+cellHash(gx*7+salt*13+i*3, gy*11+salt*7+i*5)*0.5);
-        pts.push([c.x+dx+Math.cos(ang)*rr, c.y+dy+Math.sin(ang)*rr*0.82]); }
-      function m(v){ return Math.round(v*10)/10; }
-      var d="M"+m((pts[0][0]+pts[n-1][0])/2)+","+m((pts[0][1]+pts[n-1][1])/2);
-      for(i=0;i<n;i++){ var p=pts[i], q=pts[(i+1)%n];
-        d+=" Q"+m(p[0])+","+m(p[1])+" "+m((p[0]+q[0])/2)+","+m((p[1]+q[1])/2); }
-      return '<path d="'+d+' Z" fill="'+col+'"/>';
-    }
-    function speck(dx,dy,salt){ var s="", i, a, b;
-      for(i=0;i<3;i++){ a=cellHash(gx*3+salt+i*7, gy*5+i*11); b=cellHash(gx*13+i*3, gy*3+salt*7);
-        s+='<circle cx="'+(Math.round((c.x+dx+(a-0.5)*9)*10)/10)+'" cy="'+(Math.round((c.y+dy+(b-0.5)*6)*10)/10)+'" r="'+(0.8+a*0.7).toFixed(1)+'" fill="rgba(12,32,12,0.35)"/>'; }
-      return s; }
-    var sc=1.15+((hv*53)%1)*0.85; /* 木ごとの大きさ 1.15〜2.0倍（樹冠が隣へはみ出して重なる） */
-    var o1x=Math.round(((hv*97)%1-0.5)*70)/10, o2x=Math.round(((hv*41)%1-0.5)*90)/10;
-    if(hv<0.52){ /* 木 */
-      body=fe(0,3,13.5*sc,5.5*sc,"rgba(14,32,14,0.35)")
-        +'<polygon points="'+(Math.round((c.x-1.2)*10)/10)+','+(Math.round((c.y+3.4)*10)/10)+' '+(Math.round((c.x+1.2)*10)/10)+','+(Math.round((c.y+3.4)*10)/10)+' '+(Math.round((c.x+0.5)*10)/10)+','+(Math.round((c.y-6*sc)*10)/10)+' '+(Math.round((c.x-0.7)*10)/10)+','+(Math.round((c.y-6*sc)*10)/10)+'" fill="#5a4230"/>'
-        +blob(o1x,-13*sc,12.6*sc,1,"#2e5f31")
-        +blob(o1x-4,-10.5*sc,8.6*sc,2,"#26512a")
-        +blob(o1x+3.5,-15.5*sc,7.2*sc,3,"#477f45")
-        +blob(o2x*0.4,-17.5*sc,3.6*sc,4,"#6da354")
-        +speck(o1x,-12*sc,5); }
-    else { /* 低い茂み：幹なしで小さな塊の重なり */
-      body=fe(0,1.8,8.5*sc,3.8*sc,"rgba(14,32,14,0.3)")
-        +blob(o1x,-4.5,6.8*sc,6,"#356b38")
-        +blob(o1x+2.5,-6.5,4.4*sc,7,"#4d8a4e")
-        +speck(o1x,-4.5,8); }
-    items.push({s:c.s, h:body});
-  }
+  /* 盤外はすべて「絵」で覆う：風景画（6マス拡張）＋最背面の深い森の絵。
+     手続き描画の木と樹冠パターンは廃止済み（図形の木では森に見えなかった）。 */
   /* 盤外のフラット塗り（絵が読めない環境での景色の下地）：盤外地形モデル
      の色で拡張格子全体を敷く。絵が読める環境では次の景色レイヤーに覆われる。 */
   var outer="";
@@ -2174,15 +2143,16 @@ function groundSvg(){
     if(gx>=0&&gx<COLS&&gy>=0&&gy<ROWS) continue;
     outer+='<polygon points="'+diaPts(gCenter(gx,gy,0))+'" fill="'+groundFillTH(outerTerrain(gx,gy),outerHeight(gx,gy))+'"/>';
   }
-  /* 盤外の景色：拡張格子の外周の菱形でクリップし、風景画を1枚のまま
-     高さ0の平面へ貼る。川・川岸・草地が盤面の端で切れずに続く。 */
+  /* 盤外の景色：拡張格子全体の平行四辺形に、風景画を1枚のまま高さ0の
+     平面へ貼る。川・川岸・草地が盤面の端で切れずに続く。平行四辺形の
+     縁はぼかしたマスクでフェザーし、最背面の深い森の絵へ溶け込ませる
+     （硬い切り抜きの輪郭を出さない）。 */
   var eA=gCenter(-PAINT_OX-0.5,-PAINT_OY-0.5,0), eB=gCenter(COLS+PAINT_OX-0.5,-PAINT_OY-0.5,0),
       eC=gCenter(COLS+PAINT_OX-0.5,ROWS+PAINT_OY-0.5,0), eD=gCenter(-PAINT_OX-0.5,ROWS+PAINT_OY-0.5,0);
   var extPts=gPt([eA.x,eA.y])+" "+gPt([eB.x,eB.y])+" "+gPt([eC.x,eC.y])+" "+gPt([eD.x,eD.y]);
-  var defs='<pattern id="gforest2" patternUnits="userSpaceOnUse" width="157" height="113"><ellipse cx="40" cy="34" rx="38" ry="20" fill="#244d27"/><ellipse cx="118" cy="82" rx="44" ry="23" fill="#2e5f31"/><ellipse cx="140" cy="18" rx="19" ry="11" fill="#3c7340"/></pattern>'
-    +'<pattern id="gforest1" patternUnits="userSpaceOnUse" width="92" height="62"><ellipse cx="18" cy="16" rx="21" ry="12" fill="#356b38"/><ellipse cx="63" cy="40" rx="26" ry="14" fill="#2a5a2e"/><ellipse cx="82" cy="8" rx="13" ry="8" fill="#477f45"/><ellipse cx="38" cy="52" rx="11" ry="6" fill="#1f4423"/></pattern>'
-    +'<clipPath id="gext"><polygon points="'+extPts+'"/></clipPath>';
-  var scenery='<g clip-path="url(#gext)"><image href="assets/map-paint-wide.jpg" width="'+PAINT_W+'" height="'+PAINT_H+'" transform="'+paintMatrixWide()+'" preserveAspectRatio="none"/></g>';
+  var defs='<filter id="gsoft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="10"/></filter>'
+    +'<mask id="gextm" maskUnits="userSpaceOnUse" x="-265" y="-300" width="1000" height="800"><polygon points="'+extPts+'" fill="#fff" filter="url(#gsoft)"/></mask>';
+  var scenery='<g mask="url(#gextm)"><image href="assets/map-paint-wide.jpg" width="'+PAINT_W+'" height="'+PAINT_H+'" transform="'+paintMatrixWide()+'" preserveAspectRatio="none"/></g>';
   /* 盤面内マス（従来どおり：高さで持ち上がるフェザー付きパッチ） */
   for(y=0;y<ROWS;y++) for(x=0;x<COLS;x++){
     var cc=gCenter(x,y,heightAt(x,y)); var hw=HW, hh=HH;
@@ -2207,10 +2177,13 @@ function groundSvg(){
      重なって、盤面の境界を二重に示す。 */
   var pA=gCenter(-0.5,-0.5,0), pB=gCenter(COLS-0.5,-0.5,0), pC=gCenter(COLS-0.5,ROWS-0.5,0), pD=gCenter(-0.5,ROWS-0.5,0);
   var perim='<polygon points="'+gPt([pA.x,pA.y])+" "+gPt([pB.x,pB.y])+" "+gPt([pC.x,pC.y])+" "+gPt([pD.x,pD.y])+'" fill="none" stroke="rgba(43,32,12,0.45)" stroke-width="2.2" stroke-linejoin="round"/>';
-  items.sort(function(a,b){ return a.s-b.s; }); cellsList.sort(function(a,b){ return a.s-b.s; });
-  var out='<svg class="iso-ground" viewBox="-235 -100 940 400" preserveAspectRatio="none" aria-hidden="true"><defs>'+defs+'</defs><rect x="-235" y="-100" width="940" height="400" fill="#274a28"/><rect x="-235" y="-100" width="940" height="400" fill="url(#gforest2)"/><rect x="-235" y="-100" width="940" height="400" fill="url(#gforest1)" opacity="0.55"/>';
+  cellsList.sort(function(a,b){ return a.s-b.s; });
+  /* 最背面：viewBox 全体を「深い森」の水彩画で覆う（その下の単色 rect は
+     絵が読めない環境向けの予備）。これにより全体表示で画面の隅まで
+     平らな色面や図形が残らない。 */
+  var out='<svg class="iso-ground" viewBox="-265 -300 1000 800" preserveAspectRatio="none" aria-hidden="true"><defs>'+defs+'</defs><rect x="-265" y="-300" width="1000" height="800" fill="#22401f"/><image href="assets/map-forest-deep.jpg" x="-265" y="-300" width="1000" height="800" preserveAspectRatio="none"/><rect x="-265" y="-300" width="1000" height="800" fill="rgba(10,24,12,0.12)"/>';
   out+=outer+scenery;
-  items.forEach(function(it){ out+=it.h; }); cellsList.forEach(function(it){ out+=it.h; });
+  cellsList.forEach(function(it){ out+=it.h; });
   return out+perim+'</svg>'; }
 /* ============ 地形（固定レイアウト：川が奥行き方向に流れる） ============
    このデータ自体がマップの見た目の源泉（groundSvg がここから絵を生成する）。
