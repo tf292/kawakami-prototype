@@ -473,6 +473,24 @@ select{font-family:inherit;font-size:calc(var(--k)*15);padding:calc(var(--k)*8);
 .b-predict .bp-bar>s{display:block;height:100%;background:repeating-linear-gradient(45deg,rgba(242,112,92,.45) 0 calc(var(--k)*4),rgba(0,0,0,.25) calc(var(--k)*4) calc(var(--k)*8))}
 .b-predict .bp-btns{display:grid;grid-template-columns:1fr 1fr;gap:calc(var(--k)*9);margin-top:calc(var(--k)*11)}
 .b-predict.single{bottom:auto;width:min(calc(var(--k)*370),calc(100% - calc(var(--k)*24)))}
+/* 移動選択中の「もどる」：盤面コンテナ（.b-stage）の右下に固定表示。
+   .cam-world の外に置くため、ズーム／パン／回転の影響を受けない。 */
+.b-move-back{position:absolute;right:calc(var(--k)*12);bottom:calc(var(--k)*12);z-index:26;background:linear-gradient(180deg,#e3c169,#c39a3e);color:#2c2410;border:1.5px solid #8a6d24;border-radius:calc(var(--k)*10);padding:calc(var(--k)*10) calc(var(--k)*26);font-family:"Shippori Mincho",serif;font-size:calc(var(--k)*17);font-weight:800;letter-spacing:.06em;box-shadow:0 calc(var(--k)*8) calc(var(--k)*20) rgba(0,0,0,.5);min-height:calc(var(--k)*44)}
+.b-move-back:hover{filter:brightness(1.06)}
+/* 攻撃確認パネル（中央・大きめ）：通常攻撃と攻撃系の単体技専用。
+   盤面中央を覆う前提で、背後に半透明の幕を敷いて戦闘画面の一部として見せる。
+   .cam-world の外（.b-stage 直下）に置くため、カメラの影響を受けない固定表示。 */
+.b-predict-backdrop{position:absolute;inset:0;z-index:28;background:rgba(4,18,24,.52)}
+.b-predict.center{left:50%;top:50%;bottom:auto;transform:translate(-50%,-50%);z-index:29;width:min(calc(var(--k)*560),calc(100% - calc(var(--k)*28)));padding:calc(var(--k)*20) calc(var(--k)*22) calc(var(--k)*18);border-radius:calc(var(--k)*16);border-width:2px;box-shadow:0 calc(var(--k)*18) calc(var(--k)*44) rgba(0,0,0,.6)}
+.b-predict.center .bp-t{font-size:calc(var(--k)*12.5);text-align:center}
+.b-predict.center .bp-name{font-size:calc(var(--k)*26);justify-content:center;text-align:center}
+.b-predict.center .bp-skillline{text-align:center;font-size:calc(var(--k)*15.5);margin-top:calc(var(--k)*5);font-weight:700}
+.b-predict.center .bp-row{font-size:calc(var(--k)*15);padding:calc(var(--k)*11) 0 calc(var(--k)*6)}
+.b-predict.center .bp-bar{height:calc(var(--k)*12)}
+.b-predict.center .bp-mods{font-size:calc(var(--k)*13.5);line-height:1.85;padding-top:calc(var(--k)*9);margin-top:calc(var(--k)*8)}
+.b-predict.center .bp-q{text-align:center;font-family:"Shippori Mincho",serif;font-size:calc(var(--k)*20);font-weight:800;color:#ffe9a8;letter-spacing:.04em;margin-top:calc(var(--k)*14);border-top:1px solid rgba(230,200,120,.45);padding-top:calc(var(--k)*12)}
+.b-predict.center .bp-btns{grid-template-columns:1fr 1fr;gap:calc(var(--k)*12);margin-top:calc(var(--k)*12)}
+.b-predict.center .bp-btns .btn{min-height:calc(var(--k)*52);font-size:calc(var(--k)*17);border-radius:calc(var(--k)*10)}
 .b-predict .bp-mods{font-size:calc(var(--k)*12);color:#c8d4bd;line-height:1.75;border-top:1px solid rgba(42,160,175,.55);padding-top:calc(var(--k)*7);margin-top:calc(var(--k)*6)}
 .b-predict .bp-ko{color:#ffb59d;font-weight:900}
 .b-predict .bp-bar.heal>i{background:#8fd07e}
@@ -493,31 +511,26 @@ select{font-family:inherit;font-size:calc(var(--k)*15);padding:calc(var(--k)*8);
 .cr-banner .cb-t{font-family:"Shippori Mincho",serif;font-size:calc(var(--k)*27);font-weight:800;letter-spacing:.1em}
 .cr-banner .cb-t::before,.cr-banner .cb-t::after{content:"◆";color:var(--gold);font-size:calc(var(--k)*12);vertical-align:middle;margin:0 calc(var(--k)*14)}
 .cr-banner .cb-s{font-size:calc(var(--k)*13);color:var(--gold2);font-weight:700;margin-top:1px}
-.cr-gain{position:absolute;left:50%;top:21%;transform:translateX(-50%);z-index:6;width:min(calc(var(--k)*620),86%);background:linear-gradient(170deg,rgba(16,48,60,.96),rgba(9,29,38,.97));border:var(--panel-border);border-radius:calc(var(--k)*14);padding:calc(var(--k)*14) calc(var(--k)*20) calc(var(--k)*17);box-shadow:0 calc(var(--k)*10) calc(var(--k)*28) rgba(6,30,38,.5);text-align:center}
-.cr-gain .cg-t{font-family:"Shippori Mincho",serif;font-size:calc(var(--k)*26);font-weight:800;color:#fff;letter-spacing:.14em;margin-bottom:calc(var(--k)*11)}
-.cr-boxes{display:grid;grid-template-columns:repeat(3,1fr);gap:calc(var(--k)*12)}
-.cr-box{border:1.5px solid rgba(230,200,120,.85);border-radius:calc(var(--k)*10);padding:calc(var(--k)*11) calc(var(--k)*8) calc(var(--k)*9);background:rgba(255,255,255,.04)}
-.cr-box .cb-ic{font-size:calc(var(--k)*30);line-height:1.15}
-.cr-box .cb-num{font-family:"Shippori Mincho",serif;font-size:calc(var(--k)*27);font-weight:800;color:#fff}
+.cr-gain{position:absolute;left:50%;top:34.5%;transform:translateX(-50%);z-index:6;width:min(calc(var(--k)*436),94%);background:linear-gradient(170deg,rgba(16,48,60,.94),rgba(9,29,38,.95));border:var(--panel-border);border-radius:calc(var(--k)*14);padding:calc(var(--k)*13) calc(var(--k)*16) calc(var(--k)*16);box-shadow:0 calc(var(--k)*10) calc(var(--k)*28) rgba(6,30,38,.5);text-align:center}
+.cr-gain .cg-t{font-family:"Shippori Mincho",serif;font-size:calc(var(--k)*29);font-weight:800;color:#fff;letter-spacing:.14em;margin-bottom:calc(var(--k)*11)}
+.cr-boxes{display:grid;grid-template-columns:repeat(3,1fr);gap:calc(var(--k)*11)}
+.cr-box{border:1.5px solid rgba(230,200,120,.85);border-radius:calc(var(--k)*10);padding:calc(var(--k)*10) calc(var(--k)*6) calc(var(--k)*11);background:rgba(255,255,255,.04)}
+.cr-box .cb-ic{height:calc(var(--k)*37);display:flex;align-items:center;justify-content:center}
+.cr-box .cb-ic svg{height:100%;width:auto;display:block}
+.cr-box .cb-num{font-family:"Shippori Mincho",serif;font-size:calc(var(--k)*29);font-weight:800;color:#fff;margin-top:calc(var(--k)*3)}
 .cr-box .cb-nm{font-size:calc(var(--k)*12);color:#dfe7d2;font-weight:700}
-.cr-gauge{height:calc(var(--k)*7);background:rgba(255,255,255,.16);border-radius:calc(var(--k)*99);overflow:hidden;margin-top:calc(var(--k)*8);display:flex}
-.cr-gauge .old{display:block;height:100%;background:rgba(255,255,255,.38)}
-.cr-gauge .add{display:block;height:100%}
-.cr-gauge.w .add{background:#6db3e8}.cr-gauge.l .add{background:#8fd07e}.cr-gauge.r .add{background:#f0b45c}
-.cr-bottom{position:absolute;left:1.2%;right:1.2%;bottom:1.6%;z-index:6;background:linear-gradient(170deg,rgba(16,48,60,.96),rgba(9,29,38,.97));border:var(--panel-border);border-radius:calc(var(--k)*12);padding:calc(var(--k)*13) calc(var(--k)*20) calc(var(--k)*14);color:#f2ecd8;box-shadow:0 calc(var(--k)*8) calc(var(--k)*24) rgba(6,30,38,.5)}
+.cr-bottom{position:absolute;left:2.4%;right:2.4%;bottom:2.6%;z-index:6;background:linear-gradient(170deg,rgba(16,48,60,.95),rgba(9,29,38,.96));border:var(--panel-border);border-radius:calc(var(--k)*12);padding:calc(var(--k)*13) calc(var(--k)*20) calc(var(--k)*14);color:#f2ecd8;box-shadow:0 calc(var(--k)*8) calc(var(--k)*24) rgba(6,30,38,.5)}
 .cr-bottom .cb-name{color:var(--gold2);font-weight:900;font-size:calc(var(--k)*13.5)}
 .cr-bottom .cb-line{font-size:calc(var(--k)*16.5);margin:2px 0 calc(var(--k)*9)}
-.cr-row{display:flex;flex-wrap:wrap;gap:calc(var(--k)*8);align-items:center;font-size:calc(var(--k)*13)}
+.cr-row{display:flex;flex-wrap:wrap;gap:calc(var(--k)*8);align-items:center;font-size:calc(var(--k)*13);padding-right:calc(var(--k)*128)}
 .cr-row .cr-lbl{font-weight:700;color:#c8d4bd;font-size:calc(var(--k)*12.5)}
 .cr-pchip{border:1px solid rgba(230,200,120,.55);border-radius:calc(var(--k)*8);padding:calc(var(--k)*4) calc(var(--k)*11);background:rgba(255,255,255,.05);font-weight:700;white-space:nowrap}
 .cr-pchip b{color:var(--gold2)}
-.cr-mchip{border:1px solid rgba(150,205,230,.5);border-radius:calc(var(--k)*8);padding:calc(var(--k)*4) calc(var(--k)*11);background:rgba(255,255,255,.05);white-space:nowrap}
-.cr-stars{color:var(--gold2);letter-spacing:.18em;font-size:calc(var(--k)*15)}
-.cr-go{position:absolute;right:calc(var(--k)*18);bottom:calc(var(--k)*16);z-index:7;background:linear-gradient(180deg,#e3c169,#c39a3e);color:#2c2410;border:1px solid #8a6d24;border-radius:calc(var(--k)*9);padding:calc(var(--k)*13) calc(var(--k)*40);font-family:"Shippori Mincho",serif;font-size:calc(var(--k)*17);font-weight:800;letter-spacing:.1em;box-shadow:0 calc(var(--k)*6) calc(var(--k)*16) rgba(6,30,38,.45)}
+.cr-go{position:absolute;right:calc(var(--k)*17);bottom:calc(var(--k)*13);z-index:7;background:linear-gradient(180deg,#e3c169,#c39a3e);color:#2c2410;border:1px solid #8a6d24;border-radius:calc(var(--k)*9);padding:calc(var(--k)*11) calc(var(--k)*33);font-family:"Shippori Mincho",serif;font-size:calc(var(--k)*17);font-weight:800;letter-spacing:.1em;box-shadow:0 calc(var(--k)*6) calc(var(--k)*16) rgba(6,30,38,.45)}
 @media(max-height:500px){
-  .cr-gain{top:19%;padding:calc(var(--k)*10) calc(var(--k)*14) calc(var(--k)*12)}
+  .cr-gain{top:29%;padding:calc(var(--k)*10) calc(var(--k)*14) calc(var(--k)*12)}
   .cr-gain .cg-t{font-size:calc(var(--k)*21);margin-bottom:calc(var(--k)*7)}
-  .cr-box .cb-ic{font-size:calc(var(--k)*22)} .cr-box .cb-num{font-size:calc(var(--k)*21)}
+  .cr-box .cb-ic{height:calc(var(--k)*24)} .cr-box .cb-num{font-size:calc(var(--k)*21)}
   .cr-banner .cb-t{font-size:calc(var(--k)*21)}
   .cr-bottom .cb-line{font-size:calc(var(--k)*14)}
 }
@@ -1190,10 +1203,13 @@ function viewCare(){
    +'</div>';
 }
 /* ============ 手入れ演出（ドット絵アニメーション）＆結果画面 ============
-   演出は 160×90 のドット絵グリッドを canvas に描くループアニメーション。
-   場所ごとに作業（ゴミ拾い／魚道の修理／苗木植え等）と小道具が変わり、
-   進み具合 p（0→1）で「片付いていく・直っていく」様子が見える。
-   タップでスキップでき、必ず結果画面（viewCareResult）へ進む。 */
+   演出は 160×90 のドット絵グリッドを canvas に描くコマ送りアニメーション。
+   キャラは戦闘と同じドット絵スプライトを使い、7fps のフレーム切替で動く。
+   場所ごとに作業（ゴミ拾い／魚道の修理／土砂さらい／流木除去／葦刈り／
+   草取り／石積み／水車修理／祠の掃除）と背景が変わり、進み具合 p（0→1）が
+   8段階のステップで「片付いていく・直っていく」様子を見せる。
+   タップでスキップでき、必ず結果画面（viewCareResult）へ進む。
+   結果画面の構図は参照イメージ（手入れ結果v8）どおり。 */
 var CARE_LINES=[
   "見て見て！ ゴミがなくなって、川が笑ってるみたいだ！",
   "魚道が直ったよ。これで魚たちが上流へ行けるね。",
@@ -1205,8 +1221,8 @@ var CARE_LINES=[
   "水車が回り出した！ カタカタって、いい音だね。",
   "祠がきれいになった。川の神様たちも喜んでくれるかな。"
 ];
-var CARE_ACTION=["pick","hammer","shovel","hammer","plant","hoe","carry","hammer","broom"];
-var CARE_GODX=[40,64,52,44,40,38,48,84,84];
+var CARE_ACTION=["pick","hammer","shovel","pull","scythe","hoe","carry","hammer","broom"];
+var CARE_GODX=[44,102,102,98,74,40,40,122,88];
 function viewCareAnim(){
   var c=CARES[careResult.i];
   return '<div class="care-anim-scene" id="care-anim"><canvas id="care-canvas" width="480" height="270"></canvas>'
@@ -1214,34 +1230,31 @@ function viewCareAnim(){
    +'<div class="care-skip">タップでスキップ ▸</div></div>';
 }
 function viewCareResult(){
+  /* 参照イメージ（手入れ結果v8）の構図どおり：獲得ボックスとチップは獲得量の多い順（同点は水量→生命→資源） */
   var r=careResult, c=CARES[r.i], god=GODS[G.god];
   var spotName=c.name.replace(/^\d+\.\s*/,"");
   var gv={water:r.gains[0], life:r.gains[1], res:r.gains[2]};
-  var order=[["life","🌿","生命ポイント","l"],["water","💧","水量ポイント","w"],["res","◆","資源ポイント","r"]];
-  var boxes=order.map(function(o){
-    var before=r.before[o[0]], gain=gv[o[0]];
-    var oldW=Math.min(100,before), addW=Math.min(100-oldW,gain);
-    return '<div class="cr-box"><div class="cb-ic">'+o[1]+'</div><div class="cb-num">+'+gain+'</div><div class="cb-nm">'+o[2]+'</div>'
-     +'<div class="cr-gauge '+o[3]+'"><span class="old" style="width:'+oldW+'%"></span><span class="add" style="width:'+addW+'%"></span></div></div>';
+  var ICONS={
+    life:'<svg viewBox="0 0 48 48" aria-hidden="true"><ellipse cx="24" cy="24" rx="17" ry="10" fill="#7ed37e" transform="rotate(-16 24 24)"/><path d="M10 30 Q24 23 38 18" stroke="#3f7d3a" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>',
+    water:'<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 4 C24 4 10 22 10 30 a14 14 0 0 0 28 0 C38 22 24 4 24 4 Z" fill="#57a8e8"/></svg>',
+    res:'<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="14" y="14" width="20" height="20" fill="#f2a94e" transform="rotate(45 24 24)"/></svg>'
+  };
+  var tie={water:0, life:1, res:2};
+  var entries=[["water","水量ポイント"],["life","生命ポイント"],["res","資源ポイント"]].map(function(e){ return {id:e[0], nm:e[1]}; })
+    .sort(function(a,b){ return (gv[b.id]-gv[a.id]) || (tie[a.id]-tie[b.id]); });
+  var boxes=entries.map(function(e){
+    return '<div class="cr-box"><div class="cb-ic">'+ICONS[e.id]+'</div><div class="cb-num">+'+gv[e.id]+'</div><div class="cb-nm">'+e.nm+'</div></div>';
   }).join("");
-  var chips=order.map(function(o){
-    var before=r.before[o[0]], gain=gv[o[0]];
-    return '<span class="cr-pchip">'+o[2]+' '+before+' <b>+'+gain+'</b> → '+(before+gain)+'</span>';
+  var chips=entries.map(function(e){
+    var before=r.before[e.id];
+    return '<span class="cr-pchip">'+e.nm+' '+before+' <b>+'+gv[e.id]+'</b> → '+(before+gv[e.id])+'</span>';
   }).join("");
-  var mats=Object.keys(r.cost).map(function(m){ return '<span class="cr-mchip">'+MAT_ICON[m]+m+'×'+r.cost[m]+'</span>'; }).join("");
-  var stageNow=r.tierBefore+1;
-  var stars=""; for(var si2=0;si2<3;si2++) stars+= si2<stageNow?"●":"○";
-  var stageNote = r.countAfter>=3 ? "この場所は最大段階（3段階目）です" : ("次回は段階 "+(stageNow+1)+" の手入れになります");
   return '<div class="care-result-scene"><canvas id="care-result-canvas" width="480" height="270"></canvas>'
    +'<div class="cr-banner"><div class="cb-t">手入れ完了！</div><div class="cb-s">'+esc(spotName)+'</div></div>'
-   +'<div class="cr-gain"><div class="cg-t">獲得！</div><div class="cr-boxes">'+boxes+'</div>'
-   +'<div style="font-size:calc(var(--k)*10.5);color:#9fc3bb;margin-top:calc(var(--k)*8)">ゲージはパラメータツリー頂上（累計100）までの進みです</div></div>'
+   +'<div class="cr-gain"><div class="cg-t">獲得！</div><div class="cr-boxes">'+boxes+'</div></div>'
    +'<div class="cr-bottom"><div class="cb-name">'+esc(god.name)+'</div><div class="cb-line">'+esc(CARE_LINES[r.i])+'</div>'
    +'<div class="cr-row"><span class="cr-lbl">ポイント変化：</span>'+chips+'</div>'
-   +'<div class="cr-row" style="margin-top:calc(var(--k)*7)"><span class="cr-lbl">使った素材：</span>'+mats
-   +'<span class="cr-lbl" style="margin-left:calc(var(--k)*10)">この場所の段階：</span><span class="cr-stars">'+stars+'</span><span>段階 '+stageNow+' / 3 で実施（'+r.countAfter+' 回目）｜'+stageNote+'</span></div>'
-   +'</div>'
-   +'<button class="cr-go" id="btn-carecont">つづける</button></div>';
+   +'<button class="cr-go" id="btn-carecont">つづける</button></div></div>';
 }
 var careAnimRAF=null;
 function startCareAnim(){
@@ -1267,120 +1280,185 @@ function drawCareResultBg(){
   var cv=$("care-result-canvas"); if(!cv||!careResult) return;
   drawCareScene(cv.getContext("2d"), careResult.i, 1.3, 1);
 }
-/* ---- ドット絵シーン描画（160×90グリッド） ---- */
+/* ---- ドット絵シーン描画（160×90グリッド／コマ送りフレームアニメーション） ----
+   キャラは戦闘と同じドット絵スプライト（spr-*.png）をそのまま使い、動きは
+   7fps のフレーム単位で切り替える（トゥイーンしない）。作業の進み具合も
+   8段階のステップで不連続に変化する。場所ごとに背景・小道具・作業が違う。 */
+var CARE_IMG={};
+function careImg(src){
+  if(!(src in CARE_IMG)){ var im=new Image(); im.src=src; CARE_IMG[src]=im; }
+  return CARE_IMG[src];
+}
 function drawCareScene(ctx, spot, t, p){
   var S=3;
+  ctx.imageSmoothingEnabled=false;
   function R(x,y,w,h,c){ ctx.fillStyle=c; ctx.fillRect(Math.round(x*S),Math.round(y*S),Math.ceil(w*S),Math.ceil(h*S)); }
-  var fr=Math.floor(t*4)%2, fr5=Math.floor(t*5)%2;
-  function riverCX(gy){ return 138-(gy-24)*1.15; }
-  /* 空と遠景 */
+  var FR=Math.floor(t*7);                 /* フレーム番号（7fpsでコマ送り） */
+  var pStep=Math.floor(p*8);              /* 進み具合 0..8 */
+  function spr(src, cx, feetY, hgt){
+    var im=careImg(src); if(!im.complete||!im.naturalWidth) return;
+    var w=hgt*im.naturalWidth/im.naturalHeight;
+    ctx.drawImage(im, Math.round((cx-w/2)*S), Math.round((feetY-hgt)*S), Math.round(w*S), Math.round(hgt*S));
+  }
+  function riverCX(gy){ return 146-(gy-24)*0.16; }
+  /* 空と遠景（雲はフレーム単位でカクカク流れる） */
   R(0,0,160,24,"#a9d3e8"); R(0,24,160,4,"#c4e2da");
-  var ci;
-  for(ci=0;ci<3;ci++){ var cx=((t*2.5+ci*58)%185)-12; R(cx,3+ci*4,13,2.5,"#eef8fc"); R(cx+3,5.5+ci*4,8,2,"#eef8fc"); }
+  for(var ci=0;ci<3;ci++){ var cx=((FR+ci*58)%190)-15; R(cx,3+ci*4,13,2.5,"#eef8fc"); R(cx+3,5.5+ci*4,8,2,"#eef8fc"); }
   R(0,20,160,9,"#8fbc7a");
-  [[8,15],[30,13],[120,14],[146,16],[58,16]].forEach(function(tr){ R(tr[0],tr[1],7,6,"#5d8a4a"); R(tr[0]+2.5,tr[1]+5,2,5,"#7a5a34"); });
-  /* 川（右上→左下へ流れる帯）と岸 */
+  [[8,15],[30,13],[58,16],[104,14]].forEach(function(tr){ R(tr[0],tr[1],7,6,"#5d8a4a"); R(tr[0]+2.5,tr[1]+5,2,5,"#7a5a34"); });
+  /* 川（右側の帯。流れの模様もフレーム単位で進む） */
   for(var gy=24;gy<90;gy++){
-    var cx=riverCX(gy), w=11+2.5*Math.sin(gy*0.32);
-    R(cx-w-3,gy,3,1,"#e0cd96"); R(cx+w,gy,3,1,"#e0cd96");
-    R(cx-w,gy,w*2,1,(gy%6<3)?"#5ea9d6":"#56a0cd");
-    if(((gy+Math.floor(t*9))%7)<2) R(cx-w+3+(gy%5),gy,5,1,"#c4e9f8");
+    var rcx=riverCX(gy), w=12+2*Math.sin(gy*0.32);
+    R(rcx-w-3,gy,3,1,"#e0cd96"); R(rcx+w,gy,3,1,"#e0cd96");
+    R(rcx-w,gy,w*2,1,(gy%6<3)?"#5ea9d6":"#56a0cd");
+    if(((gy+FR*2)%8)<2) R(rcx-w+3+(gy%5),gy,5,1,"#c4e9f8");
   }
   /* 手前の草地（作業場） */
-  R(0,64,66,26,"#7fae62"); R(0,62,66,3,"#8fbc72");
-  for(var d=0;d<26;d++){ R((d*37)%64+1, 66+((d*23)%22), 1.6,1.6, d%2?"#6f9e54":"#9cc47e"); }
-  var godX=CARE_GODX[spot], feetY=80;
-  /* ---- 場所ごとの小道具と作業の進み ---- */
-  if(spot===0){ /* ゴミのたまり場：ゴミ山が減り、袋がふくらむ */
-    var n=Math.max(0, Math.ceil(6*(1-p)));
-    for(var gi=0;gi<n;gi++){ R(58+(gi%3)*4, 74-Math.floor(gi/3)*3.5, 4.5,3.5, gi%2?"#8a8474":"#a34a3a"); }
-    R(godX+13, feetY-6-Math.floor(p*2), 5.5, 6+Math.floor(p*2), "#e9e5da"); R(godX+14.5, feetY-8-Math.floor(p*2), 2.5,2, "#cfc9ba");
-  } else if(spot===1){ /* 壊れた魚道：木の段が1つずつ直る */
-    var steps=Math.floor(p*4.99);
-    for(var fi=0;fi<4;fi++){ var fgy=46+fi*5.5, fx=riverCX(fgy)-5; if(fi<steps){ R(fx,fgy,11,2,"#a4762a"); R(fx,fgy+2,2,3,"#7d5a2e"); R(fx+9,fgy+2,2,3,"#7d5a2e"); } else { R(fx,fgy,11,1,"rgba(122,90,46,.55)"); } }
-    R(godX+11, feetY-3, 9, 2, "#b08344");
-  } else if(spot===2){ /* 水門：土砂山が減り、門が開く */
-    var gy2=40, gx=riverCX(gy2);
-    R(gx-14,gy2-6,3,26,"#7d5a2e"); R(gx+11,gy2-6,3,26,"#7d5a2e"); R(gx-14,gy2-8,31,3,"#96703c");
-    R(gx-11,gy2-2+p*7,25,3,"#8a6420");
-    var sn=Math.max(0, Math.ceil(5*(1-p)));
-    for(var si3=0;si3<sn;si3++) R(54+(si3%3)*3.6, 76-Math.floor(si3/3)*3, 4,3, "#d8c690");
-  } else if(spot===3){ /* 橋のたもと：板が1枚ずつ渡る */
-    var planks=Math.floor(p*10.99);
-    for(var bi=0;bi<11;bi++){ if(bi<planks) R(56+bi*6.2, 56, 6, 2.2, "#b08344"); }
-    R(56,60,68,1.6,"#7d5a2e"); R(58,58,2,10,"#7d5a2e"); R(118,58,2,10,"#7d5a2e");
-  } else if(spot===4){ /* 葦原：葦が揺れ、苗が増える */
-    for(var ri=0;ri<7;ri++){ var rx=68+ri*2.6, sw=fr?(ri%2?1:-1):0; R(rx+sw, 66, 1.4, 14, "#4e7d3a"); R(rx+sw*1.6, 63, 1.2, 4, "#8a6a3a"); }
-    var sprouts=Math.floor(p*5.99);
-    for(var pi=0;pi<sprouts;pi++){ R(28+pi*5, 82, 1.2, 3, "#477a34"); R(26.8+pi*5, 80.4, 3.6, 1.6, "#6fae56"); }
-  } else if(spot===5){ /* 休耕田と水路：畝が1列ずつ耕される */
-    R(22,67,46,19,"#8a6a44");
-    var rows=Math.floor(p*4.99);
-    for(var fi2=0;fi2<4;fi2++){ if(fi2<rows) R(24, 69.5+fi2*4.2, 42, 2.2, "#65482a"); }
-    R(66,67,2.5,19,"#5ea9d6");
-  } else if(spot===6){ /* 崩れた護岸：石垣が積み上がる */
-    var layers=Math.floor(p*3.99);
-    for(var li=0;li<3;li++){ if(li<layers){ for(var st2=0;st2<5;st2++){ R(63+st2*4.6+(li%2)*2, 77-li*3.4, 4.2, 3.2, st2%2?"#9a958a":"#8a8474"); } } }
-    if(p<1) R(63,80,4.2,3.2,"#7d7668");
-  } else if(spot===7){ /* 水車小屋：水車が回り出す */
-    R(96,36,27,17,"#c9b18a"); R(93,32,33,5,"#8a4a3a"); R(104,42,6,11,"#6b4a26");
-    var wx=88, wy=58, wr=8.5, ang=t*(1+p*3);
-    for(var wi=0;wi<8;wi++){ var a=ang+wi*Math.PI/4; R(wx+Math.cos(a)*wr-1, wy+Math.sin(a)*wr*0.8-1, 2.4, 2.4, "#7d5a2e"); }
-    for(var wj=0;wj<4;wj++){ var a2=ang+wj*Math.PI/2; R(wx+Math.cos(a2)*wr*0.5-0.8, wy+Math.sin(a2)*wr*0.4-0.8, 1.8, 1.8, "#96703c"); }
-    R(wx-1.6,wy-1.6,3.2,3.2,"#5d4020");
-  } else if(spot===8){ /* 寂れた祠：掃除で葉が減り、祠が輝く */
-    R(96,58,22,3,"#8a8474"); R(98,46,2.6,12,"#7d7668"); R(113,46,2.6,12,"#7d7668");
-    R(94,42,26,4.5,"#5d4a66"); R(99,49,16,8,"#a39a8b"); R(104.5,51.5,5,5.5,"#4a3a2a");
-    var ln=Math.max(0, Math.ceil(5*(1-p)));
-    for(var li2=0;li2<ln;li2++) R(92+(li2%3)*4, 60+Math.floor(li2/3)*3, 3, 1.8, "#b98d3e");
+  R(0,64,132,26,"#7fae62"); R(0,62,132,3,"#8fbc72");
+  for(var d=0;d<26;d++){ R((d*37)%128+1, 66+((d*23)%22), 1.6,1.6, d%2?"#6f9e54":"#9cc47e"); }
+  var godX=CARE_GODX[spot], feetY=84, act=CARE_ACTION[spot];
+  var bob=[0,0,1,1][FR%4];               /* 2コマの上下動 */
+  /* お供アユ（川で泳ぐ：位置はフレーム単位で切り替わる） */
+  var ayuOff=[0,2,4,2][FR%4];
+  spr("assets/spr-ayu-r.png", riverCX(74)-2+ayuOff, 76+((FR%2)?0:1), 11);
+  /* お供ドジョウ（岸でお手伝い：2コマでぴょこぴょこ） */
+  function dojou(x, y, hold){
+    spr("assets/spr-dojou-f.png", x, y+((FR%2)?0:0.9), 9);
+    if(hold) R(x+3.4, y-6.4, 3, 2.6, hold);
   }
-  /* ---- お供たち ---- */
-  var ay=62, ax=riverCX(ay)-3, hop=Math.abs(Math.sin(t*2.3))*3.2;
-  R(ax, ay-hop, 9, 3, "#eef1f4"); R(ax+8.5, ay-1-hop, 3, 4.5, fr?"#f0a24a":"#e88f3a"); R(ax+2, ay+0.6-hop, 1.6, 1.6, "#22382f");
-  var djx=godX+16, djy=83;
-  R(djx, djy+(fr5?0:0.8), 9, 2.2, "#7a5a34"); R(djx+8, djy-0.6+(fr5?0.8:0), 2.6, 2.6, "#8a6a3f");
-  /* ---- 神様（作業アクション） ---- */
-  drawCareGod(ctx, godX, feetY, t, CARE_ACTION[spot], p);
-  /* 完了のきらめき */
+  /* ================= 場所ごとの小道具・作業 ================= */
+  if(spot===0){ /* ゴミのたまり場：拾って袋へ */
+    var removed = p>=1?6:Math.min(5, Math.floor(FR/4));
+    var cols=["#a34a3a","#8a8474","#4a7a9a","#c9a83e","#7a5a8a","#5d8a4a"];
+    for(var gi=0;gi<6-removed;gi++){ R(58+(gi%3)*4.2, 78-Math.floor(gi/3)*3.6, 4.4,3.4, cols[gi]); }
+    var bagH=6+pStep*0.9;
+    R(godX+15, feetY-bagH, 6, bagH, "#e9e5da"); R(godX+16.6, feetY-bagH-2, 2.8, 2.2, "#cfc9ba");
+    if(FR%4===2) R(godX+6.4, feetY-3.4, 3, 2.4, cols[removed%6]);       /* 拾ったゴミが手元に */
+    if(FR%4===3) R(godX+13.4, feetY-8.6, 3, 2.4, cols[removed%6]);      /* 袋へ放る途中 */
+    dojou(godX+22, feetY, null);
+  } else if(spot===1){ /* 壊れた魚道：段を叩いてはめ直す */
+    var fixed=Math.floor(pStep/2);
+    for(var fi=0;fi<4;fi++){
+      var fgy=44+fi*6, fx=riverCX(fgy)-13;
+      if(fi<fixed){ R(fx,fgy,12,2.2,"#a4762a"); R(fx,fgy+2.2,2,3,"#7d5a2e"); R(fx+10,fgy+2.2,2,3,"#7d5a2e"); if(FR%2) R(fx+2,fgy-1,7,1,"#dff3fb"); }
+      else if(fi===fixed){ R(fx,fgy+1.2,12,2,"#8a6420"); R(fx+5,fgy-0.6,1.2,3.4,"#5d4020"); }
+      else { R(fx,fgy+2.6,12,1.2,"rgba(122,90,46,.55)"); }
+    }
+    R(godX+8.4, feetY-2.4, 10, 2.2, "#b08344");                          /* 岸で直す板 */
+    if(p>=1){ var jp=[0,-3,-6,-3,0,0][FR%6]; spr("assets/spr-ayu-r.png", riverCX(52)-6, 52+jp, 8); } /* 魚がのぼる */
+    dojou(godX-13, feetY, "#b08344");
+  } else if(spot===2){ /* 水門：土砂をすくって運び出す */
+    var gy2=38, gx=riverCX(gy2);
+    R(gx-16,gy2-4,3.4,30,"#7d5a2e"); R(gx+13,gy2-4,3.4,30,"#7d5a2e"); R(gx-16,gy2-7,33,3.4,"#96703c");
+    R(gx-12.6,gy2+16-pStep*1.9,28,3,"#8a6420");                          /* 門が段階的に開く */
+    var scoops = p>=1?6:Math.min(5, Math.floor(FR/4));
+    for(var si3=0;si3<6-scoops;si3++) R(112+(si3%3)*3.8, 80-Math.floor(si3/3)*3.2, 4.2,3.2, "#d8c690"); /* 土砂山 */
+    for(var di=0;di<scoops;di++) R(26+(di%3)*3.8, 81-Math.floor(di/3)*3, 4,3, "#c9b47e");               /* 運び先の山 */
+    if(FR%4===1) R(godX+7, feetY-4.6, 3.4, 2.8, "#d8c690");              /* すくった土砂 */
+    if(FR%4===3) R(godX-6, feetY-12, 3.4, 2.8, "#d8c690");               /* 放る土砂 */
+    var djPh=FR%12, djX= djPh<6 ? 34+djPh*7 : 76-(djPh-6)*7;             /* ドジョウが往復運搬 */
+    dojou(djX, feetY, djPh<6?"#d8c690":null);
+  } else if(spot===3){ /* 橋のたもと：橋の下のゴミ・流木を取り除く */
+    for(var bi=0;bi<11;bi++) R(104+bi*5.4, 30, 5.2, 2.2, "#b08344");     /* 橋板 */
+    R(104,34.5,60,1.6,"#7d5a2e"); R(107,32,2.4,12,"#7d5a2e"); R(152,32,2.4,12,"#7d5a2e");
+    var pulled = p>=1?4:Math.min(3, Math.floor(FR/4));
+    var logCols=["#7a5a34","#8a6a3f","#6b4a26","#96703c"];
+    for(var li3=0;li3<4-pulled;li3++) R(122+li3*7, 52+li3*7, 11, 2.6, logCols[li3]);  /* 水中の流木 */
+    for(var pi3=0;pi3<pulled;pi3++) R(66+pi3*6.4, 79-pi3*0.4, 10, 2.4, logCols[pi3]); /* 岸に積んだ流木 */
+    if(pulled<4) R(godX+8, feetY-16, 26-pulled*3, 1, "#5d4020");         /* 引くロープ */
+    dojou(godX+18, feetY, null);
+  } else if(spot===4){ /* 葦原：葦を刈って束ねる */
+    var cut = p>=1?7:Math.min(6, Math.floor(FR/3));
+    for(var ri=0;ri<9;ri++){
+      var rx=88+ri*3.1;
+      if(ri<cut){ R(rx, 78, 1.5, 6, "#4e7d3a"); }                        /* 刈り株 */
+      else { var sw=(FR%2)?(ri%2?1:-1):0; R(rx+sw, 66, 1.5, 18, "#4e7d3a"); R(rx+sw*1.7, 62.6, 1.3, 4.4, "#8a6a3a"); }
+    }
+    if(FR%3===2 && cut<7) R(84+cut*3.1, 76, 8, 1.6, "#6fae56");          /* 倒れる葦 */
+    var bundles=Math.floor(cut/2);
+    for(var bu=0;bu<bundles;bu++){ R(24+bu*6, 74, 3.4, 10, "#8a6a3a"); R(24+bu*6, 78, 3.4, 1.6, "#c94f38"); }
+    dojou(20, feetY, null);
+  } else if(spot===5){ /* 休耕田と水路：草取りと泥さらい */
+    R(14,66,52,20,"#8a6a44");
+    var rows=Math.floor(pStep/2);
+    for(var fi2=0;fi2<4;fi2++){ if(fi2<rows) R(16, 69+fi2*4.4, 48, 2.2, "#65482a"); }
+    var weeds = p>=1?8:Math.min(7, Math.floor(FR/3));
+    for(var wi2=0;wi2<8-weeds;wi2++){ var wx2=18+(wi2%4)*11, wy2=70+Math.floor(wi2/4)*9; R(wx2,wy2,1.3,3.4,"#477a34"); R(wx2-1.4,wy2+0.4,4,1.4,"#5d9a44"); }
+    if(FR%3===2) R(godX+6.6, feetY-6, 3.6, 2.6, "#5d9a44");              /* 抜いた草 */
+    for(var ch=0;ch<6;ch++){ var chy=66+ch*3.6; R(70,chy,3,3.6, ch<Math.floor(pStep*6/8)?"#5ea9d6":"#8a6a44"); } /* 水路：泥→清水 */
+    dojou(76, feetY, FR%4<2?"#8a6a44":null);
+  } else if(spot===6){ /* 崩れた護岸：石を運んで積み直す */
+    var layers=Math.floor(pStep*6/8);
+    for(var li=0;li<6;li++){ for(var st2=0;st2<3;st2++){ if(li<layers) R(108+st2*5+(li%2)*2.4, 80-li*3.6, 4.6, 3.4, (st2+li)%2?"#9a958a":"#8a8474"); } }
+    if(layers<6) for(var sc=0;sc<3;sc++) R(106+sc*6, 84, 4.2, 3, "#7d7668");  /* 崩れた石 */
+    for(var sp2=0;sp2<4;sp2++) R(22+(sp2%2)*5, 80-Math.floor(sp2/2)*3.4, 4.6, 3.4, "#9a958a"); /* 石の山 */
+    dojou(16, feetY, null);
+  } else if(spot===7){ /* 水車小屋：水車を直して回り出す */
+    R(104,34,28,19,"#c9b18a"); R(101,29,34,5.5,"#8a4a3a"); R(114,43,6,10,"#6b4a26");
+    var wx=141, wy=60, wr=9;
+    var blades = pStep>=3?8:7;                                           /* 欠けた羽根が直る */
+    var ang = FR*(p>=1?2:(1+Math.floor(pStep/3)))*Math.PI/6;             /* 段階的に速く、コマ送り回転 */
+    for(var wi=0;wi<blades;wi++){ var a=ang+wi*Math.PI/4; R(wx+Math.cos(a)*wr-1.3, wy+Math.sin(a)*wr*0.82-1.3, 2.6, 2.6, "#7d5a2e"); }
+    for(var wj=0;wj<4;wj++){ var a2=ang+wj*Math.PI/2; R(wx+Math.cos(a2)*wr*0.5-0.9, wy+Math.sin(a2)*wr*0.42-0.9, 1.8, 1.8, "#96703c"); }
+    R(wx-1.7,wy-1.7,3.4,3.4,"#5d4020");
+    if(pStep>=5 && FR%2) { R(wx-6, wy+wr*0.82+1, 2, 1.6, "#dff3fb"); R(wx+4, wy+wr*0.82+1.6, 2, 1.6, "#dff3fb"); } /* 水しぶき */
+    dojou(110, feetY, null);
+  } else if(spot===8){ /* 寂れた祠：掃除してお供え */
+    R(100,60,30,3,"#8a8474"); R(103,47,2.8,13,"#7d7668"); R(124,47,2.8,13,"#7d7668");
+    R(98,42.6,34,4.6,"#5d4a66"); R(105,50,20,9,"#a39a8b"); R(112.5,52,5,7,"#4a3a2a");
+    var swept = p>=1?6:Math.min(5, Math.floor(FR/3));
+    for(var li2=0;li2<6-swept;li2++) R(88+(li2%3)*5, 68+Math.floor(li2/3)*4, 3.2, 1.8, li2%2?"#b98d3e":"#a34a3a");
+    for(var pi4=0;pi4<swept;pi4++) R(126+(pi4%2)*3.4, 76+Math.floor(pi4/2)*2.6, 3, 1.8, "#b98d3e"); /* 掃き寄せた葉 */
+    if(pStep>=6){ R(108,61.4,14,1.8,"#7d5a2e"); R(110,59.6,2.6,2.6,"#f2ead8"); R(114,59.6,2.6,2.6,"#f0a24a"); R(118,59.6,2.6,2.6,"#f2ead8"); } /* お供え */
+    dojou(godX+24, feetY, pStep<6?"#c9b18a":null);
+  }
+  /* ================= 神様（スプライト＋道具のコマ送り） ================= */
+  drawCareGod(ctx, spr, R, godX, feetY, FR, act, spot);
+  /* 完了のきらめき（フレーム単位で点滅） */
   if(p>=1){
-    [[30,52],[74,40],[120,66],[52,30],[100,24]].forEach(function(sp,ix){
-      if((Math.floor(t*2)+ix)%2) return;
-      R(sp[0],sp[1]-2,1.4,5.4,"#ffe9a8"); R(sp[0]-2,sp[1],5.4,1.4,"#ffe9a8");
+    [[30,52],[74,40],[120,66],[52,30],[100,24]].forEach(function(sp3,ix){
+      if((FR+ix)%2) return;
+      R(sp3[0],sp3[1]-2,1.4,5.4,"#ffe9a8"); R(sp3[0]-2,sp3[1],5.4,1.4,"#ffe9a8");
     });
   }
 }
-function drawCareGod(ctx, x, feetY, t, action, p){
-  var S=3;
-  function R(x2,y2,w,h,c){ ctx.fillStyle=c; ctx.fillRect(Math.round(x2*S),Math.round(y2*S),Math.ceil(w*S),Math.ceil(h*S)); }
-  var god=GODS[G.god];
-  var hair={dobu:"#7a9a5d",kare:"#8a6a3a",akayu:"#c46a4a"}[G.god]||"#7a9a5d";
-  var fr5=Math.floor(t*5)%2;
-  var bend=(action==="plant"||action==="pick")&&fr5?2:0;
-  var bob=fr5?0:-0.8;
-  R(x+2, feetY-4, 2.2, 4, "#2e3a4a"); R(x+6.2, feetY-4, 2.2, 4, "#2e3a4a");
-  R(x+1, feetY-11+bob+bend*0.4, 9, 7.2, "#46689c");
-  R(x+1, feetY-6.4+bob+bend*0.4, 9, 1.8, "#d9b45c");
-  R(x+2, feetY-17+bob+bend, 7, 6, "#f6cfa8");
-  R(x+1.4, feetY-18+bob+bend, 8.2, 2.8, hair); R(x+1.4, feetY-15.4+bob+bend, 1.8, 3.6, hair); R(x+7.8, feetY-15.4+bob+bend, 1.8, 3.6, hair);
-  if(G.god==="dobu"){ R(x-1.2, feetY-16.4+bob+bend, 13.4, 1.8, "#d9b45c"); R(x+2.2, feetY-19+bob+bend, 6.6, 3, "#e3c169"); }
-  var hx=x+10.5, hy=feetY-10+bob+bend;
-  R(x+8.6, feetY-10.6+bob+bend, 3, 2, "#f6cfa8");
-  if(action==="hammer"){
-    if(fr5){ R(hx,hy-4.6,1.6,4.6,"#8a6420"); R(hx-1.2,hy-6,4.6,2.2,"#9aa3a8"); }
-    else { R(hx,hy-0.6,4.4,1.6,"#8a6420"); R(hx+3.4,hy-1.8,3,3.4,"#9aa3a8"); }
-  } else if(action==="shovel"||action==="hoe"){
-    var c1=action==="hoe"?"#6f5233":"#9aa3a8";
-    if(fr5){ R(hx,hy+1,5.5,1.5,"#8a6420"); R(hx+5,hy+0.4,2.6,2.8,c1); }
-    else { R(hx,hy-3.4,1.6,5,"#8a6420"); R(hx-0.4,hy-4.6,3.4,2,c1); }
-  } else if(action==="broom"){
-    if(fr5){ R(hx,hy-1,6.5,1.4,"#8a6420"); R(hx+5.6,hy+0.6,3.4,3.6,"#d9b45c"); }
-    else { R(hx-2,hy-1,6.5,1.4,"#8a6420"); R(hx-4.6,hy+0.6,3.4,3.6,"#d9b45c"); }
-  } else if(action==="carry"){
-    R(x+2.2, feetY-16.5+bob, 6.4, 4.2, "#9a958a"); R(x+0.6, feetY-13+bob, 2, 3.4, "#f6cfa8"); R(x+8.2, feetY-13+bob, 2, 3.4, "#f6cfa8");
-  } else { /* pick / plant：かがんで手を伸ばす */
-    if(fr5){ R(hx-1,hy+2.6,4.6,1.6,"#f6cfa8"); }
-    else { R(hx-1,hy-0.6,4.6,1.6,"#f6cfa8"); }
+function drawCareGod(ctx, spr, R, x, feetY, FR, action, spot){
+  var god="assets/spr-"+G.god;
+  var bob=[0,0,1,1][FR%4];
+  function tool(kind, hx, hy, up){
+    if(kind==="hammer"){
+      if(up){ R(hx,hy-5,1.7,5,"#8a6420"); R(hx-1.4,hy-6.6,5,2.4,"#9aa3a8"); }
+      else { R(hx,hy-0.6,4.6,1.7,"#8a6420"); R(hx+3.6,hy-2,3.2,3.6,"#9aa3a8"); }
+    } else if(kind==="shovel"){
+      if(up){ R(hx,hy-3.6,1.7,5.4,"#8a6420"); R(hx-0.6,hy-5.2,3.6,2.2,"#9aa3a8"); }
+      else { R(hx,hy+0.8,5.6,1.6,"#8a6420"); R(hx+5,hy+0.2,2.8,3,"#9aa3a8"); }
+    } else if(kind==="broom"){
+      if(up){ R(hx-2.4,hy-1,7,1.5,"#8a6420"); R(hx-5.2,hy+0.6,3.6,3.8,"#d9b45c"); }
+      else { R(hx,hy-1,7,1.5,"#8a6420"); R(hx+6.2,hy+0.6,3.6,3.8,"#d9b45c"); }
+    } else if(kind==="scythe"){
+      if(up){ R(hx-1,hy-6,1.7,7,"#8a6420"); R(hx-1,hy-7.4,7,1.8,"#c8ced2"); }
+      else { R(hx,hy+0.4,7.4,1.7,"#8a6420"); R(hx+6,hy-0.8,1.8,5,"#c8ced2"); }
+    }
   }
+  if(action==="carry"){ /* 石を運ぶ：往復もフレーム単位で進む */
+    var ph=FR%20, gx, dir;
+    if(ph<10){ gx=30+ph*6.6; dir="-r"; } else { gx=96-(ph-10)*6.6; dir="-l"; }
+    spr(god+dir+".png", gx, feetY+((FR%2)?0:1), 27);
+    if(ph<10) R(gx-2.6, feetY-24, 5.2, 4.2, "#9a958a");                  /* 運んでいる石 */
+    return;
+  }
+  var bend = (action==="pick"||action==="hoe") ? [0,1,2,2][FR%4] : 0;
+  var yOff = bend? bend : bob;
+  var xOff = action==="pull" ? [0,-1.4,-2.4,-1.4][FR%4] : 0;           /* 引くときは体ごと後ろへ */
+  spr(god+"-f.png", x+xOff, feetY+yOff, 27);
+  x+=xOff;
+  var hx=x+8.6, hy=feetY-13+yOff;
+  if(action==="hammer"){ tool("hammer", hx, hy, FR%2===0); }
+  else if(action==="shovel"){ tool("shovel", hx, hy, FR%4>=2); }
+  else if(action==="broom"){ tool("broom", hx, hy, FR%2===0); }
+  else if(action==="scythe"){ tool("scythe", hx, hy, FR%2===0); }
+  else if(action==="hoe"){ tool("shovel", hx, hy, FR%4>=2); }
+  /* pick はスプライトの屈み（yOff）と手元のゴミで表現 */
 }
 </script>
 <script>
@@ -1989,6 +2067,7 @@ function positionMenu(){
    盤面を覆いすぎないよう対象の上側を優先し、上に置けない場合は下へ回す。 */
 function positionPredict(){
   var panel=document.getElementById("predict-panel"); if(!panel||!B||!B.predict) return;
+  if(panel.classList.contains("center")) return; /* 中央固定パネルはカメラに追随させない */
   var e=camEls(); if(!e.stage||!e.board) return;
   var pt=cellScreenPx(B.predict.x, B.predict.y); if(!pt) return;
   var vw=e.stage.clientWidth, vh=e.stage.clientHeight;
@@ -2153,10 +2232,15 @@ function predictPanelHtml(){
   var healKind = !!(sk && (sk.k==="h"||sk.k==="hb"||sk.k==="rev"));
   var tgt = healKind ? unitAtIncludingDead(p.x,p.y) : unitAt(p.x,p.y);
   if(!tgt) return "";
+  var isDamage = !healKind && !(sk && sk.k==="b");
   var head='<div class="b-predict single" id="predict-panel"><div class="bp-t">戦闘予測</div>'
     +'<div class="bp-name" style="font-size:calc(var(--k)*17)">'+esc(src.name)+' <span style="color:#9fc3bb;font-size:calc(var(--k)*14)">→</span> '+esc(tgt.name)+'</div>'
     +'<div style="font-size:calc(var(--k)*13.5);margin-top:calc(var(--k)*3);font-weight:700">'+(sk?esc(sk.n):"通常攻撃")+(sk?'<span class="bp-cost" style="margin-left:calc(var(--k)*8)">消費神力 '+sk.mp+'</span>':"")+'</div>';
+  var headCenter='<div class="b-predict-backdrop"></div><div class="b-predict center" id="predict-panel"><div class="bp-t">戦闘予測</div>'
+    +'<div class="bp-name">'+esc(src.name)+' <span style="color:#9fc3bb;font-size:calc(var(--k)*18)">→</span> '+esc(tgt.name)+'</div>'
+    +'<div class="bp-skillline">'+(sk?esc(sk.n):"通常攻撃")+(sk?'<span class="bp-cost" style="margin-left:calc(var(--k)*8)">消費神力 '+sk.mp+'</span>':"")+'</div>';
   var btns='<div class="bp-btns"><button class="btn gold" id="btn-predict-ok">実行する</button><button class="btn ghost" id="btn-predict-no" style="background:transparent;color:#eef3e6;border-color:rgba(120,200,210,.6)">キャンセル</button></div>';
+  var btnsCenter='<div class="bp-q">この対象に攻撃しますか？</div><div class="bp-btns"><button class="btn gold" id="btn-predict-ok">確定</button><button class="btn ghost" id="btn-predict-no" style="background:transparent;color:#eef3e6;border-color:rgba(120,200,210,.6)">戻る</button></div>';
   if(sk && sk.k==="b"){
     /* 単体バフ技：HPは変化しないので、付与効果を予測として出す */
     var fx=[];
@@ -2200,10 +2284,10 @@ function predictPanelHtml(){
   var ab=buffPctSum(src,"atk"); if(ab) mods.push("攻撃側の攻撃バフ "+(ab>0?"+":"")+ab+"%");
   var db=buffPctSum(tgt,"def"); if(db) mods.push("対象の防御バフ "+(db>0?"+":"")+db+"%");
   var sh=shieldPct(tgt); if(sh) mods.push("対象のシールド：ダメージ "+sh+"% 軽減");
-  return head+'<div class="bp-row"><div class="r1"><span>'+esc(tgt.name)+(terrainAt(tgt.x,tgt.y)==="water"?' <span style="color:#7ec8ff;font-size:calc(var(--k)*11);font-weight:800">浅瀬 防御+15%</span>':"")+'</span><span>HP '+tgt.hp+' → '+after+'</span></div>'
+  return headCenter+'<div class="bp-row"><div class="r1"><span>'+esc(tgt.name)+(terrainAt(tgt.x,tgt.y)==="water"?' <span style="color:#7ec8ff;font-size:calc(var(--k)*12);font-weight:800">浅瀬 防御+15%</span>':"")+'</span><span>HP '+tgt.hp+' → '+after+'</span></div>'
     +'<div class="bp-bar"><i style="width:'+Math.round(after/tgt.maxhp*100)+'%"></i><s style="width:'+Math.round((tgt.hp-after)/tgt.maxhp*100)+'%"></s></div>'
     +'<div>ダメージ <b>'+total+'</b>'+(hits>1?'（'+per+' × '+hits+'回）':"")+'｜命中 <b>'+hitChance(src,tgt)+'%</b>｜反撃 <b>なし</b>'+(after===0?'｜<span class="bp-ko">撃破！</span>':"")+'</div></div>'
-    +'<div class="bp-mods">'+mods.join("<br>")+'</div>'+btns+'</div>';
+    +'<div class="bp-mods">'+mods.join("<br>")+'</div>'+btnsCenter+'</div>';
 }
 /* 予測パネルの「実行する」：ここで初めて実処理が走る（通常攻撃は従来の
    onCellTap 内の実行処理と同一の流れをそのまま使う） */
@@ -2769,6 +2853,13 @@ function renderBattle(){
   var fc = B.focus || (B.sel?{x:B.sel.x,y:B.sel.y}:{x:2,y:8});
   var ti = terrainInfo(fc.x,fc.y);
   var terrain='<div class="b-terrain"><div class="tt"><b id="t-name">'+ti.name+'</b><span>地形情報</span></div><div class="td" id="t-body">X'+String(fc.x).padStart(2,"0")+' Y'+String(fc.y).padStart(2,"0")+'<br>高さ '+ti.h+'<br>'+ti.cost+'<br>'+ti.note+'</div></div>';
+  /* 移動選択中の「もどる」：盤面コンテナ右下に固定。地形パネルと重なるため、
+     移動選択中は地形パネルを隠してこのボタンを同じ右下に置く。 */
+  var moveBack="";
+  if(!B.over && B.sel && B.mode==="move"){
+    moveBack='<button class="b-move-back" id="btn-move-back">もどる</button>';
+    terrain="";
+  }
   /* prediction panel for area skills */
   var predict="";
   if(B.confirm && B.pendingSkill && B.sel){
@@ -2801,7 +2892,7 @@ function renderBattle(){
    +'<aside class="b-status" id="b-status">'+statusPanelHtml()+'</aside>'
    +'<aside class="b-side">'+sideHtml+'</aside>'
    +'<div class="b-main">'+skillbar
-   +'<div class="b-stage"><img src="assets/bg-battle-real.jpg" alt="水彩の川辺の戦闘背景"><div class="cam-world"><div class="iso-board"><img class="iso-map" src="assets/map-battle-wide.jpg" alt="戦闘マップ（盤面の周囲に森と川が続く）" style="left:'+MAPV.x+'%;top:'+MAPV.y+'%;width:'+MAPV.w+'%;height:'+MAPV.h+'%'+(mapImgTransform()?';transform:'+mapImgTransform():'')+'">'+cells+'</div></div>'+menu+terrain+predict+result+retreat+'</div>'
+   +'<div class="b-stage"><img src="assets/bg-battle-real.jpg" alt="水彩の川辺の戦闘背景"><div class="cam-world"><div class="iso-board"><img class="iso-map" src="assets/map-battle-wide.jpg" alt="戦闘マップ（盤面の周囲に森と川が続く）" style="left:'+MAPV.x+'%;top:'+MAPV.y+'%;width:'+MAPV.w+'%;height:'+MAPV.h+'%'+(mapImgTransform()?';transform:'+mapImgTransform():'')+'">'+cells+'</div></div>'+menu+terrain+moveBack+predict+result+retreat+'</div>'
    +'</div>'
    +'<aside class="b-rail">'+rail+'</aside></div>';
   bindBattle();
@@ -2942,6 +3033,7 @@ function bindBattle(){
   var fok=$("btn-face-ok"); if(fok) fok.addEventListener("click", confirmFacing);
   document.querySelectorAll("[data-face]").forEach(function(b){ b.addEventListener("click", function(){ var p=b.dataset.face.split(","); B.faceSel=[parseInt(p[0]),parseInt(p[1])]; renderBattle(); }); });
   var cmv=$("btn-cancelmove"); if(cmv) cmv.addEventListener("click", undoMove);
+  var mvback=$("btn-move-back"); if(mvback) mvback.addEventListener("click", cancelMoveSelect);
   var ret=$("btn-retreat"); if(ret) ret.addEventListener("click", function(){ B.retreatAsk=true; renderBattle(); });
   var retok=$("btn-retreat-ok"); if(retok) retok.addEventListener("click", retreatBattle);
   var retno=$("btn-retreat-no"); if(retno) retno.addEventListener("click", function(){ B.retreatAsk=false; renderBattle(); });
@@ -2988,7 +3080,7 @@ function bindCameraInput(){
   var pinch=null; /* {d0,z0,mx,my} */
   function stageXY(ev){ var r=stage.getBoundingClientRect(); return [ev.clientX-r.left, ev.clientY-r.top]; }
   stage.addEventListener("pointerdown", function(ev){
-    if(ev.target.closest && ev.target.closest(".b-menu,.b-terrain,.b-predict,.b-result,.b-skillbar")) return;
+    if(ev.target.closest && ev.target.closest(".b-menu,.b-terrain,.b-predict,.b-predict-backdrop,.b-result,.b-skillbar,.b-move-back")) return;
     pts.set(ev.pointerId, [ev.clientX, ev.clientY]);
     if(pts.size===1){ var p=stageXY(ev); drag={moved:false,lastX:p[0],lastY:p[1],totX:0,totY:0}; pinch=null; }
     else if(pts.size===2){
