@@ -360,13 +360,13 @@ select{font-family:inherit;font-size:calc(var(--k)*15);padding:calc(var(--k)*8);
    色は背景画の水彩に合わせた土・岩の質感（芝の縁取り＋土の層＋根元の陰影）にし、
    輪郭線は引かず、接地部を暗く落として景色に馴染ませる。寸法とclip-pathは
    renderBattle がマスごとにインラインで与える（高さデータ・ルールは不変）。 */
-.iso-cell.t-high .diamond{background:rgba(226,205,130,.16);box-shadow:inset 0 0 0 1.5px rgba(250,240,200,.5)}
+.iso-cell.t-high .diamond{background:rgba(226,205,130,.13);box-shadow:inset 0 0 0 1.5px rgba(250,240,200,.38)}
 .iso-cell{position:absolute;width:11.7647%;height:11.0588%;background:none;border:none;padding:0;margin:0;min-height:0;cursor:default;pointer-events:none}
 .iso-cell .hit{position:absolute;inset:-26% -14%;z-index:4;pointer-events:auto;background:transparent}
-.iso-cell .diamond{position:absolute;inset:0;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);background:rgba(255,255,255,.03);box-shadow:inset 0 0 0 1px rgba(252,248,228,.30)}
-.iso-cell.t-grass .diamond{background:rgba(120,190,95,.10);box-shadow:inset 0 0 0 1px rgba(225,245,195,.38)}
-.iso-cell.t-water .diamond{background:rgba(60,170,230,.20);box-shadow:inset 0 0 0 1.5px rgba(170,230,255,.75)}
-.iso-cell.t-rock .diamond{background:rgba(150,140,120,.16);box-shadow:inset 0 0 0 1px rgba(235,226,200,.40)}
+.iso-cell .diamond{position:absolute;inset:0;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);background:rgba(255,255,255,.03);box-shadow:inset 0 0 0 1px rgba(252,248,228,.16)}
+.iso-cell.t-grass .diamond{background:rgba(120,190,95,.05);box-shadow:inset 0 0 0 1px rgba(225,245,195,.20)}
+.iso-cell.t-water .diamond{background:rgba(60,170,230,.11);box-shadow:inset 0 0 0 1.5px rgba(170,230,255,.50)}
+.iso-cell.t-rock .diamond{background:rgba(150,140,120,.08);box-shadow:inset 0 0 0 1px rgba(235,226,200,.22)}
 .iso-cell .blk{position:absolute;pointer-events:none;opacity:.86}
 .iso-cell .blk-l{background:repeating-linear-gradient(96deg,rgba(46,28,8,.08) 0 3px,rgba(255,240,200,.04) 3px 7px,rgba(46,28,8,0) 7px 12px),repeating-linear-gradient(178deg,rgba(52,32,10,.07) 0 5px,rgba(52,32,10,0) 5px 11px),linear-gradient(180deg,#7c9a4e 0%,#7d8f4c 5%,#7d5c33 14%,#6b4a26 58%,#4e3315 88%,#38230d 100%)}
 .iso-cell .blk-r{background:repeating-linear-gradient(84deg,rgba(46,28,8,.06) 0 3px,rgba(255,244,210,.04) 3px 7px,rgba(46,28,8,0) 7px 12px),repeating-linear-gradient(178deg,rgba(52,32,10,.06) 0 5px,rgba(52,32,10,0) 5px 11px),linear-gradient(180deg,#8fae5c 0%,#8da254 5%,#96703c 14%,#7d5a2e 58%,#5f421e 88%,#46300f 100%)}
@@ -1963,19 +1963,25 @@ function positionPredict(){
    (1) 下絵＝データ：地形（TERRAIN）と高さ（HEIGHT_MAP）から作った「真上から
        見た格子マップ（7×10マス、各マス正方形）」が正確なレイアウトの源泉。
    (2) 一枚絵＝質感：その下絵をベースに水彩で描き起こした assets/map-paint.jpg
-       （1400×2000＝1マス200px）。川の蛇行・岩5箇所・花の高台6箇所は下絵の
+       （2100×3000＝1マス300px）。川の蛇行・岩5箇所・花の高台6箇所は下絵の
        位置のまま動かさず、光は方向性を持たせないフラットな光で描いてある。
-       生成後に全70マスの平均色を地形データと照合し、セル単位の色調補正で
-       地形の同一性を機械的に担保してある。
+       v2ではにじみ・顔料の溜まりと粒状感・紙の目を強め、生成後に実測した
+       格子位置でマスごとに切り直して均一格子へ再配置し、同種地形どうしの
+       境界はテクスチャ側でフェザーをかけて継ぎ目を消してある。さらに
+       全70マスの平均色を地形データと照合し、不一致ゼロまでセル単位の
+       色調補正で地形の同一性を機械的に担保してある。
    描画時は、マスごとに「そのマスの正方形テクスチャ」を、セルと同じ投影
    （rotXY＋高さによる持ち上がり）で菱形へアフィン変換し、菱形でクリップ
-   して貼る。テクスチャはマス単位で剛体的に回るため、0°/90°/180°/270°の
-   どの向きでも川・岩・段差の位置がタイルと一致したまま「同じ一枚絵を
-   回しただけ」になる。高さの持ち上がりもマス単位でそのまま効く。
+   して貼る。クリップ菱形は5%だけ拡大して隣マスと重ね、罫線ストロークは
+   引かない（髪の毛ほどの隙間とパッチワーク感を防ぐため。重なり部分は
+   テクスチャ同士がほぼ連続しているので自然に馴染む）。テクスチャは
+   マス単位で剛体的に回るため、0°/90°/180°/270°のどの向きでも川・岩・
+   段差の位置がタイルと一致したまま「同じ一枚絵を回しただけ」になる。
+   高さの持ち上がりもマス単位でそのまま効く。
    下には従来のフラット塗り（groundFill）を敷くので、絵が読めない環境でも
    盤面は成立する。盤外の森は従来どおり同じ投影の手続き描画。
    viewBox は盤面アスペクト 47/20 に合わせた 470×200（%座標 ×4.7 / ×2）。 */
-var PAINT_W=1400, PAINT_H=2000, PAINT_S=200; /* map-paint.jpg の寸法と1マスのpx */
+var PAINT_W=2100, PAINT_H=3000, PAINT_S=300; /* map-paint.jpg の寸法と1マスのpx */
 function cellHash(x,y){ var n=((x+61)*374761393 + (y+149)*668265263)>>>0; n=Math.imul(n^(n>>>13),1274126177)>>>0; return ((n^(n>>>16))>>>0)/4294967296; }
 function gCenter(x,y,h){ var p=rotXY(x,y); var rx=p[0], ry=p[1], RD=p[3];
   return { x:((rx-ry+RD-1)*ISO_SX+ISO_SX)*4.7, y:((rx+ry)*ISO_SY+ISO_TOP-(h||0)*ELEV_PCT+ISO_SY)*2, s:rx+ry }; }
@@ -2023,11 +2029,14 @@ function groundSvg(){
   for(y=0;y<ROWS;y++) for(x=0;x<COLS;x++){
     var cc=gCenter(x,y,heightAt(x,y)); var hw=ISO_SX*4.7, hh=ISO_SY*2;
     var dia=(Math.round(cc.x*10)/10)+","+(Math.round((cc.y-hh)*10)/10)+" "+(Math.round((cc.x+hw)*10)/10)+","+(Math.round(cc.y*10)/10)+" "+(Math.round(cc.x*10)/10)+","+(Math.round((cc.y+hh)*10)/10)+" "+(Math.round((cc.x-hw)*10)/10)+","+(Math.round(cc.y*10)/10);
+    /* クリップ用は中心から5%拡大した菱形：隣マスのテクスチャと少し重ねて
+       アンチエイリアスの隙間（下地の見える髪線）と継ぎ目を消す */
+    var hw2=hw*1.05, hh2=hh*1.05;
+    var diaC=(Math.round(cc.x*10)/10)+","+(Math.round((cc.y-hh2)*10)/10)+" "+(Math.round((cc.x+hw2)*10)/10)+","+(Math.round(cc.y*10)/10)+" "+(Math.round(cc.x*10)/10)+","+(Math.round((cc.y+hh2)*10)/10)+" "+(Math.round((cc.x-hw2)*10)/10)+","+(Math.round(cc.y*10)/10);
     var cid="gcp"+x+"-"+y;
-    defs+='<clipPath id="'+cid+'"><polygon points="'+dia+'"/></clipPath>';
+    defs+='<clipPath id="'+cid+'"><polygon points="'+diaC+'"/></clipPath>';
     cellsList.push({s:cc.s, h:'<polygon points="'+dia+'" fill="'+groundFill(x,y)+'"/>'
-      +'<g clip-path="url(#'+cid+')"><image href="assets/map-paint.jpg" width="'+PAINT_W+'" height="'+PAINT_H+'" transform="'+paintMatrix(x,y,cc)+'" preserveAspectRatio="none"/></g>'
-      +'<polygon points="'+dia+'" fill="none" stroke="rgba(28,44,22,0.20)" stroke-width="0.7"/>'});
+      +'<g clip-path="url(#'+cid+')"><image href="assets/map-paint.jpg" width="'+PAINT_W+'" height="'+PAINT_H+'" transform="'+paintMatrix(x,y,cc)+'" preserveAspectRatio="none"/></g>'});
   }
   items.sort(function(a,b){ return a.s-b.s; }); cellsList.sort(function(a,b){ return a.s-b.s; });
   var out='<svg class="iso-ground" viewBox="0 0 470 200" preserveAspectRatio="none" aria-hidden="true"><defs>'+defs+'</defs><rect x="0" y="0" width="470" height="200" fill="#2c4c2c"/>';
